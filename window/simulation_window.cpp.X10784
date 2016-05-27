@@ -1,0 +1,166 @@
+#include <QScreen>
+#include <QKeyEvent>
+#include <QMouseEvent>
+#include <QMessageBox>
+
+#include "util/matrices.h"
+#include "shader/shader.h"
+#include "object/particle.h"
+//#include "simulation_window.h"
+#include "util/timer.h"
+
+//long long int SimulationWindow::formerTime = 0.f;
+//long long int SimulationWindow::currentTime = 0.f;
+Timer SimulationWindow::timer = Timer();
+long long int SimulationWindow::dt = 0.f;
+float SimulationWindow::camRX = 0.f;
+float SimulationWindow::camRY = 0.f;
+float SimulationWindow::camTX = 0.f;
+float SimulationWindow::camTY = 0.f;
+float SimulationWindow::camTZ = 0.f;
+
+SimulationWindow::SimulationWindow()
+    : /*shaderProgram(0), */
+      frame(0)
+{
+}
+
+void SimulationWindow::initialize()
+{
+    shaderProgram = new Shader();
+
+    Particle::particles = new Particle[Particle::particlesCount];
+    for (int i = 0; i < Particle::particlesCount; ++i) {
+        Particle::particles[i] = Particle();
+    }
+}
+
+void SimulationWindow::render()
+{
+    const qreal retinaScale = devicePixelRatio();
+    glViewport( 0, 0, width() * retinaScale, height() * retinaScale );
+
+    glClear( GL_COLOR_BUFFER_BIT );
+
+    shaderProgram->bind();
+    {
+        Matrices::viewMatrix.setToIdentity();
+        Matrices::projectionMatrix.setToIdentity();
+        Matrices::viewProjectionMatrix.setToIdentity();
+        Matrices::viewProjectionInverted.setToIdentity();
+        Matrices::mvpMatrix.setToIdentity();
+
+        Matrices::setLookAtCamera();
+        Matrices::viewMatrix.rotate( 100.0f * frame / screen()->refreshRate(), 0, 1, 0 );
+        Matrices::projectionMatrix.perspective( 90.0f, 16.0f/9.0f, 0.1f, 100.0f );
+        Matrices::mvpMatrix              = Matrices::projectionMatrix * Matrices::modelViewMatrix;
+        Matrices::viewProjectionMatrix   = Matrices::projectionMatrix * Matrices::viewMatrix;
+        Matrices::viewProjectionInverted = Matrices::viewProjectionMatrix.inverted();
+
+        shaderProgram->program->setUniformValue( Handles::uMatrix, Matrices::mvpMatrix );
+
+        for (int i = 0; i < Particle::particlesCount; ++i) {
+            Particle::particles[i].draw();
+        }
+    }
+    shaderProgram->release();
+
+    ++frame;
+}
+
+void SimulationWindow::keyPressEvent(QKeyEvent* event)
+{
+//    QMessageBox* box = new QMessageBox();
+//    box->setWindowTitle(QString("Hello"));
+//    box->setText(QString("You Pressed: ") + event->text());
+//    box->show();
+
+    float tr[3] = { 0, 0, 0 };
+    switch (event->key()) {
+        case Qt::Key_W     : ;
+        case Qt::Key_Up    : tr[1] += 1; break;
+        case Qt::Key_S     : ;
+        case Qt::Key_Down  : tr[1] -= 1; break;
+        case Qt::Key_A     : ;
+        case Qt::Key_Left  : tr[0] -= 1; break;
+        case Qt::Key_D     : ;
+        case Qt::Key_Right : tr[0] += 1; break;
+    }
+    Matrices::modelMatrix.translate(QVector3D(tr[0], tr[1], tr[2]));
+}
+
+void SimulationWindow::cameraMan() {
+//    currentTime = nanoseconds.count();
+    dt = timer.diff() / 1000000000;
+    timer.reset();
+    cout << dt << endl;
+//    formerTime  = currentTime;
+    Matrices::viewMatrix.rotate(camRX, QVector3D(1, 0, 0));
+    Matrices::viewMatrix.rotate(camRY, QVector3D(0, 1, 0));
+    Matrices::viewMatrix.translate(QVector3D(camTX, camTY, camTZ));
+
+    if (camRX >  90) camRX =  90;
+    if (camRX < -90) camRX = -90;
+
+    /*
+    glfwGetCursorPos(window, &cursorX, &cursorY);
+    int width, height;
+    glfwGetWindowSize(window, &width, &height);
+    int deltaY = (width / 2) - cursorX;
+    int deltaX = (height / 2) - cursorY;
+    camRX -= deltaX * mouseSpeed;
+    camRY -= deltaY * mouseSpeed;
+    */
+}
+
+void SimulationWindow::mouseMoveEvent(QMouseEvent* event) {
+    QPointF position = event->pos();
+    float x = position.x();
+    float y = position.y();
+
+    float distance = 0;
+    float dx, dy, dd;
+    string action = "";
+
+    cameraMan();
+
+    dx = x - previousX;
+    dy = y - previousY;
+    Matrices::cam[3] += dx / 200;
+    Matrices::cam[4] += dy / 200;
+
+    if (Matrices::cam[4] >  M_PI / 2) Matrices::cam[4] = (float) ( M_PI / 2); // can't look to high
+    if (Matrices::cam[4] < -M_PI / 2) Matrices::cam[4] = (float) (-M_PI / 2); // can't look to low
+
+    Matrices::setLookAtCamera();
+    //requestRender();
+
+    previousX = x;
+    previousY = y;
+    previousDistance = distance;
+    previousAction = action;
+}
+
+const double degToRad = 2 * M_PI / 360.0f;
+const float degToRadf = 2 * (float) M_PI / 360.0f;
+
+void SimulationWindow::w() {
+    camTX -= moveSpeed * sinf(camRY * degToRadf) * cosf(camRX * degToRadf) * dt;
+    camTY += moveSpeed * sinf(camRX * degToRadf) * dt;
+    camTZ += moveSpeed * cosf(camRY * degToRadf) * cosf(camRX * degToRadf) * dt;
+}
+void SimulationWindow::s() {
+    camTX += moveSpeed * sinf(camRY * degToRadf) * cosf(camRX * degToRadf) * dt;
+    camTY -= moveSpeed * sinf(camRX * degToRadf) * dt;
+    camTZ -= moveSpeed * cosf(camRY * degToRadf) * cosf(camRX * degToRadf) * dt;
+}
+void SimulationWindow::a() {
+    camTX += moveSpeed * cosf(camRY * degToRadf) * dt;
+    camTZ += moveSpeed * sinf(camRY * degToRadf) * dt;
+}
+void SimulationWindow::d() {
+    camTX -= moveSpeed * cosf(camRY * degToRadf) * dt;
+    camTZ -= moveSpeed * sinf(camRY * degToRadf) * dt;
+}
+void SimulationWindow::h() { Matrices::cam[1] += t; Matrices::cam[4] += t; }
+void SimulationWindow::l() { Matrices::cam[1] -= t; Matrices::cam[4] -= t; }
