@@ -13,7 +13,7 @@
 using namespace std;
 
 vector<Form*> Form::forms;
-ShapeNames Form::lastBoundFormName = NOTHING;
+ShapeTypes Form::lastBoundFormType = NOTHING;
 
 Form::~Form()
 {
@@ -22,7 +22,7 @@ Form::~Form()
 }
 
 Form::Form()
-    : name(NOTHING)
+    : type(NOTHING)
 {
 }
 
@@ -30,7 +30,7 @@ Form::Form(
     vector<float> posCoords, int POS_COORDS_PER_VERTEX, int shapeMode,
     vector<float> clrCoords, int CLR_COORDS_PER_VERTEX,
     vector<float> texCoords, int TEX_COORDS_PER_VERTEX, int textureResource,
-    ShapeNames name
+    ShapeTypes name
 )
     : POS_COORDS_PER_VERTEX(POS_COORDS_PER_VERTEX),
       CLR_COORDS_PER_VERTEX(CLR_COORDS_PER_VERTEX),
@@ -42,7 +42,7 @@ Form::Form(
       posCoords(posCoords),
       clrCoords(clrCoords),
       texCoords(texCoords),
-      name(name)
+      type(name)
 {
     gl = QOpenGLContext::currentContext()->functions();
     vertexCount = posCoords.size() / ALL_COORDS_PER_VERTEX;
@@ -58,7 +58,7 @@ void Form::printForms()
     if (forms.size() > 0) {
         string s = to_string(forms.size()) + " Forms:";
         for (unsigned int i = 0; i < forms.size(); ++i) {
-            s += " " + string(Enums::shapeNames[forms[i]->name]);
+            s += " " + string(Enums::shapeNames[forms[i]->type]);
         }
         cout << s << endl;
     }
@@ -66,7 +66,7 @@ void Form::printForms()
 
 void Form::bindVAO()
 {
-    lastBoundFormName = name;
+    lastBoundFormType = type;
     vertexArray->vertexBuffer->bind();
 }
 
@@ -126,7 +126,7 @@ void Form::draw()
 
 void Form::move()
 {
-    vertexArray = new VertexArray(posCoords, name);
+    vertexArray = new VertexArray(posCoords, type);
 }
 
 void Form::recolor(float color[])

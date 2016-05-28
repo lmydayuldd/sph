@@ -1,7 +1,7 @@
 #ifndef ENUMS_H
 #define ENUMS_H
 
-enum ShapeNames : unsigned char {
+enum ShapeTypes : unsigned char {
     NOTHING,
     DOT,
     LINE,

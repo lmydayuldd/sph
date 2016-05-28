@@ -23,10 +23,10 @@ public:
     Particle(std::vector<Particle*>* parentFlow);
     ~Particle();
 
-    void createView() override;
-    void setModelMatrix() override;
-    void paint() override;
-    void collide(Particle *p2) override;
+    virtual void createView() override;
+    virtual void setModelMatrix() override;
+    virtual void paint() override;
+    virtual void collide(Particle* p2) override;
 
     void springify(Particle* p2, float ks, float d, float kd);
     void springifyMutual(Particle* p2, float ks, float d, float kd);

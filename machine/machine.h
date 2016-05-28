@@ -11,18 +11,18 @@ class Particle;
 class Machine
 {
 public:
-    static std::vector<Machine> machines;
+    static std::vector<Machine*> machines;
     Form* form;
 
     Machine();
     virtual ~Machine();
 
-    void linkView(ShapeNames formShapeName);
+    void linkView(ShapeTypes formShapeName);
     void recolor(float color[]);
     virtual void paint();
     virtual void createView();
     virtual void setModelMatrix();
-    virtual void collide(Particle* p2);
+    virtual void collide(Particle* p2) = 0;
 };
 
 #endif // MACHINE_H

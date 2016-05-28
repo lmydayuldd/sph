@@ -102,6 +102,4 @@ void Particle::paint()
     v->paint();
 }
 
-void Particle::collide(Particle *p2) {
-    p2 = p2;
-}
+void Particle::collide(Particle* p2) {}

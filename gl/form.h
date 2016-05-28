@@ -25,19 +25,19 @@ private:
 
 public:
     static std::vector<Form*> forms;
-    static ShapeNames lastBoundFormName;
+    static ShapeTypes lastBoundFormType;
     VertexArray* vertexArray;
     std::vector<float> posCoords;
     std::vector<float> clrCoords;
     std::vector<float> texCoords;
-    ShapeNames name;
+    ShapeTypes type;
 
     Form();
     Form(
         std::vector<float> posCoords, int POS_COORDS_PER_VERTEX, int shapeMode,
         std::vector<float> clrCoords, int COL_COORDS_PER_VERTEX,
         std::vector<float> texCoords, int TEX_COORDS_PER_VERTEX, int textureResource,
-        ShapeNames name
+        ShapeTypes type
     );
     ~Form();
 

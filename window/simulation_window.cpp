@@ -50,10 +50,7 @@ void SimulationWindow::initialize()
     for (unsigned int i = 0; i < Particle::flows[0].size(); ++i) {
         Particle::flows[0][i] = new Particle(&Particle::flows[0]);
     }
-    //Obstacle::obstacles.push_back(CollisionSphere(Vector(), 0.3f, getDamping("static")));
-    Walls w = Walls(10.0);
-    Machine::machines.push_back(w);//getDamping("static")));
-    //Obstacle::obstacles.push_back(          Box(10.0f, getDamping("static")));
+    Machine::machines.push_back(new Walls(10.0));//getDamping("static")));
 
     QCursor::setPos(geometry().x() + width()/2, geometry().y() + height()/2);
 
@@ -89,7 +86,7 @@ void SimulationWindow::render()
             Particle::flows[0][i]->paint();
         }
         for (unsigned int i = 0; i < Machine::machines.size(); ++i) {
-            Machine::machines[i].paint();
+            Machine::machines[i]->paint();
         }
     }
     Shader::currentShader->program->release();

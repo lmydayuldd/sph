@@ -33,7 +33,7 @@ void Computer::loop()
     for (unsigned int i = 0; i < Particle::flows.size(); ++i)
         for (unsigned int j = 0; j < Particle::flows[i].size(); ++j)
             for (unsigned int k = 0; k < Machine::machines.size(); ++k)
-                Machine::machines[k].collide(Particle::flows[i][j]);
+                Machine::machines[k]->collide(Particle::flows[i][j]);
 }
 
 void Computer::evaluateForces(const Particle& p)

@@ -14,10 +14,10 @@ private:
 public:
     static std::vector<VertexArray*> arrays;
     QOpenGLBuffer* vertexBuffer;
-    ShapeNames name;
+    ShapeTypes name;
 
     ~VertexArray();
-    VertexArray(std::vector<float> vertexData, ShapeNames name); // initialize vertex byte buffer for coordinates
+    VertexArray(std::vector<float> vertexData, ShapeTypes name); // initialize vertex byte buffer for coordinates
 
     static void printArrays();
 

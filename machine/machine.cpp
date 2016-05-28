@@ -5,7 +5,7 @@
 
 using namespace std;
 
-vector<Machine> Machine::machines;
+vector<Machine*> Machine::machines;
 
 Machine::Machine()
     : form(nullptr)
@@ -14,10 +14,10 @@ Machine::Machine()
 
 Machine::~Machine()
 {
-    delete form;
+    //delete form;
 }
 
-void Machine::linkView(ShapeNames formShapeName)
+void Machine::linkView(ShapeTypes formShapeType)
 {
     if (form == nullptr) {
         if (Form::forms.size() == 0) {
@@ -25,8 +25,7 @@ void Machine::linkView(ShapeNames formShapeName)
         }
         else {
             for (unsigned int i = 0; i < Form::forms.size(); ++i) {
-//                if (strcmp((*Form::forms[i]->name).c_str(), "Arrow") == 0) {
-                if (Form::forms[i]->name == formShapeName) {
+                if (Form::forms[i]->type == formShapeType) {
                     form = Form::forms[i];
                     break; ///////////////////////////////////////////////////
                 }
@@ -41,7 +40,7 @@ void Machine::linkView(ShapeNames formShapeName)
 void Machine::paint()
 {
     if (form != nullptr) {
-        if (Form::lastBoundFormName != form->name) {
+        if (Form::lastBoundFormType != form->type) {
            form->bindVAO();
         }
         Matrices::modelViewMatrix.setToIdentity();
@@ -55,7 +54,6 @@ void Machine::paint()
 
 void Machine::createView() {}
 void Machine::setModelMatrix() {}
-void Machine::collide(Particle* p2) { p2 = p2; }
 
 void Machine::recolor(float color[])
 {

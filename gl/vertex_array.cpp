@@ -12,7 +12,7 @@ VertexArray::~VertexArray() {
 }
 
 // initialize vertex byte buffer for coordinates
-VertexArray::VertexArray(vector<float> vertexData, ShapeNames name)
+VertexArray::VertexArray(vector<float> vertexData, ShapeTypes name)
     : vertexBuffer(new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer)),
       name(name)
 {
