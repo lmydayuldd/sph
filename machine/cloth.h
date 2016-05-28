@@ -1,21 +1,20 @@
 #ifndef CLOTH_H
 #define CLOTH_H
 
-class Flow;
 class Vector;
 
 #include "machine/machine.h"
 
 class Cloth : public Machine {
 private:
-    Flow* flow;
+    std::vector<Particle> flow;
     int knots;
     float color[3];
 
 public:
     Cloth(
-        Vector* start,
-        Vector* end,
+        const Vector& start,
+        const Vector& end,
         int knots,
         float ks,
         float d,

@@ -1,7 +1,6 @@
 #ifndef PARTICLE_H
 #define PARTICLE_H
 
-class Flow;
 class Spring;
 class Vector;
 

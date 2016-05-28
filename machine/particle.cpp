@@ -85,7 +85,7 @@ void Particle::setModelMatrix()
     // x y z // r theta phi // radius inclination azimuth // yaw roll pitch
     Vector dir = v->normal();
     Vector up = Vector(0, 1, 0);
-    double angle = - acos(dir.dotProduct(up)) * Constants::radToDeg;
+    double angle = - acos(dir.dotProduct(up)) * radToDeg;
     if (fabs(angle) > 0.5) {
         Vector axis = (dir * up).normal();
         Matrices::modelMatrix.rotate(angle, QVector3D(axis.x, axis.y, axis.z)); // rotate towards velocity direction vector

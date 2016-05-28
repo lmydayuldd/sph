@@ -8,7 +8,10 @@ Rope::~Rope()
 {
 }
 
-Rope::Rope(const Vector& start, const Vector& end, int knots, float ks, float d, float kd, int strength)
+Rope::Rope(
+        const Vector& start, const Vector& end,
+        int knots, float ks, float d, float kd, int strength
+)
     : flow(vector<Particle>(knots))
 {
     if      (strength == 0)     strength = 1;

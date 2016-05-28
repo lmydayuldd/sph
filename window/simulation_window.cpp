@@ -164,22 +164,22 @@ void SimulationWindow::mouseMoveEvent(QMouseEvent* event) {
 }
 
 void SimulationWindow::w() {
-    Matrices::camTX -= moveSpeed * sin(Matrices::camRY * Constants::degToRad) * cos(Matrices::camRX * Constants::degToRad) * dt;
-    Matrices::camTY += moveSpeed * sin(Matrices::camRX * Constants::degToRad) * dt;
-    Matrices::camTZ += moveSpeed * cos(Matrices::camRY * Constants::degToRad) * cos(Matrices::camRX * Constants::degToRad) * dt;
+    Matrices::camTX -= moveSpeed * sin(Matrices::camRY * degToRad) * cos(Matrices::camRX * degToRad) * dt;
+    Matrices::camTY += moveSpeed * sin(Matrices::camRX * degToRad) * dt;
+    Matrices::camTZ += moveSpeed * cos(Matrices::camRY * degToRad) * cos(Matrices::camRX * degToRad) * dt;
 }
 void SimulationWindow::s() {
-    Matrices::camTX += moveSpeed * sin(Matrices::camRY * Constants::degToRad) * cos(Matrices::camRX * Constants::degToRad) * dt;
-    Matrices::camTY -= moveSpeed * sin(Matrices::camRX * Constants::degToRad) * dt;
-    Matrices::camTZ -= moveSpeed * cos(Matrices::camRY * Constants::degToRad) * cos(Matrices::camRX * Constants::degToRad) * dt;
+    Matrices::camTX += moveSpeed * sin(Matrices::camRY * degToRad) * cos(Matrices::camRX * degToRad) * dt;
+    Matrices::camTY -= moveSpeed * sin(Matrices::camRX * degToRad) * dt;
+    Matrices::camTZ -= moveSpeed * cos(Matrices::camRY * degToRad) * cos(Matrices::camRX * degToRad) * dt;
 }
 void SimulationWindow::a() {
-    Matrices::camTX += moveSpeed * cos(Matrices::camRY * Constants::degToRad) * dt;
-    Matrices::camTZ += moveSpeed * sin(Matrices::camRY * Constants::degToRad) * dt;
+    Matrices::camTX += moveSpeed * cos(Matrices::camRY * degToRad) * dt;
+    Matrices::camTZ += moveSpeed * sin(Matrices::camRY * degToRad) * dt;
 }
 void SimulationWindow::d() {
-    Matrices::camTX -= moveSpeed * cos(Matrices::camRY * Constants::degToRad) * dt;
-    Matrices::camTZ -= moveSpeed * sin(Matrices::camRY * Constants::degToRad) * dt;
+    Matrices::camTX -= moveSpeed * cos(Matrices::camRY * degToRad) * dt;
+    Matrices::camTZ -= moveSpeed * sin(Matrices::camRY * degToRad) * dt;
 }
 void SimulationWindow::h() {
     Matrices::cam[1] += t;

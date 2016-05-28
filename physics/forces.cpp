@@ -1,5 +1,6 @@
 #include "physics/forces.h"
 #include "physics/vector.h"
+#include "util/constants.h"
 
 void Forces::universalGravitation(const Particle& p1, const Particle& p2) { // F1->2 = -G * m1 * m2 * r / |r|^2
     if (&p1 != &p2) {

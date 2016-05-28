@@ -53,7 +53,6 @@ SOURCES += \
     shape/sphere.cpp \
     shape/triangle.cpp \
     util/enums.cpp \
-    util/constants.cpp \
     util/settings.cpp \
     window/gl_window.cpp \
     window/simulation_window.cpp
