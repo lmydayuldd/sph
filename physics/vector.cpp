@@ -21,6 +21,11 @@ Vector::Vector(double x, double y, double z)
     linkView(ARROW);
 }
 
+Vector::Vector(const Vector& v)
+{
+    *this = Vector(v.x, v.y, v.z);
+}
+
 void Vector::createView()
 {
     Arrow arrow;

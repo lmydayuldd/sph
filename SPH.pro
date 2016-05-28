@@ -14,7 +14,8 @@ MOBILITY =
 
 FORMS +=
 
-# Defines platform-specific preprocessor macro (edit at Projects->QMake arguments required first)
+# Defines platform-specific preprocessor macro
+#   edit at Projects->QMake->additional arguments (set to CONFIG+=_BUILD) required first
 CONFIG(DESKTOP_BUILD):DEFINES += DESKTOP_BUILD
 CONFIG(ANDROID_BUILD):DEFINES += ANDROID_BUILD
 

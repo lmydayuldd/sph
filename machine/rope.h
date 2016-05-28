@@ -3,20 +3,21 @@
 
 #include <vector>
 
-class Vector;
+//class Vector;
+#include "physics/vector.h"
 
 #include "machine/particle.h"
 
-class Rope
+class Rope : public Machine
 {
 private:
-    std::vector<Particle>* flow;
+    std::vector<Particle> flow;
 
 public:
     ~Rope();
     Rope(
-        Vector* start,
-        Vector* end,
+        const Vector& start,
+        const Vector& end,
         int knots,
         float ks,
         float d,
@@ -24,7 +25,8 @@ public:
         int strength
     );
 
-    void paint();
+    virtual void paint() override;
+    virtual void collide(Particle* p2) override;
 };
 
 #endif // ROPE_H

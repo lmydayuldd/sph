@@ -14,6 +14,7 @@ public:
     ~Vector();
     Vector();
     Vector(double x, double y, double z);
+    Vector(const Vector& v);
 
     friend std::ostream& operator<<(std::ostream& out, const Vector& v)
     {

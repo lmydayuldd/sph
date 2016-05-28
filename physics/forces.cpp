@@ -33,7 +33,7 @@ void Forces::Friction(const Particle& p) {
     }
 }
 
-void Forces::Hooke(Particle& p1, Particle& p2, double ks, double d, double kd) { // F-> = -ks . x-> // d = targetSpringDistance
+void Forces::Hooke(const Particle& p1, const Particle& p2, double ks, double d, double kd) { // F-> = -ks . x-> // d = targetSpringDistance
     if (! p1.stationary || ! p2.stationary) {
         Vector r12 = *p1.r -* p2.r;
         Vector v12 = *p1.v - *p2.v;
@@ -45,7 +45,7 @@ void Forces::Hooke(Particle& p1, Particle& p2, double ks, double d, double kd) {
     }
 }
 
-void Forces::collide(Particle& p1, Particle& p2) { // Elastic Collision
+void Forces::collide(const Particle& p1, const Particle& p2) { // Elastic Collision
     // add damp(en)ing!!!
 
     double distanceFromCenter = p1.r->distance(*p2.r) - p2.radius;

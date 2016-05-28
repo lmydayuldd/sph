@@ -8,6 +8,7 @@ class Particle;
 #include "machine/machine.h"
 #include "machine/obstacle.h"
 #include "machine/particle.h"
+#include "machine/spring.h"
 #include "physics/vector.h"
 #include "util/settings.h"
 
@@ -50,7 +51,10 @@ void Computer::evaluateForces(const Particle& p)
             Forces::Coulomb(p, *(*p.parentFlow)[i]);
 
     //if (p.r.v[1] == -1.0f && p.v.v[1] == 0.0f) Forces.Friction(p);
-//    for (Spring s : p.springs) /*if (s.ks != 0 && s.kd != 0)*/ Forces.Hooke(p, s.p2, s.ks, s.d, s.kd);
+
+    for (Spring* s : p.springs)
+        /*if (s.ks != 0 && s.kd != 0)*/
+            Forces::Hooke(p, *s->p2, s->ks, s->d, s->kd);
     /*if (Settings::FORCES_HOOKE_SPRING != 0 && Settings.FORCES_HOOKE_DAMP != 0) {
         for (Particle p2 : p.parentFlow.particles)
             Forces.Hooke(p, p2, Settings.FORCES_HOOKE_SPRING, Settings.FORCES_HOOKE_DISTANCE, Settings.FORCES_HOOKE_DAMP);

@@ -13,6 +13,7 @@ class Particle;
 #include "gl/handles.h"
 #include "gl/matrices.h"
 #include "gl/vertex_array.h"
+#include "machine/rope.h"
 #include "machine/walls.h"
 #include "physics/computer.h"
 #include "shader/shader.h"
@@ -51,6 +52,12 @@ void SimulationWindow::initialize()
         Particle::flows[0][i] = new Particle(&Particle::flows[0]);
     }
     Machine::machines.push_back(new Walls(10.0));//getDamping("static")));
+//    Machine::machines.push_back(
+//        new Rope(
+//            Vector(-3, 3, 0), Vector(3, 3, 0),
+//            30, 300, 0.001, 12, 5
+//        )
+//    );
 
     QCursor::setPos(geometry().x() + width()/2, geometry().y() + height()/2);
 
