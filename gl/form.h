@@ -5,16 +5,7 @@
 
 class VertexArray;
 
-enum ShapeNames {
-    NOTHING,
-    DOT,
-    LINE,
-    ARROW,
-    TRIANGLE,
-    RECTANGLE,
-    SPHERE,
-    LANDSCHAFT
-};
+#include "util/enums.h"
 
 class Form {
 private:
@@ -33,7 +24,7 @@ private:
     void disableVertexAttribArrays();
 
 public:
-    static std::vector<Form> forms;
+    static std::vector<Form*> forms;
     static ShapeNames lastBoundFormName;
     VertexArray* vertexArray;
     std::vector<float> posCoords;

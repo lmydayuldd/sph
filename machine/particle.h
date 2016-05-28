@@ -1,7 +1,6 @@
 #ifndef PARTICLE_H
 #define PARTICLE_H
 
-//#include "machine/flow.h"
 class Flow;
 class Spring;
 class Vector;
@@ -11,8 +10,8 @@ class Vector;
 class Particle : public Machine
 {
 public:
-    static std::vector<std::vector<Particle>> flows;
-    Flow* parentFlow;
+    static std::vector<std::vector<Particle*>> flows;
+    std::vector<Particle*>* parentFlow;
     std::vector<Spring*> springs;
     Vector *r, *v, *a, *dr, *dv, *da, *F;
     double m, rho, charge, temperature, viscosity;
@@ -21,7 +20,7 @@ public:
     bool stationary;
 
     Particle();
-    Particle(std::vector<Particle>* parentFlow);
+    Particle(std::vector<Particle*>* parentFlow);
     ~Particle();
 
     void createView() override;

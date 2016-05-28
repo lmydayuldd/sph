@@ -34,13 +34,14 @@ SOURCES += \
     shape/landschaft.cpp \
     shape/line.cpp \
     shape/rectangle.cpp \
+    shape/shape.cpp \
     shape/sphere.cpp \
     shape/triangle.cpp \
+    util/enums.cpp \
     util/constants.cpp \
     util/settings.cpp \
     window/gl_window.cpp \
-    window/simulation_window.cpp \
-    shape/shape.cpp
+    window/simulation_window.cpp
 
 HEADERS += \
     control/interaction.h \
@@ -64,16 +65,17 @@ HEADERS += \
     shape/landschaft.h \
     shape/line.h \
     shape/rectangle.h \
+    shape/shape.h \
     shape/sphere.h \
     shape/triangle.h \
+    util/enums.h \
     util/constants.h \
     util/operations.h \
     util/parser.h \
     util/settings.h \
     util/timer.h \
     window/gl_window.h \
-    window/simulation_window.h \
-    shape/shape.h
+    window/simulation_window.h
 
 FORMS +=
 

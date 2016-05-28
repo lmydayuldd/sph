@@ -5,9 +5,9 @@
 class Particle;
 
 #include "forces.h"
-#include "machine/flow.h"
 #include "machine/machine.h"
 #include "machine/obstacle.h"
+#include "machine/particle.h"
 #include "physics/vector.h"
 #include "util/settings.h"
 
@@ -19,21 +19,21 @@ Computer::Computer()
 
 void Computer::loop()
 {
-    for (unsigned int i = 0; i < Flow::flows.size(); ++i)
-        for (unsigned int j = 0; j < Flow::flows[i].particles.size(); ++j)
-            Computer::computeVectors(Flow::flows[i].particles[j], Settings::dt);
+    for (unsigned int i = 0; i < Particle::flows.size(); ++i)
+        for (unsigned int j = 0; j < Particle::flows[i].size(); ++j)
+            Computer::computeVectors(*Particle::flows[i][j], Settings::dt);
 
     if (Settings::PARTICLES_REACT)
-        for (unsigned int i = 0; i < Flow::flows.size(); ++i)
-            for (unsigned int j = 0; j < Flow::flows[i].particles.size(); ++j)
-                for (unsigned int k = 0; k < Flow::flows[i].particles.size(); ++k)
-                    if (&Flow::flows[i].particles[j] != &Flow::flows[i].particles[k])
-                        Forces::collide(Flow::flows[i].particles[j], Flow::flows[i].particles[k]);
+        for (unsigned int i = 0; i < Particle::flows.size(); ++i)
+            for (unsigned int j = 0; j < Particle::flows[i].size(); ++j)
+                for (unsigned int k = 0; k < Particle::flows[i].size(); ++k)
+                    if (j != k)
+                        Forces::collide(*Particle::flows[i][j], *Particle::flows[i][k]);
 
-    for (unsigned int i = 0; i < Flow::flows.size(); ++i)
-        for (unsigned int j = 0; j < Flow::flows[i].particles.size(); ++j)
+    for (unsigned int i = 0; i < Particle::flows.size(); ++i)
+        for (unsigned int j = 0; j < Particle::flows[i].size(); ++j)
             for (unsigned int k = 0; k < Machine::machines.size(); ++k)
-                Machine::machines[k].collide(&Flow::flows[i].particles[j]);
+                Machine::machines[k].collide(Particle::flows[i][j]);
 }
 
 void Computer::evaluateForces(const Particle& p)
@@ -42,12 +42,12 @@ void Computer::evaluateForces(const Particle& p)
         Forces::gravityEarth(p);
 
     if (Settings::FORCES_UNIVERSAL_GRAVITY)
-        for (unsigned int i = 0; i < p.parentFlow->particles.size(); ++i)
-            Forces::universalGravitation(p, p.parentFlow->particles[i]);
+        for (unsigned int i = 0; i < p.parentFlow->size(); ++i)
+            Forces::universalGravitation(p, *(*p.parentFlow)[i]);
 
     if (Settings::FORCES_COULOMB)
-        for (unsigned int i = 0; i < p.parentFlow->particles.size(); ++i)
-            Forces::Coulomb(p, p.parentFlow->particles[i]);
+        for (unsigned int i = 0; i < p.parentFlow->size(); ++i)
+            Forces::Coulomb(p, *(*p.parentFlow)[i]);
 
     //if (p.r.v[1] == -1.0f && p.v.v[1] == 0.0f) Forces.Friction(p);
 //    for (Spring s : p.springs) /*if (s.ks != 0 && s.kd != 0)*/ Forces.Hooke(p, s.p2, s.ks, s.d, s.kd);

@@ -1,15 +1,16 @@
 #ifndef ROPE_H
 #define ROPE_H
 
-//class Flow;
-#include "machine/flow.h"
+#include <vector>
 
 class Vector;
+
+#include "machine/particle.h"
 
 class Rope
 {
 private:
-    Flow* flow;
+    std::vector<Particle>* flow;
 
 public:
     ~Rope();

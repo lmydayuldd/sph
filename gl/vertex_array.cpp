@@ -8,7 +8,7 @@ vector<VertexArray*> VertexArray::arrays;
 
 VertexArray::~VertexArray() {
     delete gl;
-    delete vertexBuffer;
+    //delete vertexBuffer;
 }
 
 // initialize vertex byte buffer for coordinates
@@ -33,7 +33,7 @@ void VertexArray::printArrays()
     if (arrays.size() > 0) {
         string s = to_string(arrays.size()) + " VAOs:";
         for (unsigned int i = 0; i < arrays.size(); ++i) {
-            s += " " + arrays[i]->name;
+            s += " " + string(Enums::shapeNames[arrays[i]->name]);
         }
         cout << s << endl;
     }

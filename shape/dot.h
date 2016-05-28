@@ -10,9 +10,6 @@ private:
     void makeForm();
 
 public:
-    Form* form;
-
-    ~Dot();
     Dot();
     Dot(float color[]);
 };

@@ -26,8 +26,8 @@ void Machine::linkView(ShapeNames formShapeName)
         else {
             for (unsigned int i = 0; i < Form::forms.size(); ++i) {
 //                if (strcmp((*Form::forms[i]->name).c_str(), "Arrow") == 0) {
-                if (Form::forms[i].name == formShapeName) {
-                    form = &Form::forms[i];
+                if (Form::forms[i]->name == formShapeName) {
+                    form = Form::forms[i];
                     break; ///////////////////////////////////////////////////
                 }
                 else if (i == Form::forms.size() - 1) {

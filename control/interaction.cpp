@@ -6,7 +6,7 @@
 
 #include "physics/computer.h"
 #include "physics/geometry.h"
-#include "machine/flow.h"
+
 #include "machine/particle.h"
 #include "util/operations.h"
 
@@ -27,13 +27,13 @@ void Interaction::handleTouchPress(float normalizedX, float normalizedY)
 
         double minProximity = std::numeric_limits<double>::infinity();
         Particle* closest;
-        for (unsigned int i = 0; i < Flow::flows.size(); ++i) {
-            for (Particle p : Flow::flows[i].particles) {
-                Geometry::Sphere particleBoundingSphere = Geometry::Sphere(p.r, p.radius);
+        for (unsigned int i = 0; i < Particle::flows.size(); ++i) {
+            for (Particle* p : Particle::flows[i]) {
+                Geometry::Sphere particleBoundingSphere = Geometry::Sphere(p->r, p->radius);
                 double distance = distanceBetween(*particleBoundingSphere.center, ray);
                 if (distance < minProximity) {
                     minProximity = distance;
-                    closest = &p;
+                    closest = p;
                 }
             }
         }

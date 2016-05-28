@@ -1,24 +1,23 @@
 #include "window/simulation_window.h"
 
-#include <iostream>
-
 #include <QScreen>
 #include <QKeyEvent>
 #include <QMouseEvent>
 #include <QMessageBox>
 
+#include <iostream>
+
 class Particle;
 
 #include "gl/form.h"
 #include "gl/handles.h"
+#include "gl/matrices.h"
 #include "gl/vertex_array.h"
-#include "machine/flow.h"
 #include "machine/walls.h"
 #include "physics/computer.h"
 #include "shader/shader.h"
 #include "util/constants.h"
 #include "util/timer.h"
-#include "gl/matrices.h"
 #include "util/settings.h"
 
 Timer* SimulationWindow::timer = new Timer();
@@ -35,32 +34,29 @@ SimulationWindow::SimulationWindow()
 void SimulationWindow::initialize()
 {
     Shader::currentShader = new Shader();
-//    Matrices::viewMatrix.translate(QVector3D(10, 10, 10));
+    Computer::currentComputer = new Computer();
+
+    refreshRate = screen()->refreshRate();
+    const qreal retinaScale = devicePixelRatio();
+    glViewport(0, 0, width() * retinaScale, height() * retinaScale);
+
+    //    Matrices::viewMatrix.translate(QVector3D(10, 10, 10));
     Matrices::camTZ = 12;
     Matrices::camRY = 180;
     Matrices::projectionMatrix.setToIdentity();
     Matrices::projectionMatrix.perspective(90.0f, width()/height(), 0.1f, 100.0f);
 
-    Flow::flows.push_back(Flow(Settings::PARTICLE_COUNT));
-    for (unsigned int i = 0; i < Flow::flows[0].particles.size(); ++i) {
-        Flow::flows[0].particles[i] = Particle(&Flow::flows[0]);
+    Particle::flows.push_back(std::vector<Particle*>(Settings::PARTICLE_COUNT));
+    for (unsigned int i = 0; i < Particle::flows[0].size(); ++i) {
+        Particle::flows[0][i] = new Particle(&Particle::flows[0]);
     }
-
     //Obstacle::obstacles.push_back(CollisionSphere(Vector(), 0.3f, getDamping("static")));
     Walls w = Walls(10.0);
     Machine::machines.push_back(w);//getDamping("static")));
     //Obstacle::obstacles.push_back(          Box(10.0f, getDamping("static")));
 
-    Computer::currentComputer = new Computer();
+    QCursor::setPos(geometry().x() + width()/2, geometry().y() + height()/2);
 
-    QCursor::setPos(
-        geometry().x() + width()/2,
-        geometry().y() + height()/2
-    );
-
-    refreshRate = screen()->refreshRate();
-    const qreal retinaScale = devicePixelRatio();
-    glViewport(0, 0, width() * retinaScale, height() * retinaScale);
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
 }
@@ -89,8 +85,8 @@ void SimulationWindow::render()
 
         Form::printForms();
         VertexArray::printArrays();
-        for (unsigned int i = 0; i < Flow::flows[0].particles.size(); ++i) {
-            Flow::flows[0].particles[i].paint();
+        for (unsigned int i = 0; i < Particle::flows[0].size(); ++i) {
+            Particle::flows[0][i]->paint();
         }
         for (unsigned int i = 0; i < Machine::machines.size(); ++i) {
             Machine::machines[i].paint();

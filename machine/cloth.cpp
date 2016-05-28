@@ -1,7 +1,7 @@
 #include "machine/cloth.h"
 
 #include "gl/matrices.h"
-#include "machine/flow.h"
+
 #include "machine/particle.h"
 #include "physics/vector.h"
 #include "shape/rectangle.h"
@@ -21,46 +21,46 @@ Cloth::Cloth(
     color[2] = 0.0f;
 
     this->knots = knots;
-    flow = new Flow(knots * knots);//, 0, 0, 0);
+//    flow = new Flow(knots * knots);//, 0, 0, 0);
 
-    for (int i = 1; i < knots * knots; ++i) // hor-sing
-        if (i % knots != 0)
-            flow->particles[i].springifyMutual(&flow->particles[i - 1], ks, d, kd);
-    for (int i = 2; i < knots * knots; ++i) // hor-dual
-        if (i % knots > 1)
-            flow->particles[i].springifyMutual(&flow->particles[i-2], ks/2, d*2, kd/2);
+//    for (int i = 1; i < knots * knots; ++i) // hor-sing
+//        if (i % knots != 0)
+//            flow->particles[i].springifyMutual(&flow->particles[i - 1], ks, d, kd);
+//    for (int i = 2; i < knots * knots; ++i) // hor-dual
+//        if (i % knots > 1)
+//            flow->particles[i].springifyMutual(&flow->particles[i-2], ks/2, d*2, kd/2);
 
-    for (int i = knots; i < knots * knots; ++i) // ver-sing
-        flow->particles[i].springifyMutual(&flow->particles[i - knots], ks, d, kd);
-    for (int i = 2 * knots; i < knots * knots; ++i) // ver-dual
-        flow->particles[i].springifyMutual(&flow->particles[i-(2*knots)], ks/2, d*2, kd/2);
+//    for (int i = knots; i < knots * knots; ++i) // ver-sing
+//        flow->particles[i].springifyMutual(&flow->particles[i - knots], ks, d, kd);
+//    for (int i = 2 * knots; i < knots * knots; ++i) // ver-dual
+//        flow->particles[i].springifyMutual(&flow->particles[i-(2*knots)], ks/2, d*2, kd/2);
 
-    for (int i = knots + 1; i < knots * knots; ++i) // skw-sing-upright
-        if ((i-1)%knots != 0)
-            flow->particles[i].springifyMutual(&flow->particles[i-knots-1], ks, d, kd);
-    for (int i = knots * knots - knots; i > 0; --i) // skw-sing-upleft
-        if (i%knots != 0)
-            flow->particles[i].springifyMutual(&flow->particles[i+knots-1], ks, d, kd);
+//    for (int i = knots + 1; i < knots * knots; ++i) // skw-sing-upright
+//        if ((i-1)%knots != 0)
+//            flow->particles[i].springifyMutual(&flow->particles[i-knots-1], ks, d, kd);
+//    for (int i = knots * knots - knots; i > 0; --i) // skw-sing-upleft
+//        if (i%knots != 0)
+//            flow->particles[i].springifyMutual(&flow->particles[i+knots-1], ks, d, kd);
 
-    double ny = start->y;
-    double nz = start->z;
-    for (int i = 0; i < knots; ++i) {
-        ny += (end->y - start->y) / knots;
-        nz += (end->z - start->z) / knots;
-        double nx = start->x;
-        for (int j = 0; j < knots; ++j) {
-            nx += (end->x - start->x) / knots;
-            flow->particles[i*knots + j].r->x = nx;
-            flow->particles[i*knots + j].r->y = ny;
-            flow->particles[i*knots + j].r->z = nz;
-            if ((i == 0 && j == 0) || (i == 0 && j == knots-1) || (i == knots-1 && j == 0) || (i == knots-1 && j == knots-1)) {
-                flow->particles[i*knots + j].stationary = true;
-            }
-        }
-    }
+//    double ny = start->y;
+//    double nz = start->z;
+//    for (int i = 0; i < knots; ++i) {
+//        ny += (end->y - start->y) / knots;
+//        nz += (end->z - start->z) / knots;
+//        double nx = start->x;
+//        for (int j = 0; j < knots; ++j) {
+//            nx += (end->x - start->x) / knots;
+//            flow->particles[i*knots + j].r->x = nx;
+//            flow->particles[i*knots + j].r->y = ny;
+//            flow->particles[i*knots + j].r->z = nz;
+//            if ((i == 0 && j == 0) || (i == 0 && j == knots-1) || (i == knots-1 && j == 0) || (i == knots-1 && j == knots-1)) {
+//                flow->particles[i*knots + j].stationary = true;
+//            }
+//        }
+//    }
 
-    for (Particle p : flow->particles) p.v = new Vector();
-    for (Particle p : flow->particles) p.recolor(color);
+//    for (Particle p : flow->particles) p.v = new Vector();
+//    for (Particle p : flow->particles) p.recolor(color);
 }
 
 void Cloth::setModelMatrix()

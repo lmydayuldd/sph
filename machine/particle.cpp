@@ -10,6 +10,8 @@
 #include "shape/sphere.h"
 #include "util/constants.h"
 
+std::vector<std::vector<Particle*>> Particle::flows;
+
 Particle::Particle()
 {
 }
@@ -29,7 +31,7 @@ Particle::~Particle()
     }
 }
 
-Particle::Particle(std::vector<Particle>* parentFlow)
+Particle::Particle(std::vector<Particle*>* parentFlow)
     : parentFlow(parentFlow)
 {
     m = 1.0;

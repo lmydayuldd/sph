@@ -49,8 +49,8 @@
                          </base-DElement>
                          <object>{51f4717d-681c-4d41-9d3d-0adb025d6de1}</object>
                          <name>gl</name>
-                         <pos>x:35;y:225</pos>
-                         <rect>x:-260;y:-280;w:520;h:560</rect>
+                         <pos>x:300;y:320</pos>
+                         <rect>x:-690;y:-405;w:1380;h:810</rect>
                          <auto-sized>false</auto-sized>
                          <visual-role>0</visual-role>
                         </DObject>
@@ -71,8 +71,8 @@
                          <object>{b9176f0c-4695-4e5f-8824-f1ee306fa41a}</object>
                          <context>gl</context>
                          <name>Form</name>
-                         <pos>x:265;y:220</pos>
-                         <rect>x:-635;y:-220;w:1270;h:440</rect>
+                         <pos>x:300;y:185</pos>
+                         <rect>x:-630;y:-220;w:1260;h:440</rect>
                          <auto-sized>false</auto-sized>
                          <visual-role>0</visual-role>
                         </DObject>
@@ -94,7 +94,7 @@
                          <object>{2a020a3d-c70a-49ca-a6d6-934e30f1ca57}</object>
                          <context>gl</context>
                          <name>Handles</name>
-                         <pos>x:-155;y:250</pos>
+                         <pos>x:-10;y:35</pos>
                          <rect>x:-50;y:-55;w:100;h:110</rect>
                          <visual-role>0</visual-role>
                         </DObject>
@@ -116,7 +116,7 @@
                          <object>{bdbf6b40-acab-4d30-a8cc-980771312afc}</object>
                          <context>gl</context>
                          <name>Matrices</name>
-                         <pos>x:-135;y:505</pos>
+                         <pos>x:-235;y:550</pos>
                          <rect>x:-115;y:-135;w:230;h:270</rect>
                          <visual-role>0</visual-role>
                         </DObject>
@@ -138,19 +138,20 @@
                          <object>{35bb9b8c-7a60-44b8-a069-5a3b65ee2031}</object>
                          <context>gl</context>
                          <name>VertexArray</name>
-                         <pos>x:-270;y:230</pos>
-                         <rect>x:-40;y:-30;w:80;h:60</rect>
+                         <pos>x:-25;y:345</pos>
+                         <rect>x:-270;y:-85;w:540;h:170</rect>
                          <visual-role>0</visual-role>
                         </DObject>
                        </base-DObject>
                        <template-display>2</template-display>
+                       <show-all-members>true</show-all-members>
                       </DClass>
                      </instance>
                     </item>
                    </qlist>
                   </elements>
-                  <last-modified>1464345435281</last-modified>
-                  <toolbarid>Classes</toolbarid>
+                  <last-modified>1464345616456</last-modified>
+                  <toolbarid>Components</toolbarid>
                  </MDiagram>
                 </base-MDiagram>
                </MCanvasDiagram>
@@ -196,7 +197,7 @@
                             <qlist>
                              <item>
                               <MClassMember>
-                               <uid>{e3f8d630-57c6-4561-8eca-1c4531e466b8}</uid>
+                               <uid>{d75046b8-a2a3-4695-aaca-0f78c9e49f2c}</uid>
                                <visibility>3</visibility>
                                <type>1</type>
                                <declaration>int POS_COORDS_PER_VERTEX</declaration>
@@ -204,7 +205,7 @@
                              </item>
                              <item>
                               <MClassMember>
-                               <uid>{84d62525-6e69-444f-8235-a6325462bd04}</uid>
+                               <uid>{42c4eb9f-215f-4355-bd6b-84bfe3954aea}</uid>
                                <visibility>3</visibility>
                                <type>1</type>
                                <declaration>int CLR_COORDS_PER_VERTEX</declaration>
@@ -212,7 +213,7 @@
                              </item>
                              <item>
                               <MClassMember>
-                               <uid>{e0023f49-390d-4aa9-b6c2-103e72729005}</uid>
+                               <uid>{33e0ee47-f649-44bc-853e-004ea56ddda5}</uid>
                                <visibility>3</visibility>
                                <type>1</type>
                                <declaration>int TEX_COORDS_PER_VERTEX</declaration>
@@ -220,7 +221,7 @@
                              </item>
                              <item>
                               <MClassMember>
-                               <uid>{2bc9bc2d-6e5b-4665-9dff-c6f013207488}</uid>
+                               <uid>{9b17fb7e-d288-410e-8edd-15d6d72a58c2}</uid>
                                <visibility>3</visibility>
                                <type>1</type>
                                <declaration>int ALL_COORDS_PER_VERTEX</declaration>
@@ -228,7 +229,7 @@
                              </item>
                              <item>
                               <MClassMember>
-                               <uid>{011f3f2b-25da-49e7-b41c-a05bca60d1dd}</uid>
+                               <uid>{1075a7ac-5008-4c6a-a96f-38e7953eb88e}</uid>
                                <visibility>3</visibility>
                                <type>1</type>
                                <declaration>int vertexCount</declaration>
@@ -236,7 +237,7 @@
                              </item>
                              <item>
                               <MClassMember>
-                               <uid>{bc82daf5-e2a2-4fa1-80f1-c9bc07d416d5}</uid>
+                               <uid>{6e6d1013-05c8-4c09-9a0f-c11f21729e76}</uid>
                                <visibility>3</visibility>
                                <type>1</type>
                                <declaration>int vertexStride</declaration>
@@ -244,7 +245,7 @@
                              </item>
                              <item>
                               <MClassMember>
-                               <uid>{9e7c180e-91d5-4382-9c4d-19cc6d7ddfcf}</uid>
+                               <uid>{024bb058-8e50-49a4-a96a-459181d366cf}</uid>
                                <visibility>3</visibility>
                                <type>1</type>
                                <declaration>int shapeMode</declaration>
@@ -252,7 +253,7 @@
                              </item>
                              <item>
                               <MClassMember>
-                               <uid>{2752d8c4-f7ba-4512-aa0b-8df48c477e40}</uid>
+                               <uid>{e66a7582-3b05-4078-b951-dcec51f0f180}</uid>
                                <visibility>3</visibility>
                                <type>1</type>
                                <declaration>int textureResource</declaration>
@@ -260,7 +261,7 @@
                              </item>
                              <item>
                               <MClassMember>
-                               <uid>{49216cef-f7a1-4f61-9d1d-91fe8e50f435}</uid>
+                               <uid>{cae656c0-8fec-4e0e-965a-4f1733a49f7b}</uid>
                                <visibility>3</visibility>
                                <type>1</type>
                                <declaration>QOpenGLFunctions* gl</declaration>
@@ -268,7 +269,7 @@
                              </item>
                              <item>
                               <MClassMember>
-                               <uid>{82534b15-f8c6-4f6d-ab6c-d05a9ed497eb}</uid>
+                               <uid>{d83b7d85-f12a-4fde-a8d6-b529401b772a}</uid>
                                <visibility>3</visibility>
                                <type>2</type>
                                <declaration>void bindUniforms()</declaration>
@@ -276,7 +277,7 @@
                              </item>
                              <item>
                               <MClassMember>
-                               <uid>{e5e3c9b5-09da-48c3-bdb9-623e39bc524c}</uid>
+                               <uid>{1000fe31-63a2-43fc-85a1-42c21abf838f}</uid>
                                <visibility>3</visibility>
                                <type>2</type>
                                <declaration>void bindAttributes()</declaration>
@@ -284,7 +285,7 @@
                              </item>
                              <item>
                               <MClassMember>
-                               <uid>{ae0ad3b7-4035-4b4b-80c1-dd45cfabe1a3}</uid>
+                               <uid>{82e4bb2a-6207-4886-b971-f2199c779678}</uid>
                                <visibility>3</visibility>
                                <type>2</type>
                                <declaration>void disableVertexAttribArrays()</declaration>
@@ -292,7 +293,7 @@
                              </item>
                              <item>
                               <MClassMember>
-                               <uid>{7662a10d-e466-4b15-b65e-511150866b18}</uid>
+                               <uid>{d501730c-3aad-4d04-bbe2-6110c21a423d}</uid>
                                <visibility>1</visibility>
                                <type>1</type>
                                <properties>64</properties>
@@ -301,7 +302,7 @@
                              </item>
                              <item>
                               <MClassMember>
-                               <uid>{8cc18fee-6c48-4349-963a-6912258bc6ea}</uid>
+                               <uid>{4d26f9a3-6fe3-49bf-83c4-fd6f2fb00091}</uid>
                                <visibility>1</visibility>
                                <type>1</type>
                                <properties>64</properties>
@@ -310,7 +311,7 @@
                              </item>
                              <item>
                               <MClassMember>
-                               <uid>{3aa35b5c-64b2-44ed-9f77-97473809f5bf}</uid>
+                               <uid>{570fd0f3-09d9-475f-8eef-5016e56fee5b}</uid>
                                <visibility>1</visibility>
                                <type>1</type>
                                <declaration>VertexArray* vertexArray</declaration>
@@ -318,7 +319,7 @@
                              </item>
                              <item>
                               <MClassMember>
-                               <uid>{5bbf905c-a089-4474-8ee4-231d5a13ef32}</uid>
+                               <uid>{727cefec-63e5-4c01-828b-6d1c0875227b}</uid>
                                <visibility>1</visibility>
                                <type>1</type>
                                <declaration>std::vector&lt;float&gt; posCoords</declaration>
@@ -326,7 +327,7 @@
                              </item>
                              <item>
                               <MClassMember>
-                               <uid>{946c423a-2526-4da7-978b-9dde94ec3b9b}</uid>
+                               <uid>{203b6145-45eb-460d-a866-ff1cb4a4daf8}</uid>
                                <visibility>1</visibility>
                                <type>1</type>
                                <declaration>std::vector&lt;float&gt; clrCoords</declaration>
@@ -334,7 +335,7 @@
                              </item>
                              <item>
                               <MClassMember>
-                               <uid>{c810e1f4-7584-4fb1-8d0e-ee3c0958c2e2}</uid>
+                               <uid>{123de83f-593b-440f-be41-cb7f1ccf97a7}</uid>
                                <visibility>1</visibility>
                                <type>1</type>
                                <declaration>std::vector&lt;float&gt; texCoords</declaration>
@@ -342,7 +343,7 @@
                              </item>
                              <item>
                               <MClassMember>
-                               <uid>{bb9b6321-64bb-4df2-8538-0856511e01c0}</uid>
+                               <uid>{9489440f-d849-413e-94f9-25a3b0318037}</uid>
                                <visibility>1</visibility>
                                <type>1</type>
                                <declaration>ShapeNames name</declaration>
@@ -350,7 +351,7 @@
                              </item>
                              <item>
                               <MClassMember>
-                               <uid>{2bbe9df2-4ad3-42dc-a950-6904d4ec53c1}</uid>
+                               <uid>{68ee9e45-1666-4e76-b849-81aaaada27a0}</uid>
                                <visibility>1</visibility>
                                <type>2</type>
                                <declaration>Form()</declaration>
@@ -358,7 +359,7 @@
                              </item>
                              <item>
                               <MClassMember>
-                               <uid>{e4f8f9b5-27b5-444e-aeb4-5e212607a7cb}</uid>
+                               <uid>{0f753e7c-4671-4e06-b45a-d3afe2027339}</uid>
                                <visibility>1</visibility>
                                <type>2</type>
                                <declaration>Form(std::vector&lt;float&gt; posCoords, int POS_COORDS_PER_VERTEX, int shapeMode,   std::vector&lt;float&gt; clrCoords, int COL_COORDS_PER_VERTEX,   std::vector&lt;float&gt; texCoords, int TEX_COORDS_PER_VERTEX, int textureResource, ShapeNames name)</declaration>
@@ -366,7 +367,7 @@
                              </item>
                              <item>
                               <MClassMember>
-                               <uid>{1ca9ab72-8841-41eb-99d9-7ea898c846b9}</uid>
+                               <uid>{02191ddd-846b-4dbf-a190-b71cf0917a4d}</uid>
                                <visibility>1</visibility>
                                <type>2</type>
                                <declaration>~Form()</declaration>
@@ -374,7 +375,7 @@
                              </item>
                              <item>
                               <MClassMember>
-                               <uid>{c9b28c81-1673-4d9c-a0dc-ef818af8fdf5}</uid>
+                               <uid>{ba2b9b2d-3d05-453a-9269-781067aabf79}</uid>
                                <visibility>1</visibility>
                                <type>2</type>
                                <properties>64</properties>
@@ -383,7 +384,7 @@
                              </item>
                              <item>
                               <MClassMember>
-                               <uid>{11a0dad4-17cf-49c3-a416-f247ca9a3a1d}</uid>
+                               <uid>{b1f95925-d2ee-4519-b13f-1bf38413788e}</uid>
                                <visibility>1</visibility>
                                <type>2</type>
                                <declaration>void bindVAO()</declaration>
@@ -391,7 +392,7 @@
                              </item>
                              <item>
                               <MClassMember>
-                               <uid>{3345c08e-ee4a-4c0d-91f6-32e125ced311}</uid>
+                               <uid>{4a9d6d74-83b7-421d-abb5-d5fe5813c191}</uid>
                                <visibility>1</visibility>
                                <type>2</type>
                                <declaration>void createShaderProgram()</declaration>
@@ -399,7 +400,7 @@
                              </item>
                              <item>
                               <MClassMember>
-                               <uid>{86c2cb66-16dd-4e27-a11f-58e67ed271a8}</uid>
+                               <uid>{c010a597-7236-48e5-b823-3ee8dd15c803}</uid>
                                <visibility>1</visibility>
                                <type>2</type>
                                <declaration>void recolor(float color[])</declaration>
@@ -407,7 +408,7 @@
                              </item>
                              <item>
                               <MClassMember>
-                               <uid>{8686ef6f-c652-44f4-bb2c-cd50b092df59}</uid>
+                               <uid>{8d373cfa-34dd-4706-a381-4209d8056b9f}</uid>
                                <visibility>1</visibility>
                                <type>2</type>
                                <declaration>void move()</declaration>
@@ -415,7 +416,7 @@
                              </item>
                              <item>
                               <MClassMember>
-                               <uid>{0781ba7e-6b6a-4f5a-a307-a8042f6e489f}</uid>
+                               <uid>{e590dc97-e92a-4e74-96de-c8cf574eabd8}</uid>
                                <visibility>1</visibility>
                                <type>2</type>
                                <declaration>void draw()</declaration>
@@ -448,7 +449,7 @@
                             <qlist>
                              <item>
                               <MClassMember>
-                               <uid>{1012fd8b-6d67-4856-bdcb-63351bb79cf5}</uid>
+                               <uid>{5663569b-820c-4175-a3c1-0d974712a74a}</uid>
                                <visibility>1</visibility>
                                <type>1</type>
                                <properties>64</properties>
@@ -457,7 +458,7 @@
                              </item>
                              <item>
                               <MClassMember>
-                               <uid>{0a93e68f-ad41-4f63-b952-5faa67f30aef}</uid>
+                               <uid>{c11ff1bd-d5d8-4de4-b777-8ee2497777c6}</uid>
                                <visibility>1</visibility>
                                <type>1</type>
                                <properties>64</properties>
@@ -466,7 +467,7 @@
                              </item>
                              <item>
                               <MClassMember>
-                               <uid>{35f4fac7-6b24-4ff9-83ca-01c005806956}</uid>
+                               <uid>{a5619f6b-9bf0-40ff-b66a-7ba8016d1cb6}</uid>
                                <visibility>1</visibility>
                                <type>1</type>
                                <properties>64</properties>
@@ -475,7 +476,7 @@
                              </item>
                              <item>
                               <MClassMember>
-                               <uid>{ea6d5676-8509-4b51-82e0-fa781b88f781}</uid>
+                               <uid>{1a86e0dc-5fa3-459c-9865-e0445abb8b25}</uid>
                                <visibility>1</visibility>
                                <type>1</type>
                                <properties>64</properties>
@@ -509,7 +510,7 @@
                             <qlist>
                              <item>
                               <MClassMember>
-                               <uid>{0df6d72e-9446-49c1-8be4-dec3d65b54c7}</uid>
+                               <uid>{0bad138d-916b-4653-8849-3d0506236d7e}</uid>
                                <visibility>1</visibility>
                                <type>1</type>
                                <properties>64</properties>
@@ -518,7 +519,7 @@
                              </item>
                              <item>
                               <MClassMember>
-                               <uid>{d9df8822-00c8-49ca-9fb2-11e5068ed748}</uid>
+                               <uid>{c0365b7d-0904-4525-a8f0-fd1b1a85250d}</uid>
                                <visibility>1</visibility>
                                <type>1</type>
                                <properties>64</properties>
@@ -527,7 +528,7 @@
                              </item>
                              <item>
                               <MClassMember>
-                               <uid>{6211b495-93a5-4a73-ba19-a09f160fe52b}</uid>
+                               <uid>{3b88ccd8-f6ad-4ee1-abad-59015474a0ab}</uid>
                                <visibility>1</visibility>
                                <type>1</type>
                                <properties>64</properties>
@@ -536,7 +537,7 @@
                              </item>
                              <item>
                               <MClassMember>
-                               <uid>{cf5327ee-65ec-416f-acfe-a8befc0521d7}</uid>
+                               <uid>{7acd7392-2286-4f7b-a7b8-b2ff82ef3ed8}</uid>
                                <visibility>1</visibility>
                                <type>1</type>
                                <properties>64</properties>
@@ -545,7 +546,7 @@
                              </item>
                              <item>
                               <MClassMember>
-                               <uid>{08a61200-a2f5-4d5a-959f-4a332f5a1d86}</uid>
+                               <uid>{356f0447-e54d-4132-8bce-badc5b33e722}</uid>
                                <visibility>1</visibility>
                                <type>1</type>
                                <properties>64</properties>
@@ -554,7 +555,7 @@
                              </item>
                              <item>
                               <MClassMember>
-                               <uid>{30eed2e5-5a87-4e88-a7b4-ae914c0bfc35}</uid>
+                               <uid>{1900bfff-7503-4df5-8de5-d1980068c193}</uid>
                                <visibility>1</visibility>
                                <type>1</type>
                                <properties>64</properties>
@@ -563,7 +564,7 @@
                              </item>
                              <item>
                               <MClassMember>
-                               <uid>{991c61e8-e32e-4164-97de-222599361d4c}</uid>
+                               <uid>{679e557a-dd6c-4d11-9c19-28533ddc9717}</uid>
                                <visibility>1</visibility>
                                <type>1</type>
                                <properties>64</properties>
@@ -572,7 +573,7 @@
                              </item>
                              <item>
                               <MClassMember>
-                               <uid>{44702650-6432-435f-8889-672419bf8341}</uid>
+                               <uid>{cc48bac1-1a31-4de8-a3be-ba199397b70f}</uid>
                                <visibility>1</visibility>
                                <type>2</type>
                                <properties>64</properties>
@@ -581,7 +582,7 @@
                              </item>
                              <item>
                               <MClassMember>
-                               <uid>{4fdb7981-34f5-473f-9e0b-d984a7224d5c}</uid>
+                               <uid>{ea82da77-fb19-4213-95f5-1fb38ca2099f}</uid>
                                <visibility>1</visibility>
                                <type>1</type>
                                <properties>64</properties>
@@ -590,7 +591,7 @@
                              </item>
                              <item>
                               <MClassMember>
-                               <uid>{dd011496-b414-4d36-b3fb-a559cc7d1672}</uid>
+                               <uid>{1772d13c-7e64-4c8b-a8fd-3c9bd047a26a}</uid>
                                <visibility>1</visibility>
                                <type>1</type>
                                <properties>64</properties>
@@ -599,7 +600,7 @@
                              </item>
                              <item>
                               <MClassMember>
-                               <uid>{e623b802-2b9c-478c-abc1-7e80adcf68f8}</uid>
+                               <uid>{3eb24472-561a-49d4-a2f4-bbfc62c9b97c}</uid>
                                <visibility>1</visibility>
                                <type>1</type>
                                <properties>64</properties>
@@ -608,7 +609,7 @@
                              </item>
                              <item>
                               <MClassMember>
-                               <uid>{a75b0526-884e-4979-abcd-0792fc78248a}</uid>
+                               <uid>{21704ad5-050f-4d79-aa58-3515147bf0ff}</uid>
                                <visibility>1</visibility>
                                <type>1</type>
                                <properties>64</properties>
@@ -617,7 +618,7 @@
                              </item>
                              <item>
                               <MClassMember>
-                               <uid>{b3422549-c936-4a65-8ce8-fbd8ffe634f4}</uid>
+                               <uid>{1a92f420-cd8f-43e3-9576-919daf503a7c}</uid>
                                <visibility>1</visibility>
                                <type>1</type>
                                <properties>64</properties>
@@ -626,7 +627,7 @@
                              </item>
                              <item>
                               <MClassMember>
-                               <uid>{3cbf2e15-2753-44df-bb46-d784f3c12c7a}</uid>
+                               <uid>{0c9c6eed-b9d2-49e0-9b24-399b8b02eb9c}</uid>
                                <visibility>1</visibility>
                                <type>1</type>
                                <properties>64</properties>
@@ -635,7 +636,7 @@
                              </item>
                              <item>
                               <MClassMember>
-                               <uid>{0bc4de91-b114-4662-938b-b4eabb5edb63}</uid>
+                               <uid>{47fd6eeb-142a-41da-97ad-f7a2b0ab1169}</uid>
                                <visibility>1</visibility>
                                <type>1</type>
                                <properties>64</properties>
@@ -665,6 +666,76 @@
                              <name>VertexArray</name>
                             </MObject>
                            </base-MObject>
+                           <members>
+                            <qlist>
+                             <item>
+                              <MClassMember>
+                               <uid>{e6b4d3fb-6a9f-429c-ab9a-61db2904dc0a}</uid>
+                               <visibility>3</visibility>
+                               <type>1</type>
+                               <declaration>QOpenGLFunctions* gl</declaration>
+                              </MClassMember>
+                             </item>
+                             <item>
+                              <MClassMember>
+                               <uid>{31edb55c-edbb-4dbb-82f7-f8c28367ffdb}</uid>
+                               <visibility>1</visibility>
+                               <type>1</type>
+                               <properties>64</properties>
+                               <declaration>std::vector&lt;VertexArray*&gt; arrays</declaration>
+                              </MClassMember>
+                             </item>
+                             <item>
+                              <MClassMember>
+                               <uid>{037ef4f2-e44e-4bb0-893f-f0e35a94a19c}</uid>
+                               <visibility>1</visibility>
+                               <type>1</type>
+                               <declaration>QOpenGLBuffer* vertexBuffer</declaration>
+                              </MClassMember>
+                             </item>
+                             <item>
+                              <MClassMember>
+                               <uid>{22f8fe2c-e6c4-4364-ba90-1266468d98dd}</uid>
+                               <visibility>1</visibility>
+                               <type>1</type>
+                               <declaration>ShapeNames name</declaration>
+                              </MClassMember>
+                             </item>
+                             <item>
+                              <MClassMember>
+                               <uid>{0465d8ba-6a37-4db9-bfa6-cc0c55f4f720}</uid>
+                               <visibility>1</visibility>
+                               <type>2</type>
+                               <declaration>~VertexArray()</declaration>
+                              </MClassMember>
+                             </item>
+                             <item>
+                              <MClassMember>
+                               <uid>{3655a732-38aa-4191-a1a2-82143e94ec75}</uid>
+                               <visibility>1</visibility>
+                               <type>2</type>
+                               <declaration>VertexArray(std::vector&lt;float&gt; vertexData, ShapeNames name)</declaration>
+                              </MClassMember>
+                             </item>
+                             <item>
+                              <MClassMember>
+                               <uid>{508314e0-9509-48be-a7f7-9f4eaee2da4f}</uid>
+                               <visibility>1</visibility>
+                               <type>2</type>
+                               <properties>64</properties>
+                               <declaration>void printArrays()</declaration>
+                              </MClassMember>
+                             </item>
+                             <item>
+                              <MClassMember>
+                               <uid>{c896498b-f59d-41c1-a04c-9fc158d98bae}</uid>
+                               <visibility>1</visibility>
+                               <type>2</type>
+                               <declaration>void setVertexAttribPointer(int attributeHandle,         int COORDS_PER_VERTEX, int dataStride, int dataOffset)</declaration>
+                              </MClassMember>
+                             </item>
+                            </qlist>
+                           </members>
                           </MClass>
                          </instance>
                         </target>

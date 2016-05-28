@@ -1,13 +1,12 @@
 #include "util/settings.h"
 
+unsigned int Settings::PARTICLE_COUNT  = 13;    // used by Particle
+unsigned int Settings::SPHERE_DETAIL   = 23;    // used by Particle, CollisionSphere
+bool         Settings::PAINT_VECTORS   = true;  // used by Vector
+bool         Settings::PARTICLES_REACT = true; // used by Particle, ?glRenderer?
+bool         Settings::DIMENSIONS_3D   = false;
+
 float  Settings::dt = 0.01;
-
-int    Settings::PARTICLE_COUNT  = 13;    // used by Particle
-int    Settings::SPHERE_DETAIL   = 23;    // used by Particle, CollisionSphere
-bool   Settings::PAINT_VECTORS   = true;  // used by Vector
-bool   Settings::PARTICLES_REACT = true; // used by Particle, ?glRenderer?
-bool   Settings::DIMENSIONS_3D   = false;
-
 float  Settings::DAMPENING = 0.00; // 1.0 - ELASTICITY
 
 bool   Settings::FORCES_EARTH_GRAVITY     = true;

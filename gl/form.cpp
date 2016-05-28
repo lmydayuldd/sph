@@ -12,7 +12,7 @@
 
 using namespace std;
 
-vector<Form> Form::forms;
+vector<Form*> Form::forms;
 ShapeNames Form::lastBoundFormName = NOTHING;
 
 Form::~Form()
@@ -50,7 +50,7 @@ Form::Form(
 
     createShaderProgram();
 
-    forms.push_back(*this);
+    forms.push_back(this);
 }
 
 void Form::printForms()
@@ -58,7 +58,7 @@ void Form::printForms()
     if (forms.size() > 0) {
         string s = to_string(forms.size()) + " Forms:";
         for (unsigned int i = 0; i < forms.size(); ++i) {
-            s += " " + forms[i].name;
+            s += " " + string(Enums::shapeNames[forms[i]->name]);
         }
         cout << s << endl;
     }
