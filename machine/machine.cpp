@@ -17,7 +17,7 @@ Machine::~Machine()
     //delete form;
 }
 
-void Machine::linkView(ShapeTypes formShapeType)
+void Machine::linkView(ShapeType formShapeType)
 {
     if (form == nullptr) {
         if (Form::forms.size() == 0) {

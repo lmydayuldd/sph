@@ -13,12 +13,12 @@
 using namespace std;
 
 vector<Form*> Form::forms;
-ShapeTypes Form::lastBoundFormType = NOTHING;
+ShapeType Form::lastBoundFormType = NOTHING;
 
 Form::~Form()
 {
     delete gl;
-    delete vertexArray;
+    //delete vertexArray;
 }
 
 Form::Form()
@@ -30,7 +30,7 @@ Form::Form(
     vector<float> posCoords, int POS_COORDS_PER_VERTEX, int shapeMode,
     vector<float> clrCoords, int CLR_COORDS_PER_VERTEX,
     vector<float> texCoords, int TEX_COORDS_PER_VERTEX, int textureResource,
-    ShapeTypes name
+    ShapeType type
 )
     : POS_COORDS_PER_VERTEX(POS_COORDS_PER_VERTEX),
       CLR_COORDS_PER_VERTEX(CLR_COORDS_PER_VERTEX),
@@ -38,11 +38,11 @@ Form::Form(
       ALL_COORDS_PER_VERTEX(POS_COORDS_PER_VERTEX + CLR_COORDS_PER_VERTEX + TEX_COORDS_PER_VERTEX),
       shapeMode(shapeMode),
       textureResource(textureResource),
-      vertexArray(new VertexArray(posCoords, name)), // initialize vertex byte buffer for shape coordinates
+      vertexArray(new VertexArray(posCoords, type)), // initialize vertex byte buffer for shape coordinates
       posCoords(posCoords),
       clrCoords(clrCoords),
       texCoords(texCoords),
-      type(name)
+      type(type)
 {
     gl = QOpenGLContext::currentContext()->functions();
     vertexCount = posCoords.size() / ALL_COORDS_PER_VERTEX;

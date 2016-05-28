@@ -12,9 +12,9 @@ VertexArray::~VertexArray() {
 }
 
 // initialize vertex byte buffer for coordinates
-VertexArray::VertexArray(vector<float> vertexData, ShapeTypes name)
+VertexArray::VertexArray(vector<float> vertexData, ShapeType type)
     : vertexBuffer(new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer)),
-      name(name)
+      type(type)
 {
     //cout << QOpenGLContext::currentContext() << " ";
     vertexBuffer->create();
@@ -33,7 +33,7 @@ void VertexArray::printArrays()
     if (arrays.size() > 0) {
         string s = to_string(arrays.size()) + " VAOs:";
         for (unsigned int i = 0; i < arrays.size(); ++i) {
-            s += " " + string(Enums::shapeNames[arrays[i]->name]);
+            s += " " + string(Enums::shapeNames[arrays[i]->type]);
         }
         cout << s << endl;
     }
