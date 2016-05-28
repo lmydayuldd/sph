@@ -13,6 +13,7 @@ class Particle;
 #include "gl/handles.h"
 #include "gl/matrices.h"
 #include "gl/vertex_array.h"
+#include "machine/cloth.h"
 #include "machine/rope.h"
 #include "machine/walls.h"
 #include "physics/computer.h"
@@ -56,6 +57,12 @@ void SimulationWindow::initialize()
 //        new Rope(
 //            Vector(-3, 3, 0), Vector(3, 3, 0),
 //            30, 300, 0.001, 12, 5
+//        )
+//    );
+//    Machine::machines.push_back(
+//        new Cloth(
+//            Vector(-2, -2, 0), Vector(2, 2, 0),
+//            6, 300, 0.001, 12, -1
 //        )
 //    );
 

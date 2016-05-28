@@ -2,8 +2,6 @@
 
 #include <cmath>
 
-#include <QOpenGLFunctions>
-
 #include "gl/form.h"
 #include "shape/line.h"
 
@@ -41,16 +39,10 @@ Rectangle::Rectangle(float lim, float color[])
 
 void Rectangle::makeForm()
 {
-//    form = new Form(
-//        vertices, 3, GL_TRIANGLE_FAN,
-//        vector<float>(), 3,
-//        vector<float>(), 0, 0,
-//        "Rectangle"
-//    );
-    posCoordsPerVertex = 2;
+    posCoordsPerVertex = 2;//3
     clrCoordsPerVertex = 3;
     form = new Form(
-        vertices, posCoordsPerVertex, GL_LINES,
+        vertices, posCoordsPerVertex, GL_LINES,//GL_TRIANGLE_FAN
         vector<float>(), clrCoordsPerVertex,
         vector<float>(), 0, 0,
         RECTANGLE

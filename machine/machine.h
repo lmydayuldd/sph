@@ -19,9 +19,9 @@ public:
 
     void linkView(ShapeType formShapeName);
     void recolor(float color[]);
+    virtual void setModelMatrix();
     virtual void paint();
     virtual void createView();
-    virtual void setModelMatrix();
     virtual void collide(Particle* p2) = 0;
 };
 

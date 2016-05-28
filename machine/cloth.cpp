@@ -4,6 +4,7 @@
 #include "machine/particle.h"
 #include "physics/vector.h"
 #include "shape/rectangle.h"
+#include "util/enums.h"
 
 using namespace std;
 
@@ -13,7 +14,7 @@ Cloth::~Cloth()
 
 Cloth::Cloth(
     const Vector& start, const Vector& end,
-    int knots, float ks, float d, float kd//, int strength
+    int knots, float ks, float d, float kd, int strength
 )
     : flow(vector<Particle>(knots * knots)),
       knots(knots)
@@ -59,57 +60,81 @@ Cloth::Cloth(
     }
 
     for (Particle p : flow) p.v = new Vector();
-    for (Particle p : flow) p.recolor(color);
+    //for (Particle p : flow) p.recolor(color);
+
+    linkView(LANDSCHAFT);
+}
+
+void Cloth::createView()
+{
+    vector<float> primaryClothSingularity
+            = vector<float>(36 * (knots - 1) * (knots - 1));
+
+    for (unsigned int i = 0; i < primaryClothSingularity.size(); i += 6) {
+        primaryClothSingularity[i+0] = 0; // pos
+        primaryClothSingularity[i+1] = 0;
+        primaryClothSingularity[i+2] = 0;
+        primaryClothSingularity[i+3] = 0; // color
+        primaryClothSingularity[i+4] = 1;
+        primaryClothSingularity[i+5] = 0;
+    }
+
+    form = new Form(
+        primaryClothSingularity, 3, GL_TRIANGLE_FAN,
+        vector<float>(), 3,
+        vector<float>(), 0, 0,
+        LANDSCHAFT
+    );
 }
 
 void Cloth::setModelMatrix()
 {
-
+    Matrices::modelMatrix.setToIdentity();
 }
 
 void Cloth::paint()
 {
-//    float rr[15] = {0};
-//    Rectangle r(rr, color);
-//    if (this->forms.empty())
-//        for (int i = 0; i < knots - 1; ++i)
-//            for (int j = 0; j < knots - 1; ++j)
-//                this->forms.push_back(r.shape);
+    move();
 
-//    for (int i = 0; i < knots - 1; ++i) {
-//        for (int j = 0; j < knots - 1; ++j) {
-//            Form currentForm = forms[i*(knots-1) + j];
+    setModelMatrix();
 
-//            currentForm.posCoords[6]  = (float) flow[(i+1)*knots + j + 1].r.x;
-//            currentForm.posCoords[7]  = (float) flow[(i+1)*knots + j + 1].r.y;
-//            currentForm.posCoords[8]  = (float) flow[(i+1)*knots + j + 1].r.z;
-
-//            currentForm.posCoords[24] = (float) flow[i*knots + j + 1].r.x;
-//            currentForm.posCoords[25] = (float) flow[i*knots + j + 1].r.y;
-//            currentForm.posCoords[26] = (float) flow[i*knots + j + 1].r.z;
-
-//            currentForm.posCoords[18] = (float) flow[i*knots + j].r.x;
-//            currentForm.posCoords[19] = (float) flow[i*knots + j].r.y;
-//            currentForm.posCoords[20] = (float) flow[i*knots + j].r.z;
-
-//            currentForm.posCoords[12] = (float) flow[(i+1)*knots + j].r.x;
-//            currentForm.posCoords[13] = (float) flow[(i+1)*knots + j].r.y;
-//            currentForm.posCoords[14] = (float) flow[(i+1)*knots + j].r.z;
-
-//            currentForm.posCoords[0]  = currentForm.posCoords[18] + fabs(currentForm.posCoords[6] - currentForm.posCoords[18]) / 2;
-//            currentForm.posCoords[1]  = currentForm.posCoords[19] + fabs(currentForm.posCoords[7] - currentForm.posCoords[19]) / 2;
-//            currentForm.posCoords[2]  = currentForm.posCoords[20] + fabs(currentForm.posCoords[8] - currentForm.posCoords[20]) / 2;
-
-//            currentForm.posCoords[30] = currentForm.posCoords[6];
-//            currentForm.posCoords[31] = currentForm.posCoords[7];
-//            currentForm.posCoords[32] = currentForm.posCoords[8];
-//        }
-//    }
-
-//    Matrices::mvpMatrix.setToIdentity();
-//    Matrices::mvpMatrix = Matrices::projectionMatrix * Matrices::viewMatrix;
-//    for (Form s : forms) {
-//        s.move();
-//        s.draw(/*mvpMatrix*/);
-//    }
+    Machine::paint();
 }
+
+void Cloth::move()
+{
+    if (form != nullptr) {
+        for (int i = 0; i < knots - 1; ++i) {
+            for (int j = 0; j < knots - 1; ++j) {
+                int k = i * (knots - 1) + j;
+
+                form->posCoords[k+6]  = flow[(i+1)*knots + j + 1].r->x;
+                form->posCoords[k+7]  = flow[(i+1)*knots + j + 1].r->y;
+                form->posCoords[k+8]  = flow[(i+1)*knots + j + 1].r->z;
+
+                form->posCoords[k+24] = flow[i*knots + j + 1].r->x;
+                form->posCoords[k+25] = flow[i*knots + j + 1].r->y;
+                form->posCoords[k+26] = flow[i*knots + j + 1].r->z;
+
+                form->posCoords[k+18] = flow[i*knots + j].r->x;
+                form->posCoords[k+19] = flow[i*knots + j].r->y;
+                form->posCoords[k+20] = flow[i*knots + j].r->z;
+
+                form->posCoords[k+12] = flow[(i+1)*knots + j].r->x;
+                form->posCoords[k+13] = flow[(i+1)*knots + j].r->y;
+                form->posCoords[k+14] = flow[(i+1)*knots + j].r->z;
+
+                form->posCoords[k+0]  = form->posCoords[k+18] + fabs(form->posCoords[k+6] - form->posCoords[k+18]) / 2;
+                form->posCoords[k+1]  = form->posCoords[k+19] + fabs(form->posCoords[k+7] - form->posCoords[k+19]) / 2;
+                form->posCoords[k+2]  = form->posCoords[k+20] + fabs(form->posCoords[k+8] - form->posCoords[k+20]) / 2;
+
+                form->posCoords[k+30] = form->posCoords[k+6];
+                form->posCoords[k+31] = form->posCoords[k+7];
+                form->posCoords[k+32] = form->posCoords[k+8];
+            }
+        }
+        form->move();
+    }
+}
+
+void Cloth::collide(Particle* p2) {}

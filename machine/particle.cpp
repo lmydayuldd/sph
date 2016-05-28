@@ -9,6 +9,7 @@
 #include "shape/dot.h"
 #include "shape/sphere.h"
 #include "util/constants.h"
+#include "util/settings.h"
 
 std::vector<std::vector<Particle*>> Particle::flows;
 
@@ -41,11 +42,14 @@ Particle::Particle(std::vector<Particle*>* parentFlow)
         (static_cast<float>(rand()) / static_cast<float>(RAND_MAX) - 1.0f) * (rand()%5),
         0//(static_cast<float>(rand()) / static_cast<float>(RAND_MAX) - 1.0f) * (rand()%5)
     );
-    v = new Vector(
-        (static_cast<float>(rand()) / static_cast<float>(RAND_MAX) - 1.0f) * (rand()%30),
-        (static_cast<float>(rand()) / static_cast<float>(RAND_MAX) - 1.0f) * (rand()%30),
-        0//(static_cast<float>(rand()) / static_cast<float>(RAND_MAX) - 1.0f) * (rand()%30)
-    );
+    v = new Vector();
+    if (Settings::PARTICLES_INITIAL_SPEED) {
+        v = new Vector(
+            (static_cast<float>(rand()) / static_cast<float>(RAND_MAX) - 1.0f) * (rand()%30),
+            (static_cast<float>(rand()) / static_cast<float>(RAND_MAX) - 1.0f) * (rand()%30),
+            0//(static_cast<float>(rand()) / static_cast<float>(RAND_MAX) - 1.0f) * (rand()%30)
+        );
+    }
     a = new Vector();
     dr = new Vector();
     dv = new Vector();

@@ -3,10 +3,8 @@
 
 #include <vector>
 
-//class Vector;
-#include "physics/vector.h"
-
 #include "machine/particle.h"
+#include "physics/vector.h"
 
 class Rope : public Machine
 {

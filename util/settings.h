@@ -10,6 +10,7 @@ public:
     static bool         PAINT_VECTORS;  // used by Vector
     static bool         PARTICLES_REACT; // used by Particle, ?glRenderer?
     static bool         DIMENSIONS_3D;
+    static bool         PARTICLES_INITIAL_SPEED;
 
     static float  dt;
     static float  DAMPENING; // 1.0 - ELASTICITY

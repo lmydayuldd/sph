@@ -5,6 +5,7 @@ unsigned int Settings::SPHERE_DETAIL   = 23;    // used by Particle, CollisionSp
 bool         Settings::PAINT_VECTORS   = true;  // used by Vector
 bool         Settings::PARTICLES_REACT = true; // used by Particle, ?glRenderer?
 bool         Settings::DIMENSIONS_3D   = false;
+bool         Settings::PARTICLES_INITIAL_SPEED = false;
 
 float  Settings::dt = 0.01;
 float  Settings::DAMPENING = 0.00; // 1.0 - ELASTICITY

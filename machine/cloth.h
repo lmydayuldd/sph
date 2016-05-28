@@ -18,13 +18,16 @@ public:
         int knots,
         float ks,
         float d,
-        float kd/*,
-        int strength*/
+        float kd,
+        int strength
     );
     ~Cloth();
 
-    void setModelMatrix() override;
-    void paint() override;
+    void move();
+    virtual void createView() override;
+    virtual void setModelMatrix() override;
+    virtual void paint() override;
+    virtual void collide(Particle* p2) override;
 };
 
 #endif // CLOTH_H
