@@ -56,9 +56,13 @@ Form::Form(
 void Form::printForms()
 {
     if (forms.size() > 0) {
+#ifdef DESKTOP_BUILD
         string s = to_string(forms.size()) + " Forms:";
+#elif ANDROID_BUILD
+        string s = "";
+#endif
         for (unsigned int i = 0; i < forms.size(); ++i) {
-            s += " " + string(Enums::shapeNames[forms[i]->type]);
+            s += " " + string(Enums::shapeName[forms[i]->type]);
         }
         cout << s << endl;
     }

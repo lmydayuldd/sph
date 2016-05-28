@@ -15,7 +15,7 @@ enum ShapeType : unsigned char {
 class Enums
 {
 public:
-    static const char* shapeNames[];
+    static const char* shapeName[];
 };
 
 #endif // ENUMS_H

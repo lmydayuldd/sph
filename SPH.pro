@@ -9,8 +9,22 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = SPH
 TEMPLATE = app
-CONFIG += mobility #c++11
+CONFIG += mobility c++11
 MOBILITY =
+
+FORMS +=
+
+# Defines platform-specific preprocessor macro (edit at Projects->QMake arguments required first)
+CONFIG(DESKTOP_BUILD):DEFINES += DESKTOP_BUILD
+CONFIG(ANDROID_BUILD):DEFINES += ANDROID_BUILD
+
+RESOURCES += \
+    D:/Dropbox/well/WFAIS/prog/Qt/SPH
+
+DISTFILES += \
+    shader/vertex_shader.vsh \
+    shader/fragment_shader.fsh \
+    sph.qmodel
 
 SOURCES += \
     control/interaction.cpp \
@@ -76,13 +90,3 @@ HEADERS += \
     util/timer.h \
     window/gl_window.h \
     window/simulation_window.h
-
-FORMS +=
-
-DISTFILES += \
-    shader/vertex_shader.vsh \
-    shader/fragment_shader.fsh \
-    sph.qmodel
-
-RESOURCES += \
-    D:/Dropbox/well/WFAIS/prog/Qt/SPH

@@ -1,6 +1,6 @@
 #include "enums.h"
 
-const char* Enums::shapeNames[] = {
+const char* Enums::shapeName[] = {
     "NOTHING",
     "DOT",
     "LINE",

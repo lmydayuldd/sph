@@ -8,7 +8,9 @@ vector<VertexArray*> VertexArray::arrays;
 
 VertexArray::~VertexArray() {
     delete gl;
-    //delete vertexBuffer;
+    if (find(arrays.begin(), arrays.end(), this) == arrays.end()) {
+        delete vertexBuffer;
+    }
 }
 
 // initialize vertex byte buffer for coordinates
@@ -19,8 +21,6 @@ VertexArray::VertexArray(vector<float> vertexData, ShapeType type)
     //cout << QOpenGLContext::currentContext() << " ";
     vertexBuffer->create();
     vertexBuffer->setUsagePattern(QOpenGLBuffer::StaticDraw); // DynamicDraw, StreamDraw, ...?
-    //vertexBuffer->setUsagePattern(QOpenGLBuffer::DynamicDraw); // DynamicDraw, StreamDraw, ...?
-    //vertexBuffer->setUsagePattern(QOpenGLBuffer::StreamDraw); // DynamicDraw, StreamDraw, ...?
     vertexBuffer->bind();
     vertexBuffer->allocate(vertexData.data(), vertexData.size() * sizeof(float));
     vertexBuffer->write(0, vertexData.data(), vertexData.size() * sizeof(float));
@@ -31,9 +31,13 @@ VertexArray::VertexArray(vector<float> vertexData, ShapeType type)
 void VertexArray::printArrays()
 {
     if (arrays.size() > 0) {
+#ifdef DESKTOP_BUILD
         string s = to_string(arrays.size()) + " VAOs:";
+#elif ANDROID_BUILD
+        string s = "";
+#endif
         for (unsigned int i = 0; i < arrays.size(); ++i) {
-            s += " " + string(Enums::shapeNames[arrays[i]->type]);
+            s += " " + string(Enums::shapeName[arrays[i]->type]);
         }
         cout << s << endl;
     }
