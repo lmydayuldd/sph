@@ -10,7 +10,8 @@ class Particle : public Machine
 {
 public:
     static std::vector<std::vector<Particle*>> flows;
-    std::vector<Particle*>* parentFlow;
+    //std::vector<Particle*>* parentFlow;
+    int parentFlow;
     std::vector<Spring*> springs;
     Vector *r, *v, *a, *dr, *dv, *da, *F;
     double m, rho, charge, temperature, viscosity;
@@ -19,7 +20,7 @@ public:
     bool stationary;
 
     Particle();
-    Particle(std::vector<Particle*>* parentFlow);
+    Particle(int parentFlow);
     ~Particle();
 
     void springify(Particle* p2, float ks, float d, float kd);

@@ -24,7 +24,7 @@ Cloth::Cloth(
 
     flow = vector<Particle*>(knots * knots);
     for (unsigned int i = 0; i < flow.size(); ++i)
-        flow[i] = new Particle(&flow);
+        flow[i] = new Particle(2);
 
     for (int i = 1; i < knots * knots; ++i) // hor-sing
         if (i % knots != 0)

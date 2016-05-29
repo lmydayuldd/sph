@@ -16,13 +16,10 @@ Rope::Rope(
     if      (strength == 0)     strength = 1;
     else if (strength >= knots) strength = knots - 1;
 
-    flow = new vector<Particle*>(knots);
+    Particle::flows.push_back(vector<Particle*>(knots));
+    flow = &Particle::flows.back();
     for (int i = 0; i < knots; ++i)
-        (*flow)[i] = new Particle(flow);
-//    Particle::flows.push_back(vector<Particle*>(knots));
-//    flow = &Particle::flows.back();
-//    for (int i = 0; i < knots; ++i)
-//        (*flow)[i] = new Particle(flow);
+        (*flow)[i] = new Particle(Particle::flows.size() - 1);
 
     for (int j = 1; j <= strength; ++j) {
         for (int i = j; i < knots; ++i)

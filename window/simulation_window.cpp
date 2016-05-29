@@ -50,7 +50,7 @@ void SimulationWindow::initialize()
 
     Particle::flows.push_back(std::vector<Particle*>(Settings::PARTICLE_COUNT));
     for (unsigned int i = 0; i < Particle::flows[0].size(); ++i) {
-        Particle::flows[0][i] = new Particle(&Particle::flows[0]);
+        Particle::flows[0][i] = new Particle(Particle::flows.size() - 1);
     }
     Machine::machines.push_back(new Walls(10.0));//getDamping("static")));
     Machine::machines.push_back(
@@ -59,12 +59,12 @@ void SimulationWindow::initialize()
             30, 300, 0.001, 12, 5
         )
     );
-    Machine::machines.push_back(
-        new Cloth(
-            Vector(-2, -2, 4), Vector(2, 2, 4),
-            6, 300, 0.001, 12, -1
-        )
-    );
+//    Machine::machines.push_back(
+//        new Cloth(
+//            Vector(-2, -2, 0), Vector(2, 2, 0),
+//            6, 300, 0.001, 12, -1
+//        )
+//    );
 
     QCursor::setPos(geometry().x() + width()/2, geometry().y() + height()/2);
 

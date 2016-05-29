@@ -26,10 +26,11 @@ void Computer::loop()
 
     if (Settings::PARTICLES_REACT)
         for (unsigned int i = 0; i < Particle::flows.size(); ++i)
-            for (unsigned int j = 0; j < Particle::flows[i].size(); ++j)
+            for (unsigned int j = 0; j < Particle::flows.size(); ++j)
                 for (unsigned int k = 0; k < Particle::flows[i].size(); ++k)
-                    if (j != k)
-                        Forces::collide(*Particle::flows[i][j], *Particle::flows[i][k]);
+                    for (unsigned int l = 0; l < Particle::flows[j].size(); ++l)
+                        if (! (k == l && i == j))
+                            Forces::collide(*Particle::flows[i][k], *Particle::flows[j][l]);
 
     for (unsigned int i = 0; i < Particle::flows.size(); ++i)
         for (unsigned int j = 0; j < Particle::flows[i].size(); ++j)
@@ -43,12 +44,12 @@ void Computer::evaluateForces(const Particle& p)
         Forces::gravityEarth(p);
 
     if (Settings::FORCES_UNIVERSAL_GRAVITY)
-        for (unsigned int i = 0; i < p.parentFlow->size(); ++i)
-            Forces::universalGravitation(p, *(*p.parentFlow)[i]);
+        for (unsigned int i = 0; i < Particle::flows[p.parentFlow].size(); ++i)
+            Forces::universalGravitation(p, *Particle::flows[p.parentFlow][i]);
 
     if (Settings::FORCES_COULOMB)
-        for (unsigned int i = 0; i < p.parentFlow->size(); ++i)
-            Forces::Coulomb(p, *(*p.parentFlow)[i]);
+        for (unsigned int i = 0; i < Particle::flows[p.parentFlow].size(); ++i)
+            Forces::Coulomb(p, *Particle::flows[p.parentFlow][i]);
 
     //if (p.r.v[1] == -1.0f && p.v.v[1] == 0.0f) Forces.Friction(p);
 
