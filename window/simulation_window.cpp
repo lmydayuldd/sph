@@ -53,15 +53,15 @@ void SimulationWindow::initialize()
         Particle::flows[0][i] = new Particle(&Particle::flows[0]);
     }
     Machine::machines.push_back(new Walls(10.0));//getDamping("static")));
-//    Machine::machines.push_back(
-//        new Rope(
-//            Vector(-3, 3, 0), Vector(3, 3, 0),
-//            30, 300, 0.001, 12, 5
-//        )
-//    );
+    Machine::machines.push_back(
+        new Rope(
+            Vector(-6, 3, 0), Vector(6, 3, 0),
+            30, 300, 0.001, 12, 5
+        )
+    );
 //    Machine::machines.push_back(
 //        new Cloth(
-//            Vector(-2, -2, 0), Vector(2, 2, 0),
+//            Vector(-2, -2, 4), Vector(2, 2, 4),
 //            6, 300, 0.001, 12, -1
 //        )
 //    );

@@ -7,7 +7,7 @@ class Vector;
 
 class Cloth : public Machine {
 private:
-    std::vector<Particle> flow;
+    std::vector<Particle*> flow;
     int knots;
     float color[3];
 

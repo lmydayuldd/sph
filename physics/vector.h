@@ -14,7 +14,7 @@ public:
     ~Vector();
     Vector();
     Vector(double x, double y, double z);
-    Vector(const Vector& v);
+    Vector(const Vector& v); // copy constructor
 
     friend std::ostream& operator<<(std::ostream& out, const Vector& v)
     {

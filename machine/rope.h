@@ -9,7 +9,7 @@
 class Rope : public Machine
 {
 private:
-    std::vector<Particle> flow;
+    std::vector<Particle*>* flow;
 
 public:
     ~Rope();

@@ -12,16 +12,23 @@ Rope::Rope(
     const Vector& start, const Vector& end,
     int knots, float ks, float d, float kd, int strength
 )
-    : flow(vector<Particle>(knots))
 {
     if      (strength == 0)     strength = 1;
     else if (strength >= knots) strength = knots - 1;
 
+    flow = new vector<Particle*>(knots);
+    for (int i = 0; i < knots; ++i)
+        (*flow)[i] = new Particle(flow);
+//    Particle::flows.push_back(vector<Particle*>(knots));
+//    flow = &Particle::flows.back();
+//    for (int i = 0; i < knots; ++i)
+//        (*flow)[i] = new Particle(flow);
+
     for (int j = 1; j <= strength; ++j) {
         for (int i = j; i < knots; ++i)
-            flow[i - j].springify(&flow[i], ks / j, d * j, kd / j);
+            (*flow)[i - j]->springify((*flow)[i], ks / j, d * j, kd / j);
         for (int i = j; i < knots; ++i)
-            flow[i].springify(&flow[i - j], ks / j, d * j, kd / j);
+            (*flow)[i]->springify((*flow)[i - j], ks / j, d * j, kd / j);
     }
 
     /*for (int i = 1; i < knots; ++i) {
@@ -30,26 +37,30 @@ Rope::Rope(
     }*/
 
     Vector rn = start;
-    flow[0].r       = new Vector(start);
-    flow[knots-1].r = new Vector(end);
+    (*flow)[0]->r       = new Vector(start);
+    (*flow)[knots-1]->r = new Vector(end);
     for (int i = 1; i < knots - 1; ++i) {
         rn.x += (end.x - start.x) / knots;
         rn.y += (end.y - start.y) / knots;
         rn.z += (end.z - start.z) / knots;
-        *flow[i].r = rn;
+        (*flow)[i]->r = new Vector(rn);
     }
-    flow[0].stationary         = true;
-    flow[knots - 1].stationary = true;
+    (*flow)[0]->stationary         = true;
+    (*flow)[knots - 1]->stationary = true;
 
     float color[4] = {1, 1, 0, 0.5};
-    for (unsigned int i = 0; i < flow.size(); ++i) {
-        flow[i].v = new Vector();
+    for (unsigned int i = 0; i < (*flow).size(); ++i) {
+        (*flow)[i]->v = new Vector();
         //flow[i].recolor(color);
     }
 }
 
 void Rope::paint() {
-
+    // using Shape iterator would require Shape object to be temporarily created
+    // by non-parametred Shape(). It would then get destroyed, so a ~Shape() call!!!
+    for (unsigned int i = 0; i < (*flow).size(); ++i) {
+        (*flow)[i]->paint();
+    }
 }
 
 void Rope::collide(Particle* p2) {}
