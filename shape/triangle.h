@@ -10,7 +10,7 @@ private:
 public:
     Triangle(float side);
 
-    void makeForm();
+    virtual void makeForm() override;
 };
 
 #endif // TRIANGLE_H

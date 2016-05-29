@@ -5,8 +5,7 @@ Spring::~Spring()
     delete p2;
 }
 
-Spring::Spring(/*Particle p1, */Particle* p2, float ks, float d, float kd) {
-    //this.p1 = p1;
+Spring::Spring(Particle* p2, float ks, float d, float kd) {
     this->p2 = p2;
     this->ks = ks;
     this->d  = d;

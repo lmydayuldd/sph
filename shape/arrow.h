@@ -7,7 +7,7 @@ class Arrow : public Shape {
 public:
     Arrow();
 
-    void makeForm();
+    virtual void makeForm() override;
 };
 
 #endif // ARROW_H

@@ -6,6 +6,7 @@
 #include "shape/line.h"
 
 using namespace std;
+using namespace shapeSpace;
 
 Rectangle::Rectangle(float c[]/*oords*//*x1 x2 x3 y1 y2*/, float color[])
 {

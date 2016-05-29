@@ -18,13 +18,15 @@ ShapeType Form::lastBoundFormType = NOTHING;
 Form::~Form()
 {
     delete gl;
-    //delete vertexArray;
+    if (find(forms.begin(), forms.end(), this) == forms.end()) {
+        delete vertexArray;
+    }
 }
 
-Form::Form()
-    : type(NOTHING)
-{
-}
+//Form::Form()
+//    : type(NOTHING)
+//{
+//}
 
 Form::Form(
     vector<float> posCoords, int POS_COORDS_PER_VERTEX, int shapeMode,
@@ -48,8 +50,6 @@ Form::Form(
     vertexCount = posCoords.size() / ALL_COORDS_PER_VERTEX;
     vertexStride = ALL_COORDS_PER_VERTEX * sizeof(float);
 
-    createShaderProgram();
-
     forms.push_back(this);
 }
 
@@ -72,13 +72,6 @@ void Form::bindVAO()
 {
     lastBoundFormType = type;
     vertexArray->vertexBuffer->bind();
-}
-
-void Form::createShaderProgram() {
-//        if      (clrCoords != nullptr)                                    shaderProgram = new UniformColorShaderProgram(context);
-//        else if (clrCoords == nullptr && COLOR_COORDS_PER_VERTEX > 0)     shaderProgram = new AttributeColorShaderProgram(context);
-//        else if (texCoords != nullptr || TEXTURE_COORDS_PER_VERTEX > 0) shaderProgram = new TextureShaderProgram(context);
-//        else                                                             shaderProgram = nullptr;
 }
 
 void Form::bindUniforms()

@@ -17,7 +17,7 @@ public:
     Machine();
     virtual ~Machine();
 
-    void linkView(ShapeType formShapeName);
+    void linkView(ShapeType formShapeType);
     void recolor(float color[]);
     virtual void setModelMatrix();
     virtual void paint();

@@ -32,7 +32,7 @@ public:
     std::vector<float> texCoords;
     ShapeType type;
 
-    Form();
+//    Form();
     Form(
         std::vector<float> posCoords, int POS_COORDS_PER_VERTEX, int shapeMode,
         std::vector<float> clrCoords, int COL_COORDS_PER_VERTEX,
@@ -43,7 +43,6 @@ public:
 
     static void printForms();
     void bindVAO();
-    void createShaderProgram();
     void recolor(float color[]);
     void move();
     void draw();

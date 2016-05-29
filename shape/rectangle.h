@@ -3,7 +3,11 @@
 
 #include "shape/shape.h"
 
-class Rectangle : public Shape {
+namespace shapeSpace {
+    class Rectangle;
+}
+
+class shapeSpace::Rectangle : public Shape {
 public:
     Rectangle(float c[]/*oords*//*x1 x2 x3 y1 y2*/, float color[]);
     Rectangle(float lim, float color[]);

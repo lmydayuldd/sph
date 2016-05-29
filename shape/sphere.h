@@ -12,7 +12,7 @@ private:
 public:
     Sphere(double radius, float color[]);
 
-    void makeForm() override;
+    virtual void makeForm() override;
 };
 
 #endif // SPHERE_H

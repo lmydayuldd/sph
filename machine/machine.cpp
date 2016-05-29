@@ -31,6 +31,9 @@ void Machine::linkView(ShapeType formShapeType)
                 }
                 else if (i == Form::forms.size() - 1) {
                     createView();
+                    break; ///////////////////////////////////////////////////
+                    // without break it shouldn't fail as well, because at createView()
+                    // Form::forms is appended and at next loop run we'll hit first break
                 }
             }
         }

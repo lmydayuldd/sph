@@ -83,7 +83,7 @@ void Cloth::createView()
         primaryClothSingularity, 3, GL_TRIANGLE_FAN,
         vector<float>(), 3,
         vector<float>(), 0, 0,
-        LANDSCHAFT
+        CLOTH
     );
 }
 

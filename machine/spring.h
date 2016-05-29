@@ -6,13 +6,16 @@
 
 class Spring {
 public:
-    //static vector<Spring> springs = vector<Spring>();
-    //Particle p1;
     Particle* p2;
     float ks, d, kd;
 
     ~Spring();
-    Spring(/*Particle p1, */Particle* p2, float ks, float d, float kd);
+    Spring(
+        Particle* p2,
+        float ks,
+        float d,
+        float kd
+    );
 };
 
 #endif // SPRING_H

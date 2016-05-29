@@ -21,29 +21,30 @@ Walls::Walls(float lim)
 
 void Walls::createView()
 {
-//    float color[3] = {0, 0.5, 0};
-//    Rectangle rectangle(lim, color);
-//    this->form = rectangle.form;
-    vector<float> vertices;
     float color[3] = {0, 0.5, 0};
-    vector<float> v1 = { lim,  lim, -lim,  lim};
-    vector<float> v2 = {-lim,  lim, -lim, -lim};
-    vector<float> v3 = {-lim, -lim,  lim, -lim};
-    vector<float> v4 = { lim, -lim,  lim,  lim};
-    Line l1 = Line(v1, vector<float> {color[0], color[1], color[2]});
-    Line l2 = Line(v2, vector<float> {color[0], color[1], color[2]});
-    Line l3 = Line(v3, vector<float> {color[0], color[1], color[2]});
-    Line l4 = Line(v4, vector<float> {color[0], color[1], color[2]});
-    vertices.insert(vertices.end(), l1.vertices.begin(), l1.vertices.end());
-    vertices.insert(vertices.end(), l2.vertices.begin(), l2.vertices.end());
-    vertices.insert(vertices.end(), l3.vertices.begin(), l3.vertices.end());
-    vertices.insert(vertices.end(), l4.vertices.begin(), l4.vertices.end());
-    form = new Form(
-        vertices, 2, GL_LINES,
-        vector<float>(), 3,
-        vector<float>(), 0, 0,
-        RECTANGLE
-    );
+    shapeSpace::Rectangle rectangle(lim, color);
+    this->form = rectangle.form;
+
+//    vector<float> vertices;
+//    float color[3] = {0, 0.5, 0};
+//    vector<float> v1 = { lim,  lim, -lim,  lim};
+//    vector<float> v2 = {-lim,  lim, -lim, -lim};
+//    vector<float> v3 = {-lim, -lim,  lim, -lim};
+//    vector<float> v4 = { lim, -lim,  lim,  lim};
+//    Line l1 = Line(v1, vector<float> {color[0], color[1], color[2]});
+//    Line l2 = Line(v2, vector<float> {color[0], color[1], color[2]});
+//    Line l3 = Line(v3, vector<float> {color[0], color[1], color[2]});
+//    Line l4 = Line(v4, vector<float> {color[0], color[1], color[2]});
+//    vertices.insert(vertices.end(), l1.vertices.begin(), l1.vertices.end());
+//    vertices.insert(vertices.end(), l2.vertices.begin(), l2.vertices.end());
+//    vertices.insert(vertices.end(), l3.vertices.begin(), l3.vertices.end());
+//    vertices.insert(vertices.end(), l4.vertices.begin(), l4.vertices.end());
+//    form = new Form(
+//        vertices, 2, GL_LINES,
+//        vector<float>(), 3,
+//        vector<float>(), 0, 0,
+//        RECTANGLE
+//    );
 }
 
 void Walls::setModelMatrix()

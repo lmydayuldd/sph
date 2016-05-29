@@ -9,7 +9,8 @@ enum ShapeType : unsigned char {
     TRIANGLE,
     RECTANGLE,
     SPHERE,
-    LANDSCHAFT
+    LANDSCHAFT,
+    CLOTH
 };
 
 class Enums

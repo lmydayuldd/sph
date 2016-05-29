@@ -15,20 +15,19 @@ public:
     Vector *r, *v, *a, *dr, *dv, *da, *F;
     double m, rho, charge, temperature, viscosity;
     double kernel;
-    double radius = 1.;
+    double radius;
     bool stationary;
 
     Particle();
     Particle(std::vector<Particle*>* parentFlow);
     ~Particle();
 
+    void springify(Particle* p2, float ks, float d, float kd);
+    void springifyMutual(Particle* p2, float ks, float d, float kd);
     virtual void createView() override;
     virtual void setModelMatrix() override;
     virtual void paint() override;
     virtual void collide(Particle* p2) override;
-
-    void springify(Particle* p2, float ks, float d, float kd);
-    void springifyMutual(Particle* p2, float ks, float d, float kd);
 };
 
 #endif // PARTICLE_H

@@ -2,7 +2,7 @@
 
 Shape::~Shape()
 {
-    delete form;
+    //delete form;
 }
 
 Shape::Shape()

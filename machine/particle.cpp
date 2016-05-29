@@ -11,6 +11,9 @@
 #include "util/constants.h"
 #include "util/settings.h"
 
+using namespace std;
+#include "shape/line.h"
+
 std::vector<std::vector<Particle*>> Particle::flows;
 
 Particle::Particle()
@@ -19,7 +22,7 @@ Particle::Particle()
 
 Particle::~Particle()
 {
-    delete parentFlow;
+    //delete parentFlow;
     delete r;
     delete v;
     delete a;
@@ -33,10 +36,16 @@ Particle::~Particle()
 }
 
 Particle::Particle(std::vector<Particle*>* parentFlow)
-    : parentFlow(parentFlow)
+    : parentFlow(parentFlow),
+      m(1.0),
+      rho(1.0),
+      charge(1.0),
+      temperature(1.0),
+      viscosity(1.0),
+      kernel(1.0),
+      radius(1.0),
+      stationary(false)
 {
-    m = 1.0;
-    rho = 1.0;
     r = new Vector(
         (static_cast<float>(rand()) / static_cast<float>(RAND_MAX) - 1.0f) * (rand()%5),
         (static_cast<float>(rand()) / static_cast<float>(RAND_MAX) - 1.0f) * (rand()%5),
@@ -61,12 +70,13 @@ Particle::Particle(std::vector<Particle*>* parentFlow)
 
 void Particle::createView()
 {
-    float color[3] = {1.0f, 0, 0};
+//    float position[3] = {0, 0, 0};
+//    Dot dot(position, color);
+//    this->forms.push_back(dot.form);
+
+    float color[3] = {1, 0, 0};
     Sphere sphere(0.8, color);
     this->form = sphere.form;
-    //        float position[3] = {0, 0, 0};
-    //        Dot dot(position, color);
-    //        this->forms.push_back(dot.form);
 }
 
 void Particle::springify(Particle* p2, float ks, float d, float kd)
