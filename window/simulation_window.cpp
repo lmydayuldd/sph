@@ -9,6 +9,7 @@
 
 class Particle;
 
+#include "control/interaction.h"
 #include "gl/form.h"
 #include "gl/handles.h"
 #include "gl/matrices.h"
@@ -52,11 +53,13 @@ void SimulationWindow::initialize()
     for (unsigned int i = 0; i < Particle::flows[0].size(); ++i) {
         Particle::flows[0][i] = new Particle(Particle::flows.size() - 1);
     }
-    Machine::machines.push_back(new Walls(10.0));//getDamping("static")));
+    Machine::machines.push_back(
+            new Walls(10.0)
+    );//getDamping("static")));
     Machine::machines.push_back(
         new Rope(
             Vector(-6, 3, 0), Vector(6, 3, 0),
-            30, 300, 0.001, 12, 5
+            25, 200, 0.1, 12, 5
         )
     );
 //    Machine::machines.push_back(
@@ -108,14 +111,17 @@ void SimulationWindow::render()
     ++frame;
 }
 
-bool key[6] = {0};
-void SimulationWindow::move() {
+bool key[9] = {0};
+void SimulationWindow::move()
+{
     if (key[0]) w();
     if (key[1]) s();
     if (key[2]) a();
     if (key[3]) d();
     if (key[4]) h();
     if (key[5]) l();
+    if (key[7]) lmb();
+    if (key[8]) rmb();
 }
 
 void SimulationWindow::keyPressEvent(QKeyEvent* e)
@@ -127,16 +133,17 @@ void SimulationWindow::keyPressEvent(QKeyEvent* e)
 
     switch (e->key())
     {
-        case Qt::Key_W     : key[0] = true; break;
-        case Qt::Key_Up    : key[0] = true; break;
-        case Qt::Key_S     : key[1] = true; break;
-        case Qt::Key_Down  : key[1] = true; break;
-        case Qt::Key_A     : key[2] = true; break;
-        case Qt::Key_Left  : key[2] = true; break;
-        case Qt::Key_D     : key[3] = true; break;
-        case Qt::Key_Right : key[3] = true; break;
-        case Qt::Key_Space : key[4] = true; break;
-        case Qt::Key_V     : key[5] = true; break;
+        case Qt::Key_W       : key[0] = true; break;
+        case Qt::Key_Up      : key[0] = true; break;
+        case Qt::Key_S       : key[1] = true; break;
+        case Qt::Key_Down    : key[1] = true; break;
+        case Qt::Key_A       : key[2] = true; break;
+        case Qt::Key_Left    : key[2] = true; break;
+        case Qt::Key_D       : key[3] = true; break;
+        case Qt::Key_Right   : key[3] = true; break;
+        case Qt::Key_Space   : key[4] = true; break;
+        case Qt::Key_V       : key[5] = true; break;
+        case Qt::Key_Control : key[6] = true; break;
     }
 }
 
@@ -144,59 +151,118 @@ void SimulationWindow::keyReleaseEvent(QKeyEvent *e)
 {
     if (! e->isAutoRepeat()) {
         switch (e->key()) {
-            case Qt::Key_W     : key[0] = false; break;
-            case Qt::Key_S     : key[1] = false; break;
-            case Qt::Key_A     : key[2] = false; break;
-            case Qt::Key_D     : key[3] = false; break;
-            case Qt::Key_Space : key[4] = false; break;
-            case Qt::Key_V     : key[5] = false; break;
+            case Qt::Key_W       : key[0] = false; break;
+            case Qt::Key_S       : key[1] = false; break;
+            case Qt::Key_A       : key[2] = false; break;
+            case Qt::Key_D       : key[3] = false; break;
+            case Qt::Key_Space   : key[4] = false; break;
+            case Qt::Key_V       : key[5] = false; break;
+            case Qt::Key_Control : key[6] = false; break;
         }
     }
 }
 
-void SimulationWindow::mouseMoveEvent(QMouseEvent* event) {
+void SimulationWindow::mouseMoveEvent(QMouseEvent* event)
+{
     QPointF p = event->pos();
     int dy = (width()  / 2) - p.x();
     int dx = (height() / 2) - p.y();
+    const float normalizedX =    (p.x() / (float) width())  * 2 - 1;
+    const float normalizedY = - ((p.y() / (float) height()) * 2 - 1);
 
-    Matrices::camRX -= dx * mouseSpeed;
-    Matrices::camRY -= dy * mouseSpeed;
-    if (Matrices::camRX >  90) Matrices::camRX =  90;
-    if (Matrices::camRX < -90) Matrices::camRX = -90;
+    if (! key[6]) {
+        Matrices::camRX -= dx * mouseSpeed;
+        Matrices::camRY -= dy * mouseSpeed;
+        if (Matrices::camRX >  90) Matrices::camRX =  90;
+        if (Matrices::camRX < -90) Matrices::camRX = -90;
 
-    QCursor::setPos(
-        geometry().x() + width()/2,
-        geometry().y() + height()/2
-    );
+        QCursor::setPos(geometry().x() + width()/2, geometry().y() + height()/2);
+    }
+    else {
+        if (key[7]) {
+            Interaction::handleTouchDrag(normalizedX, normalizedY);
+        }
+    }
 }
 
-void SimulationWindow::w() {
+void SimulationWindow::mousePressEvent(QMouseEvent* event)
+{
+    QPointF p = event->pos();
+    int dy = (width()  / 2) - p.x();
+    int dx = (height() / 2) - p.y();
+    const float normalizedX =    (p.x() / (float) width())  * 2 - 1;
+    const float normalizedY = - ((p.y() / (float) height()) * 2 - 1);
+
+    switch(event->button()) {
+        case Qt::LeftButton :
+            key[7] = true;
+            Interaction::handleTouchPress(normalizedX, normalizedY);
+        break;
+        case Qt::RightButton :
+            key[8] = true;
+        break;
+        default : break;
+    }
+}
+void SimulationWindow::mouseReleaseEvent(QMouseEvent* event)
+{
+    switch(event->button()) {
+        case Qt::LeftButton :
+            key[7] = false;
+            Interaction::handleTouchDrop();
+        break;
+        case Qt::RightButton :
+            key[8] = false;
+        break;
+        default : break;
+    }
+}
+
+void SimulationWindow::lmb()
+{
+    if (key[6]) {
+
+    }
+}
+void SimulationWindow::rmb()
+{
+
+}
+
+void SimulationWindow::w()
+{
     Matrices::camTX -= moveSpeed * sin(Matrices::camRY * degToRad) * cos(Matrices::camRX * degToRad) * dt;
     Matrices::camTY += moveSpeed * sin(Matrices::camRX * degToRad) * dt;
     Matrices::camTZ += moveSpeed * cos(Matrices::camRY * degToRad) * cos(Matrices::camRX * degToRad) * dt;
 }
-void SimulationWindow::s() {
+void SimulationWindow::s()
+{
     Matrices::camTX += moveSpeed * sin(Matrices::camRY * degToRad) * cos(Matrices::camRX * degToRad) * dt;
     Matrices::camTY -= moveSpeed * sin(Matrices::camRX * degToRad) * dt;
     Matrices::camTZ -= moveSpeed * cos(Matrices::camRY * degToRad) * cos(Matrices::camRX * degToRad) * dt;
 }
-void SimulationWindow::a() {
+void SimulationWindow::a()
+{
     Matrices::camTX += moveSpeed * cos(Matrices::camRY * degToRad) * dt;
     Matrices::camTZ += moveSpeed * sin(Matrices::camRY * degToRad) * dt;
 }
-void SimulationWindow::d() {
+void SimulationWindow::d()
+{
     Matrices::camTX -= moveSpeed * cos(Matrices::camRY * degToRad) * dt;
     Matrices::camTZ -= moveSpeed * sin(Matrices::camRY * degToRad) * dt;
 }
-void SimulationWindow::h() {
+void SimulationWindow::h()
+{
     Matrices::cam[1] += t;
     Matrices::cam[4] += t;
 }
-void SimulationWindow::l() {
+void SimulationWindow::l()
+{
     Matrices::cam[1] -= t;
     Matrices::cam[4] -= t;
 }
-void SimulationWindow::r() {
+void SimulationWindow::r()
+{
     Matrices::viewMatrix.setToIdentity();
     Matrices::viewMatrix.lookAt(
         QVector3D(Matrices::defaultCam[0], Matrices::defaultCam[1], Matrices::defaultCam[2]),

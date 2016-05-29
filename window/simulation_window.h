@@ -35,9 +35,13 @@ private:
     void keyPressEvent(QKeyEvent* e);
     void keyReleaseEvent(QKeyEvent* e);
     void mouseMoveEvent(QMouseEvent* e);
+    void mousePressEvent(QMouseEvent* e);
+    void mouseReleaseEvent(QMouseEvent* e);
 
     static void cameraMan();
     void move();
+    void lmb();
+    void rmb();
     void w();
     void s();
     void a();

@@ -43,7 +43,7 @@ Particle::Particle(int parentFlow)
       temperature(1.0),
       viscosity(1.0),
       kernel(1.0),
-      radius(0.1),
+      radius(0.2),
       stationary(false)
 {
     r = new Vector(

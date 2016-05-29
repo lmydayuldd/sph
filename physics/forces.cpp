@@ -53,7 +53,8 @@ void Forces::collide(const Particle& p1, const Particle& p2) { // Elastic Collis
     if (distanceFromCenter < p1.radius) {
         Vector sphereSurfaceNormal = (*p1.r - *p2.r).normal();
         double moveOutOfSphere = distanceFromCenter - p1.radius;// - p2.dr.norm();
-        *p2.r = *p2.r + sphereSurfaceNormal * moveOutOfSphere;
+        if (! p2.stationary)
+            *p2.r = *p2.r + sphereSurfaceNormal * moveOutOfSphere;
 
         Vector p1_v_new = *p1.v - (
             (*p1.r - *p2.r) * (
@@ -72,8 +73,9 @@ void Forces::collide(const Particle& p1, const Particle& p2) { // Elastic Collis
                         * 2 * p1.m / (p1.m + p2.m)
                 )
             );
-        if (! p1.stationary)
+        if (! p1.stationary) {
             *p1.v = p1_v_new;
+        }
     }
 }
 
