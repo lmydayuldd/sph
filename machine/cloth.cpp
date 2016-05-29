@@ -16,19 +16,19 @@ Cloth::Cloth(
     const Vector& start, const Vector& end,
     int knots, float ks, float d, float kd, int strength
 )
-    : flow(vector<Particle*>(knots * knots)),
-      knots(knots)
+    : knots(knots)
 {
     color[0] = 1.0f;
     color[1] = 1.0f;
     color[2] = 0.0f;
 
+    flow = vector<Particle*>(knots * knots);
     for (unsigned int i = 0; i < flow.size(); ++i)
         flow[i] = new Particle(&flow);
 
     for (int i = 1; i < knots * knots; ++i) // hor-sing
         if (i % knots != 0)
-            flow[i]->springifyMutual(flow[i - 1], ks, d, kd);
+            flow[i]->springifyMutual(flow[i-1], ks, d, kd);
     for (int i = 2; i < knots * knots; ++i) // hor-dual
         if (i % knots > 1)
             flow[i]->springifyMutual(flow[i-2], ks/2, d*2, kd/2);
@@ -45,27 +45,24 @@ Cloth::Cloth(
         if (i%knots != 0)
             flow[i]->springifyMutual(flow[i+knots-1], ks, d, kd);
 
-    double ny = start.y;
-    double nz = start.z;
+    Vector rn = start;
     for (int i = 0; i < knots; ++i) {
-        ny += (end.y - start.y) / knots;
-        nz += (end.z - start.z) / knots;
-        double nx = start.x;
+        rn.y += (end.y - start.y) / knots;
+        rn.z += (end.z - start.z) / knots;
+        rn.x = start.x;
         for (int j = 0; j < knots; ++j) {
-            nx += (end.x - start.x) / knots;
-            flow[i*knots + j]->r->x = nx;
-            flow[i*knots + j]->r->y = ny;
-            flow[i*knots + j]->r->z = nz;
+            rn.x += (end.x - start.x) / knots;
+            flow[i*knots + j]->r = new Vector(rn);
             if ((i == 0 && j == 0) || (i == 0 && j == knots-1) || (i == knots-1 && j == 0) || (i == knots-1 && j == knots-1)) {
                 flow[i*knots + j]->stationary = true;
             }
         }
     }
 
-    for (unsigned int i = 0; i < flow.size(); ++i)
+    for (unsigned int i = 0; i < flow.size(); ++i) {
         flow[i]->v = new Vector();
-//    for (unsigned int i = 0; i < flow.size(); ++i)
 //        p.recolor(color);
+    }
 
     linkView(CLOTH);
 }
@@ -100,10 +97,12 @@ void Cloth::setModelMatrix()
 void Cloth::paint()
 {
     move();
-
     setModelMatrix();
-
     Machine::paint();
+
+    for (unsigned int i = 0; i < flow.size(); ++i) {
+        flow[i]->paint();
+    }
 }
 
 void Cloth::move()
@@ -111,7 +110,7 @@ void Cloth::move()
     if (form != nullptr) {
         for (int i = 0; i < knots - 1; ++i) {
             for (int j = 0; j < knots - 1; ++j) {
-                int k = i * (knots - 1) + j;
+                int k = (i * (knots - 1) + j) * 36;
 
                 form->posCoords[k+6]  = flow[(i+1)*knots + j + 1]->r->x;
                 form->posCoords[k+7]  = flow[(i+1)*knots + j + 1]->r->y;

@@ -43,7 +43,7 @@ Particle::Particle(std::vector<Particle*>* parentFlow)
       temperature(1.0),
       viscosity(1.0),
       kernel(1.0),
-      radius(1.0),
+      radius(0.3),
       stationary(false)
 {
     r = new Vector(

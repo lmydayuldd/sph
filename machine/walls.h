@@ -14,9 +14,9 @@ private:
 public:
     Walls(float lim);
 
-    void paint() override;
     void createView() override;
     void setModelMatrix() override;
+    void paint() override;
     void collide(Particle* p2) override;
 };
 

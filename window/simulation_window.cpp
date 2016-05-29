@@ -59,12 +59,12 @@ void SimulationWindow::initialize()
             30, 300, 0.001, 12, 5
         )
     );
-//    Machine::machines.push_back(
-//        new Cloth(
-//            Vector(-2, -2, 4), Vector(2, 2, 4),
-//            6, 300, 0.001, 12, -1
-//        )
-//    );
+    Machine::machines.push_back(
+        new Cloth(
+            Vector(-2, -2, 4), Vector(2, 2, 4),
+            6, 300, 0.001, 12, -1
+        )
+    );
 
     QCursor::setPos(geometry().x() + width()/2, geometry().y() + height()/2);
 
