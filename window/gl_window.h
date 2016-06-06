@@ -35,7 +35,7 @@ protected:
     void exposeEvent(QExposeEvent* event) Q_DECL_OVERRIDE;
 
 private:
-    //Ui::MainWindow* ui;
+//    Ui::MainWindow* ui;
 
     bool m_update_pending;
     bool m_animating;

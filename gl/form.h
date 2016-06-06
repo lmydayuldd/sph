@@ -32,7 +32,6 @@ public:
     std::vector<float> texCoords;
     ShapeType type;
 
-//    Form();
     Form(
         std::vector<float> posCoords, int POS_COORDS_PER_VERTEX, int shapeMode,
         std::vector<float> clrCoords, int COL_COORDS_PER_VERTEX,

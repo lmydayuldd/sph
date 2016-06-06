@@ -23,11 +23,6 @@ Form::~Form()
     }
 }
 
-//Form::Form()
-//    : type(NOTHING)
-//{
-//}
-
 Form::Form(
     vector<float> posCoords, int POS_COORDS_PER_VERTEX, int shapeMode,
     vector<float> clrCoords, int CLR_COORDS_PER_VERTEX,
@@ -40,7 +35,7 @@ Form::Form(
       ALL_COORDS_PER_VERTEX(POS_COORDS_PER_VERTEX + CLR_COORDS_PER_VERTEX + TEX_COORDS_PER_VERTEX),
       shapeMode(shapeMode),
       textureResource(textureResource),
-      vertexArray(new VertexArray(posCoords, type)), // initialize vertex byte buffer for shape coordinates
+      vertexArray(new VertexArray(posCoords, type)),
       posCoords(posCoords),
       clrCoords(clrCoords),
       texCoords(texCoords),

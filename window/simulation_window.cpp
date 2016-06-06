@@ -111,17 +111,21 @@ void SimulationWindow::render()
     ++frame;
 }
 
-bool key[9] = {0};
+enum Key : unsigned char {
+    W, S, A, D, JUMP, DUCK, CTRL, LMB, RMB
+};
+
+bool key[sizeof(unsigned char)] = {0};
 void SimulationWindow::move()
 {
-    if (key[0]) w();
-    if (key[1]) s();
-    if (key[2]) a();
-    if (key[3]) d();
-    if (key[4]) h();
-    if (key[5]) l();
-    if (key[7]) lmb();
-    if (key[8]) rmb();
+    if (key[W]) w();
+    if (key[S]) s();
+    if (key[A]) a();
+    if (key[D]) d();
+    if (key[JUMP]) h();
+    if (key[DUCK]) l();
+    if (key[LMB]) lmb();
+    if (key[RMB]) rmb();
 }
 
 void SimulationWindow::keyPressEvent(QKeyEvent* e)
@@ -133,17 +137,17 @@ void SimulationWindow::keyPressEvent(QKeyEvent* e)
 
     switch (e->key())
     {
-        case Qt::Key_W       : key[0] = true; break;
-        case Qt::Key_Up      : key[0] = true; break;
-        case Qt::Key_S       : key[1] = true; break;
-        case Qt::Key_Down    : key[1] = true; break;
-        case Qt::Key_A       : key[2] = true; break;
-        case Qt::Key_Left    : key[2] = true; break;
-        case Qt::Key_D       : key[3] = true; break;
-        case Qt::Key_Right   : key[3] = true; break;
-        case Qt::Key_Space   : key[4] = true; break;
-        case Qt::Key_V       : key[5] = true; break;
-        case Qt::Key_Control : key[6] = true; break;
+        case Qt::Key_W       : key[W] = true; break;
+        case Qt::Key_Up      : key[W] = true; break;
+        case Qt::Key_S       : key[S] = true; break;
+        case Qt::Key_Down    : key[S] = true; break;
+        case Qt::Key_A       : key[A] = true; break;
+        case Qt::Key_Left    : key[A] = true; break;
+        case Qt::Key_D       : key[D] = true; break;
+        case Qt::Key_Right   : key[D] = true; break;
+        case Qt::Key_Space   : key[JUMP] = true; break;
+        case Qt::Key_V       : key[DUCK] = true; break;
+        case Qt::Key_Control : key[CTRL] = true; break;
     }
 }
 
@@ -151,13 +155,13 @@ void SimulationWindow::keyReleaseEvent(QKeyEvent *e)
 {
     if (! e->isAutoRepeat()) {
         switch (e->key()) {
-            case Qt::Key_W       : key[0] = false; break;
-            case Qt::Key_S       : key[1] = false; break;
-            case Qt::Key_A       : key[2] = false; break;
-            case Qt::Key_D       : key[3] = false; break;
-            case Qt::Key_Space   : key[4] = false; break;
-            case Qt::Key_V       : key[5] = false; break;
-            case Qt::Key_Control : key[6] = false; break;
+            case Qt::Key_W       : key[W] = false; break;
+            case Qt::Key_S       : key[S] = false; break;
+            case Qt::Key_A       : key[A] = false; break;
+            case Qt::Key_D       : key[D] = false; break;
+            case Qt::Key_Space   : key[JUMP] = false; break;
+            case Qt::Key_V       : key[DUCK] = false; break;
+            case Qt::Key_Control : key[CTRL] = false; break;
         }
     }
 }
@@ -170,7 +174,7 @@ void SimulationWindow::mouseMoveEvent(QMouseEvent* event)
     const float normalizedX =    (p.x() / (float) width())  * 2 - 1;
     const float normalizedY = - ((p.y() / (float) height()) * 2 - 1);
 
-    if (! key[6]) {
+    if (! key[CTRL]) {
         Matrices::camRX -= dx * mouseSpeed;
         Matrices::camRY -= dy * mouseSpeed;
         if (Matrices::camRX >  90) Matrices::camRX =  90;
@@ -179,7 +183,7 @@ void SimulationWindow::mouseMoveEvent(QMouseEvent* event)
         QCursor::setPos(geometry().x() + width()/2, geometry().y() + height()/2);
     }
     else {
-        if (key[7]) {
+        if (key[LMB]) {
             Interaction::handleTouchDrag(normalizedX, normalizedY);
         }
     }
@@ -188,18 +192,16 @@ void SimulationWindow::mouseMoveEvent(QMouseEvent* event)
 void SimulationWindow::mousePressEvent(QMouseEvent* event)
 {
     QPointF p = event->pos();
-    int dy = (width()  / 2) - p.x();
-    int dx = (height() / 2) - p.y();
     const float normalizedX =    (p.x() / (float) width())  * 2 - 1;
     const float normalizedY = - ((p.y() / (float) height()) * 2 - 1);
 
     switch(event->button()) {
         case Qt::LeftButton :
-            key[7] = true;
+            key[LMB] = true;
             Interaction::handleTouchPress(normalizedX, normalizedY);
         break;
         case Qt::RightButton :
-            key[8] = true;
+            key[RMB] = true;
         break;
         default : break;
     }
@@ -208,11 +210,11 @@ void SimulationWindow::mouseReleaseEvent(QMouseEvent* event)
 {
     switch(event->button()) {
         case Qt::LeftButton :
-            key[7] = false;
+            key[LMB] = false;
             Interaction::handleTouchDrop();
         break;
         case Qt::RightButton :
-            key[8] = false;
+            key[RMB] = false;
         break;
         default : break;
     }
@@ -220,7 +222,7 @@ void SimulationWindow::mouseReleaseEvent(QMouseEvent* event)
 
 void SimulationWindow::lmb()
 {
-    if (key[6]) {
+    if (key[CTRL]) {
 
     }
 }

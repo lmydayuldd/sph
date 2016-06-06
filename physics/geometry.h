@@ -12,7 +12,7 @@ namespace Geometry {
 class Geometry::Ray {
 public:
     Vector *source, *vector;
-    Ray(Vector *source, Vector *vector) {
+    Ray(Vector* source, Vector* vector) {
         this->source = source;
         this->vector = vector;
     }

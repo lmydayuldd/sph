@@ -10,52 +10,25 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = SPH
 TEMPLATE = app
 CONFIG += mobility c++11
+#QMAKE_CXXFLAGS += -std=c++11 -pthread
 MOBILITY =
-
-FORMS +=
 
 # Defines platform-specific preprocessor macro
 #   edit at Projects->QMake->additional arguments (set to CONFIG+=_BUILD) required first
-CONFIG(DESKTOP_BUILD):DEFINES += DESKTOP_BUILD
-CONFIG(ANDROID_BUILD):DEFINES += ANDROID_BUILD
+CONFIG(DESKTOP_BUILD): DEFINES += DESKTOP_BUILD
+CONFIG(ANDROID_BUILD): DEFINES += ANDROID_BUILD
 
 RESOURCES += \
     D:/Dropbox/well/WFAIS/prog/Qt/SPH
+
+# Project files:
+
+FORMS += #mainwindow.ui
 
 DISTFILES += \
     shader/vertex_shader.vsh \
     shader/fragment_shader.fsh \
     sph.qmodel
-
-SOURCES += \
-    control/interaction.cpp \
-    gl/form.cpp \
-    gl/handles.cpp \
-    gl/matrices.cpp \
-    gl/vertex_array.cpp \
-    machine/cloth.cpp \
-    machine/machine.cpp \
-    machine/particle.cpp \
-    machine/rope.cpp \
-    machine/spring.cpp \
-    machine/walls.cpp \
-    main.cpp \
-    physics/computer.cpp \
-    physics/forces.cpp \
-    physics/vector.cpp \
-    shader/shader.cpp \
-    shape/arrow.cpp \
-    shape/dot.cpp \
-    shape/landschaft.cpp \
-    shape/line.cpp \
-    shape/rectangle.cpp \
-    shape/shape.cpp \
-    shape/sphere.cpp \
-    shape/triangle.cpp \
-    util/enums.cpp \
-    util/settings.cpp \
-    window/gl_window.cpp \
-    window/simulation_window.cpp
 
 HEADERS += \
     control/interaction.h \
@@ -90,3 +63,34 @@ HEADERS += \
     util/timer.h \
     window/gl_window.h \
     window/simulation_window.h
+
+SOURCES += \
+    control/interaction.cpp \
+    gl/form.cpp \
+    gl/handles.cpp \
+    gl/matrices.cpp \
+    gl/vertex_array.cpp \
+    machine/cloth.cpp \
+    machine/machine.cpp \
+    machine/particle.cpp \
+    machine/rope.cpp \
+    machine/spring.cpp \
+    machine/walls.cpp \
+    main.cpp \
+    physics/computer.cpp \
+    physics/forces.cpp \
+    physics/vector.cpp \
+    shader/shader.cpp \
+    shape/arrow.cpp \
+    shape/dot.cpp \
+    shape/landschaft.cpp \
+    shape/line.cpp \
+    shape/rectangle.cpp \
+    shape/shape.cpp \
+    shape/sphere.cpp \
+    shape/triangle.cpp \
+    util/enums.cpp \
+    util/settings.cpp \
+    util/timer.cpp \
+    window/gl_window.cpp \
+    window/simulation_window.cpp

@@ -4,9 +4,10 @@
 #include <iostream>
 #include <vector>
 
-//class Form;
-#include "gl/form.h"
+class Form;
 class Particle;
+
+#include "util/enums.h"
 
 class Machine
 {

@@ -15,7 +15,7 @@ Particle* Interaction::pressedParticle;
 void Interaction::handleTouchPress(float normalizedX, float normalizedY)
 {
     Geometry::Ray ray = convertNormalized2DPointToRay(normalizedX, normalizedY);
-    if (Computer::currentComputer != nullptr) {
+//    if (Computer::currentComputer != nullptr) {
         /*for (Flow f : Flow.flows) for (Particle p : f.particles) {
             // Now test if this ray intersects with the mallet by creating a bounding sphere that wraps the mallet.
             Sphere particleBoundingSphere = new Sphere( new Vector( p.r ), p.radius );
@@ -38,7 +38,7 @@ void Interaction::handleTouchPress(float normalizedX, float normalizedY)
             }
         }
         /*if ( minProximity < 0.1f ) */pressedParticle = closest;
-    }
+//    }
 //    if (typeid(Computer::currentComputer) == typeid(Wave2DComputer)) {
 //        double minProximity = std::numeric_limits<double>::infinity();
 //        vector<Shape> shapes = Wave2DComputer.landschaft.shapes;

@@ -3,7 +3,7 @@
 
 #include "window/gl_window.h"
 #include "gl/matrices.h"
-#include "ui_main_window.h"
+//#include "ui_main_window.h"
 
 GLWindow::~GLWindow()
 {
@@ -53,7 +53,7 @@ void GLWindow::renderLater()
     }
 }
 
-bool GLWindow::event( QEvent *event )
+bool GLWindow::event(QEvent* event)
 {
     switch (event->type()) {
     case QEvent::UpdateRequest:

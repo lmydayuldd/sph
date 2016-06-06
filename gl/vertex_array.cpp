@@ -25,13 +25,18 @@ VertexArray::VertexArray(vector<float> vertexData, ShapeType type)
     vertexBuffer->allocate(vertexData.data(), vertexData.size() * sizeof(float));
     vertexBuffer->write(0, vertexData.data(), vertexData.size() * sizeof(float));
 
-    for (unsigned int i = 0; i < arrays.size(); ++i) {
-        if (arrays[i]->type == type) {
-            arrays[i] = this;
-            break; //////////////////////////////
-        }
-        if (i == arrays.size() - 1) {
-            arrays.push_back(this);
+    if (arrays.size() == 0) {
+        arrays.push_back(this);
+    }
+    else {
+        for (unsigned int i = 0; i < arrays.size(); ++i) {
+            if (arrays[i]->type == type) {
+                arrays[i] = this;
+                break; //////////////////////////////
+            }
+            if (i == arrays.size() - 1) {
+                arrays.push_back(this);
+            }
         }
     }
 }

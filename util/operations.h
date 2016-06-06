@@ -4,12 +4,13 @@
 #include <Qvector4D>
 
 #include "gl/matrices.h"
+#include "physics/geometry.h"
 #include "physics/vector.h"
 
-void divideByW(QVector4D v)
+void divideByW(QVector4D& v)
 {
     for (int i = 0; i < 3; ++i) {
-        v[i] /= v[4];
+        v[i] /= v[3];
     }
 }
 
@@ -31,7 +32,7 @@ Geometry::Ray convertNormalized2DPointToRay(float normalizedX, float normalizedY
     return Geometry::Ray(&nearPointRay, &ray);
 }
 
-double distanceBetween(Vector point, Geometry::Ray ray)
+double distanceBetween(const Vector& point, const Geometry::Ray& ray)
 {
     Vector p1ToPoint = point - *ray.source;
     Vector p2ToPoint = point - (*ray.source + *ray.vector);
@@ -45,12 +46,12 @@ double distanceBetween(Vector point, Geometry::Ray ray)
     return areaOfTriangleTimesTwo / lengthOfBase;
 }
 
-bool intersects(Geometry::Sphere sphere, Geometry::Ray ray)
+bool intersects(const Geometry::Sphere& sphere, const Geometry::Ray& ray)
 {
     return distanceBetween(*sphere.center, ray) < sphere.radius;
 }
 
-Vector intersectionPoint(Geometry::Ray ray, Geometry::Plane plane)
+Vector intersectionPoint(const Geometry::Ray& ray, const Geometry::Plane& plane)
 {
     Vector rayToPlaneVector = *plane.point - *ray.source;
     double scaleFactor = rayToPlaneVector.dotProduct(*plane.normal) / (*(ray.vector)).dotProduct(*plane.normal);
