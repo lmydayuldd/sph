@@ -37,13 +37,13 @@ Particle::~Particle()
 
 Particle::Particle(int parentFlow)
     : parentFlow(parentFlow),
-      m(1.0),
+      m(Settings::PARTICLE_MASS),
       rho(1.0),
       charge(1.0),
       temperature(1.0),
       viscosity(1.0),
       kernel(1.0),
-      radius(0.2),
+      radius(Settings::PARTICLE_RADIUS),
       stationary(false)
 {
     r = new Vector(
@@ -100,7 +100,8 @@ void Particle::setModelMatrix()
     Vector dir = v->normal();
     Vector up = Vector(0, 1, 0);
     double angle = - acos(dir.dotProduct(up)) * radToDeg;
-    if (fabs(angle) > 0.5) {
+    if (fabs(angle) > 0.5)
+    {
         Vector axis = (dir * up).normal();
         Matrices::modelMatrix.rotate(angle, QVector3D(axis.x, axis.y, axis.z)); // rotate towards velocity direction vector
     }
@@ -112,8 +113,11 @@ void Particle::paint()
 
     Machine::paint();
 
-    v->setApplicationPoint(*r);
-    v->paint();
+    if (Settings::PAINT_VECTORS)
+    {
+        v->setApplicationPoint(*r);
+        v->paint();
+    }
 }
 
 void Particle::collide(Particle* p2) {}

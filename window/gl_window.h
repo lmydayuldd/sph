@@ -1,14 +1,10 @@
-#ifndef GLWINDOW_H
-#define GLWINDOW_H
+#ifndef GL_WINDOW_H
+#define GL_WINDOW_H
 
 #include <QOpenGLFunctions>
 #include <QOpenGLPaintDevice>
 #include <QWindow>
 #include <QMainWindow>
-
-//namespace Ui {
-//    class MainWindow;
-//}
 
 class GLWindow
         : public QWindow,
@@ -35,8 +31,6 @@ protected:
     void exposeEvent(QExposeEvent* event) Q_DECL_OVERRIDE;
 
 private:
-//    Ui::MainWindow* ui;
-
     bool m_update_pending;
     bool m_animating;
 
@@ -44,4 +38,4 @@ private:
     QOpenGLPaintDevice* paintDevice;
 };
 
-#endif // GLWINDOW_H
+#endif // GL_WINDOW_H

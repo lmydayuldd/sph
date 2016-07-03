@@ -12,21 +12,25 @@ class Parser
 public:
     static const char* parse(const char* filename)
     {
-        try {
+        try
+        {
             std::ifstream file( filename );
             file.exceptions( std::ifstream::failbit | std::ifstream::badbit );
-            if (file) {
+            if (file)
+            {
                 std::stringstream ss_buf;
                 ss_buf << file.rdbuf();
                 std::string str = ss_buf.str();
                 const char *char_str = str.c_str();
                 return char_str;
             }
-            else {
+            else
+            {
                 //throw(errno); // android non-compatible
             }
         }
-        catch (std::ifstream::failure e) {
+        catch (std::ifstream::failure e)
+        {
             std::cout << e.what() << std::endl;
         }
     }

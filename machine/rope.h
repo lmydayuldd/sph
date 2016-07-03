@@ -17,10 +17,10 @@ public:
         const Vector& start,
         const Vector& end,
         int knots,
+        int strength,
         float ks,
         float d,
-        float kd,
-        int strength
+        float kd
     );
 
     virtual void paint() override;

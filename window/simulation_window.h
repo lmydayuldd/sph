@@ -26,6 +26,11 @@ public:
     float cursorX, cursorY;
 
 private:
+    QPoint mousePoint;
+    int dx;
+    int dy;
+    float normalizedX;
+    float normalizedY;
     std::string previousAction;
     float previousX;
     float previousY;
@@ -40,8 +45,6 @@ private:
 
     static void cameraMan();
     void move();
-    void lmb();
-    void rmb();
     void w();
     void s();
     void a();

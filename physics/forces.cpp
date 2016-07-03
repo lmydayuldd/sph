@@ -44,7 +44,7 @@ void Forces::Hooke(const Particle& p1, const Particle& p2,
                    double ks, double d, double kd)
 { // F-> = -ks . x-> // d = targetSpringDistance
     if (! p1.stationary || ! p2.stationary) {
-        Vector r12 = *p1.r -* p2.r;
+        Vector r12 = *p1.r - *p2.r;
         Vector v12 = *p1.v - *p2.v;
         double fs = ks * fabs(r12.norm() - d);
         double fd = kd * v12.dotProduct(r12) / r12.norm();

@@ -5,7 +5,7 @@
 #include <QOpenGLFunctions>
 //#include <QOpenGLVertexArrayObject>
 
-#include "gl/form.h" // enum ShapeNames
+#include "util/enums.h"
 
 class VertexArray {
 private:
@@ -17,7 +17,8 @@ public:
     ShapeType type;
 
     ~VertexArray();
-    VertexArray(std::vector<float> vertexData, ShapeType type); // initialize vertex byte buffer for coordinates
+    // initialize vertex byte buffer for coordinates
+    VertexArray(std::vector<float> vertexData, ShapeType type);
 
     static void printArrays();
 

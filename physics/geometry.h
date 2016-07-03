@@ -1,7 +1,10 @@
 #ifndef GEOMETRY_H
 #define GEOMETRY_H
 
-class Vector;
+#include <iostream>
+
+//class Vector;
+#include "physics/vector.h"
 
 namespace Geometry {
     class Ray;
@@ -11,8 +14,8 @@ namespace Geometry {
 
 class Geometry::Ray {
 public:
-    Vector *source, *vector;
-    Ray(Vector* source, Vector* vector) {
+    Vector source, vector;
+    Ray(Vector& source, Vector& vector) {
         this->source = source;
         this->vector = vector;
     }
@@ -20,9 +23,9 @@ public:
 
 class Geometry::Sphere {
 public:
-    Vector* center;
+    Vector center;
     double radius;
-    Sphere(Vector* center, double radius) {
+    Sphere(Vector& center, double radius) {
         this->center = center;
         this->radius = radius;
     }
@@ -30,8 +33,8 @@ public:
 
 class Geometry::Plane {
 public:
-    Vector *point, *normal;
-    Plane(Vector* point, Vector* normal) {
+    Vector point, normal;
+    Plane(Vector& point, Vector& normal) {
         this->point  = point;
         this->normal = normal;
     }

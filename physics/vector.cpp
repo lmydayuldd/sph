@@ -1,11 +1,13 @@
 #include "physics/vector.h"
 
+#include <iostream>
+
 #include "gl/form.h"
 #include "gl/matrices.h"
 #include "shape/arrow.h"
+#include "shape/line.h"
 #include "util/settings.h"
 
-#include "shape/line.h"
 using namespace std;
 
 Vector::~Vector()
@@ -22,7 +24,9 @@ Vector::Vector(double x, double y, double z)
     : x(x), y(y), z(z),
       source(nullptr)
 {
+#ifndef TEST_BUILD
     linkView(ARROW);
+#endif
 }
 
 Vector::Vector(const Vector& v)
@@ -61,6 +65,20 @@ void Vector::setApplicationPoint(Vector application)
     source = &application;
 }
 
+bool Vector::operator==(const Vector& v) const {
+    bool ret = true;
+    if (this->x != v.x
+    || this->y != v.y
+    || this->z != v.z)
+//    || this->source != v.source
+//    || this->source->x != v.source->x
+//    || this->source->y != v.source->y
+//    || this->source->z != v.source->z)
+    {
+        ret = false;
+    }
+    return ret;
+}
 Vector Vector::operator+(const Vector& v) const {
     return Vector(this->x+v.x, this->y+v.y, this->z+v.z);
 }
@@ -107,7 +125,7 @@ double Vector::dotProduct(const Vector& v) const {
 //}
 
 double Vector::norm() const {
-    return sqrt(dotProduct(*this));
+    return sqrt(this->dotProduct(*this));
 }
 Vector Vector::normal() const {
     return *this / this->norm();
@@ -115,7 +133,7 @@ Vector Vector::normal() const {
 
 void Vector::setModelMatrix()
 {
-    double us = norm() * 0.2;
+    double us = norm() * 0.2 * Settings::VECTOR_LENGTH_MULTIPLIER;
     Matrices::modelMatrix.scale(QVector3D(us, us, us));
     //Matrices::modelMatrix.translate(x_0, y_0, z_0);
 }

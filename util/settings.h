@@ -5,26 +5,28 @@ class Settings {
 public:
     static const int BYTES_PER_FLOAT = 4; // used by VertexArray
 
-    static unsigned int PARTICLE_COUNT;    // used by Particle
-    static unsigned int SPHERE_DETAIL;    // used by Particle, CollisionSphere
-    static bool         PAINT_VECTORS;  // used by Vector
-    static bool         PARTICLES_REACT; // used by Particle, ?glRenderer?
+    static unsigned int SPHERE_DETAIL;
+    static bool         PAINT_VECTORS;
+    static float        VECTOR_LENGTH_MULTIPLIER;
+
+    static unsigned int PARTICLE_COUNT;
+    static bool         PARTICLES_REACT;
     static bool         DIMENSIONS_3D;
     static bool         PARTICLES_INITIAL_SPEED;
 
-    static float  dt;
-    static float  DAMPENING; // 1.0 - ELASTICITY
+    static float PARTICLE_MASS;
+    static float PARTICLE_RADIUS;
 
     static bool   FORCES_EARTH_GRAVITY;
     static bool   FORCES_UNIVERSAL_GRAVITY;
     static bool   FORCES_COULOMB;
-
     static double FORCES_HOOKE_SPRING;
     static float  FORCES_HOOKE_DISTANCE;
     static double FORCES_HOOKE_DAMP;
-
     static float  FORCES_FRICTION;
+    static float  DAMPENING; // 1.0 - ELASTICITY
 
+    static float  dt;
     static float  WAVES_VELOCITY;
     static float  WAVES_DT;
 

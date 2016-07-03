@@ -4,26 +4,33 @@
 #
 #-------------------------------------------------
 
-QT += core gui
+QT += core gui opengl
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = SPH
 TEMPLATE = app
 CONFIG += mobility c++11
 #QMAKE_CXXFLAGS += -std=c++11 -pthread
+#QMAKE_CXXFLAGS += -fopenmp
 MOBILITY =
 
+#LIBS += -fopenmp
+
 # Defines platform-specific preprocessor macro
-#   edit at Projects->QMake->additional arguments (set to CONFIG+=_BUILD) required first
+#   edit at Projects->QMake->additional arguments
+#   (set to CONFIG+=_BUILD) required first
 CONFIG(DESKTOP_BUILD): DEFINES += DESKTOP_BUILD
 CONFIG(ANDROID_BUILD): DEFINES += ANDROID_BUILD
 
 RESOURCES += \
     D:/Dropbox/well/WFAIS/prog/Qt/SPH
 
-# Project files:
+############################################################
+# Project files ############################################
+############################################################
 
-FORMS += #mainwindow.ui
+FORMS += \
+    window/main_window.ui
 
 DISTFILES += \
     shader/vertex_shader.vsh \
@@ -55,6 +62,7 @@ HEADERS += \
     shape/shape.h \
     shape/sphere.h \
     shape/triangle.h \
+    util/debug_helper.h \
     util/enums.h \
     util/constants.h \
     util/operations.h \
@@ -62,7 +70,8 @@ HEADERS += \
     util/settings.h \
     util/timer.h \
     window/gl_window.h \
-    window/simulation_window.h
+    window/simulation_window.h \
+    window/main_window.h
 
 SOURCES += \
     control/interaction.cpp \
@@ -89,8 +98,10 @@ SOURCES += \
     shape/shape.cpp \
     shape/sphere.cpp \
     shape/triangle.cpp \
+    util/debug_helper.cpp \
     util/enums.cpp \
     util/settings.cpp \
     util/timer.cpp \
     window/gl_window.cpp \
-    window/simulation_window.cpp
+    window/simulation_window.cpp \
+    window/main_window.cpp

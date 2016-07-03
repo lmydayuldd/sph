@@ -19,21 +19,28 @@ Machine::~Machine()
 
 void Machine::linkView(ShapeType formShapeType)
 {
-    if (form == nullptr) {
-        if (Form::forms.size() == 0) {
+    if (form == nullptr)
+    {
+        if (Form::forms.size() == 0)
+        {
             createView();
         }
-        else {
-            for (unsigned int i = 0; i < Form::forms.size(); ++i) {
-                if (Form::forms[i]->type == formShapeType) {
+        else
+        {
+            for (unsigned int i = 0; i < Form::forms.size(); ++i)
+            {
+                if (Form::forms[i]->type == formShapeType)
+                {
                     form = Form::forms[i];
                     break; ///////////////////////////////////////////////////
                 }
-                else if (i == Form::forms.size() - 1) {
+                else if (i == Form::forms.size() - 1)
+                {
                     createView();
                     break; ///////////////////////////////////////////////////
-                    // without break it shouldn't fail as well, because at createView()
-                    // Form::forms is appended and at next loop run we'll hit first break
+                    // without break it shouldn't fail as well,
+                    // because at createView() Form::forms is appended
+                    // and at next loop run we'll hit first break
                 }
             }
         }
@@ -42,14 +49,18 @@ void Machine::linkView(ShapeType formShapeType)
 
 void Machine::paint()
 {
-    if (form != nullptr) {
-        if (Form::lastBoundFormType != form->type) {
+    if (form != nullptr)
+    {
+        if (Form::lastBoundFormType != form->type)
+        {
            form->bindVAO();
         }
         Matrices::modelViewMatrix.setToIdentity();
         Matrices::mvpMatrix.setToIdentity();
-        Matrices::modelViewMatrix = Matrices::viewMatrix       * Matrices::modelMatrix;
-        Matrices::mvpMatrix       = Matrices::projectionMatrix * Matrices::modelViewMatrix;
+        Matrices::modelViewMatrix = Matrices::viewMatrix
+                                  * Matrices::modelMatrix;
+        Matrices::mvpMatrix       = Matrices::projectionMatrix
+                                  * Matrices::modelViewMatrix;
 
         form->draw();
     }

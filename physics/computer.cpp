@@ -56,16 +56,10 @@ void Computer::evaluateForces(const Particle& p)
     for (Spring* s : p.springs)
         /*if (s.ks != 0 && s.kd != 0)*/
             Forces::Hooke(p, *s->p2, s->ks, s->d, s->kd);
-    /*if (Settings::FORCES_HOOKE_SPRING != 0 && Settings.FORCES_HOOKE_DAMP != 0) {
-        for (Particle p2 : p.parentFlow.particles)
-            Forces.Hooke(p, p2, Settings.FORCES_HOOKE_SPRING, Settings.FORCES_HOOKE_DISTANCE, Settings.FORCES_HOOKE_DAMP);
-    }*/
 }
 
 void Computer::computeVectors(const Particle& p, float dt)
 {
-    //Euler(p, dt);
-    //evaluateForces(p); // ???
     MidPoint(p, dt);
 }
 
@@ -78,7 +72,7 @@ void Computer::Euler(const Particle& p, float dt)
 }
 void Computer::MidPoint(const Particle& p, float dt)
 {
-    Euler(p, dt * 0.5f);
+    Euler(p, dt * 0.5);
     evaluateForces(p);
     Euler(p, dt);
 }

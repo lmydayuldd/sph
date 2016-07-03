@@ -3,7 +3,6 @@
 
 #include "window/gl_window.h"
 #include "gl/matrices.h"
-//#include "ui_main_window.h"
 
 GLWindow::~GLWindow()
 {
@@ -11,14 +10,12 @@ GLWindow::~GLWindow()
     delete paintDevice;
 }
 
-GLWindow::GLWindow(QWindow *parent) :
-    //QMainWindow(parent),
-    QWindow(parent),
-    //ui(new Ui::MainWindow),
-    m_update_pending(false),
-    m_animating(false),
-    glContext(0),
-    paintDevice(0)
+GLWindow::GLWindow(QWindow *parent)
+    : QWindow(parent),
+      m_update_pending(false),
+      m_animating(false),
+      glContext(0),
+      paintDevice(0)
 {
     //ui->setupUi(this);
     setSurfaceType(QWindow::OpenGLSurface);
@@ -47,7 +44,8 @@ void GLWindow::render()
 }
 void GLWindow::renderLater()
 {
-    if (! m_update_pending) {
+    if (! m_update_pending)
+    {
         m_update_pending = true;
         QCoreApplication::postEvent( this, new QEvent(QEvent::UpdateRequest) );
     }
@@ -55,13 +53,14 @@ void GLWindow::renderLater()
 
 bool GLWindow::event(QEvent* event)
 {
-    switch (event->type()) {
-    case QEvent::UpdateRequest:
-        m_update_pending = false;
-        renderNow();
-        return true;
-    default:
-        return QWindow::event(event);
+    switch (event->type())
+    {
+        case QEvent::UpdateRequest:
+            m_update_pending = false;
+            renderNow();
+            return true;
+        default:
+            return QWindow::event(event);
     }
 }
 
@@ -70,7 +69,9 @@ void GLWindow::exposeEvent( QExposeEvent *event )
     Q_UNUSED(event);
 
     if (isExposed())
+    {
         renderNow();
+    }
 }
 
 void GLWindow::renderNow()
@@ -80,7 +81,8 @@ void GLWindow::renderNow()
 
     bool needsInitialize = false;
 
-    if (! glContext) {
+    if (! glContext)
+    {
         glContext = new QOpenGLContext(this);
         glContext->setFormat(requestedFormat());
         glContext->create();
@@ -90,7 +92,8 @@ void GLWindow::renderNow()
 
     glContext->makeCurrent(this);
 
-    if (needsInitialize) {
+    if (needsInitialize)
+    {
         initializeOpenGLFunctions();
         initialize();
     }
@@ -100,7 +103,9 @@ void GLWindow::renderNow()
     glContext->swapBuffers(this);
 
     if (m_animating)
+    {
         renderLater();
+    }
 }
 
 void GLWindow::setAnimating(bool animating)
@@ -108,5 +113,7 @@ void GLWindow::setAnimating(bool animating)
     m_animating = animating;
 
     if (animating)
+    {
         renderLater();
+    }
 }

@@ -15,14 +15,21 @@ QMAKE_CXXFLAGS += -std=c++11 -pthread
 MOBILITY =
 
 # Defines platform-specific preprocessor macro
-#   edit at Projects->QMake->additional arguments (set to CONFIG+=_BUILD) required first
+#   edit at Projects->QMake->additional arguments
+#   (set to "CONFIG+=TEST_BUILD" "CONFIG+=DESKTOP_BUILD") required first
 CONFIG(DESKTOP_BUILD): DEFINES += DESKTOP_BUILD
 CONFIG(ANDROID_BUILD): DEFINES += ANDROID_BUILD
+CONFIG(TEST_BUILD): DEFINES += TEST_BUILD
 
 RESOURCES += \
     D:/Dropbox/well/WFAIS/prog/Qt/SPH
 
-# Google Test / Mock:
+SUBDIRS += \
+    SPH.pro
+
+############################################################
+# Google Test / Mock #######################################
+############################################################
 
 #DEFINES += GTEST_LINKED_AS_SHARED_LIBRARY=1
 
@@ -57,8 +64,7 @@ SOURCES += \
     googletest-master/googletest/src/gtest-printers.cc \
     googletest-master/googletest/src/gtest-test-part.cc \
     googletest-master/googletest/src/gtest-typed-test.cc \
-    googletest-master/googletest/src/gtest.cc \# \
-    test/tests.cpp
+    googletest-master/googletest/src/gtest.cc # \
     #googletest-master/googletest/src/gtest_main.cc
 
 HEADERS += \
@@ -119,11 +125,11 @@ HEADERS += \
     googletest-master/googletest/src/gtest-internal-inl.h \
     googletest-master/googletest/test/gtest-param-test_test.h \
     googletest-master/googletest/test/gtest-typed-test_test.h \
-    googletest-master/googletest/test/production.h \
-    test/tests.h \
-    mock/mock_particle.h
+    googletest-master/googletest/test/production.h
 
-# Project files:
+############################################################
+# Project files ############################################
+############################################################
 
 FORMS += \
     window/main_window.ui
@@ -141,6 +147,7 @@ HEADERS += \
     gl/vertex_array.h \
     machine/cloth.h \
     machine/machine.h \
+    machine/obstacle.h \
     machine/particle.h \
     machine/spring.h \
     machine/rope.h \
@@ -165,8 +172,7 @@ HEADERS += \
     util/settings.h \
     util/timer.h \
     window/gl_window.h \
-    window/simulation_window.h \
-    machine/obstacle.h
+    window/simulation_window.h
 
 SOURCES += \
     control/interaction.cpp \
@@ -176,6 +182,7 @@ SOURCES += \
     gl/vertex_array.cpp \
     machine/cloth.cpp \
     machine/machine.cpp \
+    machine/obstacle.cpp \
     machine/particle.cpp \
     machine/rope.cpp \
     machine/spring.cpp \
@@ -194,11 +201,21 @@ SOURCES += \
     shape/triangle.cpp \
     util/enums.cpp \
     util/settings.cpp \
-    window/gl_window.cpp \
-    window/simulation_window.cpp \
-    machine/obstacle.cpp \
     util/timer.cpp \
-    main_test.cpp
+    window/gl_window.cpp \
+    window/simulation_window.cpp
 
-SUBDIRS += \
-    SPH.pro
+############################################################
+# Project test files #######################################
+############################################################
+
+HEADERS += \
+    unit_tests/mock/mock_particle.h \
+    unit_tests/mock/mock_vector.h \
+    unit_tests/test/tests.h \
+    unit_tests/test/vector_test.h
+
+SOURCES += \
+    unit_tests/test/tests.cpp \
+    unit_tests/test/vector_test.cpp \
+    main_test.cpp

@@ -61,7 +61,8 @@ void Walls::paint()
 
 void Walls::collide(Particle* p2) {
     if ( p2->r->x < -lim || p2->r->x > lim ||
-         p2->r->y < -lim || p2->r->y > lim ) {
+         p2->r->y < -lim || p2->r->y > lim )
+    {
         if      (p2->r->x < -lim) { p2->r->x = -lim; p2->v->x *= -1 * (1. - damping); }
         else if (p2->r->x >  lim) { p2->r->x =  lim; p2->v->x *= -1 * (1. - damping); }
         else if (p2->r->y < -lim) { p2->r->y = -lim; p2->v->y *= -1 * (1. - damping); }

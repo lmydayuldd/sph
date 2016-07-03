@@ -17,7 +17,8 @@ public:
         const Particle& p1, const Particle& p2,
         double ks, double d, double kd
     ); // F-> = -ks . x-> // d = targetSpringDistance
-    static void collide(const Particle& p1, const Particle& p2); // Elastic Collision
+    // Elastic Collision
+    static void collide(const Particle& p1, const Particle& p2);
 };
 
 #endif // FORCES_H

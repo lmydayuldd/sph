@@ -23,6 +23,7 @@ public:
 
     void createView();
 
+    bool operator==(const Vector& v) const;
     Vector operator+(const Vector& v) const;
     Vector operator-(const Vector& v) const;
     Vector operator*(const Vector& v) const; // crossProduct

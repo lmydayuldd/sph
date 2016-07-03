@@ -3,7 +3,6 @@
 #include <QScreen>
 #include <QKeyEvent>
 #include <QMouseEvent>
-#include <QMessageBox>
 
 #include <iostream>
 
@@ -20,6 +19,7 @@ class Particle;
 #include "physics/computer.h"
 #include "shader/shader.h"
 #include "util/constants.h"
+#include "util/debug_helper.h"
 #include "util/timer.h"
 #include "util/settings.h"
 
@@ -47,10 +47,12 @@ void SimulationWindow::initialize()
     Matrices::camTZ = 12;
     Matrices::camRY = 180;
     Matrices::projectionMatrix.setToIdentity();
-    Matrices::projectionMatrix.perspective(90.0f, width()/height(), 0.1f, 100.0f);
+    Matrices::projectionMatrix.perspective(
+                                    90.0f, width()/height(), 0.1f, 100.0f);
 
     Particle::flows.push_back(std::vector<Particle*>(Settings::PARTICLE_COUNT));
-    for (unsigned int i = 0; i < Particle::flows[0].size(); ++i) {
+    for (unsigned int i = 0; i < Particle::flows[0].size(); ++i)
+    {
         Particle::flows[0][i] = new Particle(Particle::flows.size() - 1);
     }
     Machine::machines.push_back(
@@ -59,7 +61,9 @@ void SimulationWindow::initialize()
     Machine::machines.push_back(
         new Rope(
             Vector(-6, 3, 0), Vector(6, 3, 0),
-            25, 200, 0.1, 12, 5
+            30, 5,
+            //300, Settings::PARTICLE_RADIUS * 2, 120
+            500, Settings::PARTICLE_RADIUS * 2, 120
         )
     );
 //    Machine::machines.push_back(
@@ -87,6 +91,7 @@ void SimulationWindow::render()
 
     Computer::currentComputer->loop();
     move();
+    Interaction::holdPressedParticle();
 
     Shader::currentShader->program->bind();
     {
@@ -94,15 +99,19 @@ void SimulationWindow::render()
         Matrices::viewProjectionMatrix.setToIdentity();
         Matrices::viewProjectionInverted.setToIdentity();
         Matrices::setViewMatrix();
-        Matrices::viewProjectionMatrix   = Matrices::projectionMatrix * Matrices::viewMatrix;
-        Matrices::viewProjectionInverted = Matrices::viewProjectionMatrix.inverted();
+        Matrices::viewProjectionMatrix
+                = Matrices::projectionMatrix * Matrices::viewMatrix;
+        Matrices::viewProjectionInverted
+                = Matrices::viewProjectionMatrix.inverted();
 
-        Form::printForms();
-        VertexArray::printArrays();
-        for (unsigned int i = 0; i < Particle::flows[0].size(); ++i) {
+//        Form::printForms();
+//        VertexArray::printArrays();
+        for (unsigned int i = 0; i < Particle::flows[0].size(); ++i)
+        {
             Particle::flows[0][i]->paint();
         }
-        for (unsigned int i = 0; i < Machine::machines.size(); ++i) {
+        for (unsigned int i = 0; i < Machine::machines.size(); ++i)
+        {
             Machine::machines[i]->paint();
         }
     }
@@ -112,39 +121,34 @@ void SimulationWindow::render()
 }
 
 enum Key : unsigned char {
-    W, S, A, D, JUMP, DUCK, CTRL, LMB, RMB
+    W, S, A, D,
+    JUMP, DUCK,
+    CTRL, LMB, RMB
 };
 
-bool key[sizeof(unsigned char)] = {0};
+bool key[sizeof(unsigned char) * 256] = {0};
 void SimulationWindow::move()
 {
-    if (key[W]) w();
-    if (key[S]) s();
-    if (key[A]) a();
-    if (key[D]) d();
+    if (key[W])    w();
+    if (key[S])    s();
+    if (key[A])    a();
+    if (key[D])    d();
     if (key[JUMP]) h();
     if (key[DUCK]) l();
-    if (key[LMB]) lmb();
-    if (key[RMB]) rmb();
 }
 
 void SimulationWindow::keyPressEvent(QKeyEvent* e)
 {
-//    QMessageBox* box = new QMessageBox();
-//    box->setWindowTitle(QString("Hello"));
-//    box->setText(QString("You Pressed: ") + event->text());
-//    box->show();
-
     switch (e->key())
     {
-        case Qt::Key_W       : key[W] = true; break;
-        case Qt::Key_Up      : key[W] = true; break;
-        case Qt::Key_S       : key[S] = true; break;
-        case Qt::Key_Down    : key[S] = true; break;
-        case Qt::Key_A       : key[A] = true; break;
-        case Qt::Key_Left    : key[A] = true; break;
-        case Qt::Key_D       : key[D] = true; break;
-        case Qt::Key_Right   : key[D] = true; break;
+        case Qt::Key_W       : key[W]    = true; break;
+        case Qt::Key_Up      : key[W]    = true; break;
+        case Qt::Key_S       : key[S]    = true; break;
+        case Qt::Key_Down    : key[S]    = true; break;
+        case Qt::Key_A       : key[A]    = true; break;
+        case Qt::Key_Left    : key[A]    = true; break;
+        case Qt::Key_D       : key[D]    = true; break;
+        case Qt::Key_Right   : key[D]    = true; break;
         case Qt::Key_Space   : key[JUMP] = true; break;
         case Qt::Key_V       : key[DUCK] = true; break;
         case Qt::Key_Control : key[CTRL] = true; break;
@@ -153,37 +157,46 @@ void SimulationWindow::keyPressEvent(QKeyEvent* e)
 
 void SimulationWindow::keyReleaseEvent(QKeyEvent *e)
 {
-    if (! e->isAutoRepeat()) {
-        switch (e->key()) {
-            case Qt::Key_W       : key[W] = false; break;
-            case Qt::Key_S       : key[S] = false; break;
-            case Qt::Key_A       : key[A] = false; break;
-            case Qt::Key_D       : key[D] = false; break;
+    if (! e->isAutoRepeat())
+    {
+        switch (e->key())
+        {
+            case Qt::Key_W       : key[W]    = false; break;
+            case Qt::Key_S       : key[S]    = false; break;
+            case Qt::Key_A       : key[A]    = false; break;
+            case Qt::Key_D       : key[D]    = false; break;
             case Qt::Key_Space   : key[JUMP] = false; break;
             case Qt::Key_V       : key[DUCK] = false; break;
-            case Qt::Key_Control : key[CTRL] = false; break;
+            case Qt::Key_Control :
+                key[CTRL] = false;
+                Interaction::handleTouchDrop();
+            break;
         }
     }
 }
 
 void SimulationWindow::mouseMoveEvent(QMouseEvent* event)
 {
-    QPointF p = event->pos();
-    int dy = (width()  / 2) - p.x();
-    int dx = (height() / 2) - p.y();
-    const float normalizedX =    (p.x() / (float) width())  * 2 - 1;
-    const float normalizedY = - ((p.y() / (float) height()) * 2 - 1);
+    mousePoint = event->pos();
+    normalizedX =    (mousePoint.x() / (float) width())  * 2 - 1;
+    normalizedY = - ((mousePoint.y() / (float) height()) * 2 - 1);
+    dy = (width()  / 2) - mousePoint.x();
+    dx = (height() / 2) - mousePoint.y();
 
-    if (! key[CTRL]) {
+    if (! key[CTRL])
+    {
         Matrices::camRX -= dx * mouseSpeed;
         Matrices::camRY -= dy * mouseSpeed;
         if (Matrices::camRX >  90) Matrices::camRX =  90;
         if (Matrices::camRX < -90) Matrices::camRX = -90;
 
-        QCursor::setPos(geometry().x() + width()/2, geometry().y() + height()/2);
+        QCursor::setPos(geometry().x() + width()/2,
+                        geometry().y() + height()/2);
     }
-    else {
-        if (key[LMB]) {
+    else
+    {
+        if (key[LMB])
+        {
             Interaction::handleTouchDrag(normalizedX, normalizedY);
         }
     }
@@ -191,57 +204,61 @@ void SimulationWindow::mouseMoveEvent(QMouseEvent* event)
 
 void SimulationWindow::mousePressEvent(QMouseEvent* event)
 {
-    QPointF p = event->pos();
-    const float normalizedX =    (p.x() / (float) width())  * 2 - 1;
-    const float normalizedY = - ((p.y() / (float) height()) * 2 - 1);
+    mousePoint = event->pos();
+    normalizedX =    (mousePoint.x() / (float) width())  * 2 - 1;
+    normalizedY = - ((mousePoint.y() / (float) height()) * 2 - 1);
 
-    switch(event->button()) {
-        case Qt::LeftButton :
-            key[LMB] = true;
-            Interaction::handleTouchPress(normalizedX, normalizedY);
-        break;
-        case Qt::RightButton :
-            key[RMB] = true;
-        break;
-        default : break;
+    if (key[CTRL])
+    {
+        switch(event->button())
+        {
+            case Qt::LeftButton :
+                key[LMB] = true;
+                Interaction::handleTouchPress(normalizedX, normalizedY);
+            break;
+            case Qt::RightButton :
+                key[RMB] = true;
+            break;
+            default : break;
+        }
     }
 }
 void SimulationWindow::mouseReleaseEvent(QMouseEvent* event)
 {
-    switch(event->button()) {
-        case Qt::LeftButton :
-            key[LMB] = false;
-            Interaction::handleTouchDrop();
-        break;
-        case Qt::RightButton :
-            key[RMB] = false;
-        break;
-        default : break;
+    if (key[CTRL])
+    {
+        switch(event->button())
+        {
+            case Qt::LeftButton :
+                key[LMB] = false;
+//                DebugHelper::showVariable("normx", normalizedX);
+//                DebugHelper::showVariable("normy", normalizedY);
+//                DebugHelper::showVariables("aaaa", 12, 13, 15);
+                Interaction::handleTouchDrop();
+            break;
+            case Qt::RightButton :
+                key[RMB] = false;
+            break;
+            default : break;
+        }
     }
-}
-
-void SimulationWindow::lmb()
-{
-    if (key[CTRL]) {
-
-    }
-}
-void SimulationWindow::rmb()
-{
-
 }
 
 void SimulationWindow::w()
 {
-    Matrices::camTX -= moveSpeed * sin(Matrices::camRY * degToRad) * cos(Matrices::camRX * degToRad) * dt;
+    Matrices::camTX -= moveSpeed * sin(Matrices::camRY * degToRad)
+                                 * cos(Matrices::camRX * degToRad) * dt;
     Matrices::camTY += moveSpeed * sin(Matrices::camRX * degToRad) * dt;
-    Matrices::camTZ += moveSpeed * cos(Matrices::camRY * degToRad) * cos(Matrices::camRX * degToRad) * dt;
+    Matrices::camTZ += moveSpeed * cos(Matrices::camRY * degToRad)
+                                 * cos(Matrices::camRX * degToRad) * dt;
 }
 void SimulationWindow::s()
 {
-    Matrices::camTX += moveSpeed * sin(Matrices::camRY * degToRad) * cos(Matrices::camRX * degToRad) * dt;
+    Matrices::camTX += moveSpeed * sin(Matrices::camRY * degToRad)
+                                 * cos(Matrices::camRX * degToRad) * dt;
     Matrices::camTY -= moveSpeed * sin(Matrices::camRX * degToRad) * dt;
-    Matrices::camTZ -= moveSpeed * cos(Matrices::camRY * degToRad) * cos(Matrices::camRX * degToRad) * dt;
+    Matrices::camTZ -= moveSpeed * cos(Matrices::camRY * degToRad)
+                                 * cos(Matrices::camRX * degToRad) * dt;
 }
 void SimulationWindow::a()
 {

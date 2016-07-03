@@ -21,7 +21,6 @@ void Matrices::setViewMatrix() {
 //        QVector3D(cam[3], cam[4], cam[5]),
 //        QVector3D(cam[6], cam[7], cam[8])
 //    );
-
     viewMatrix.rotate(camRX, QVector3D(1, 0, 0));
     viewMatrix.rotate(camRY, QVector3D(0, 1, 0));
     viewMatrix.translate(QVector3D(camTX, camTY, camTZ));

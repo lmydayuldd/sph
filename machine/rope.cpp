@@ -10,8 +10,8 @@ Rope::~Rope()
 
 Rope::Rope(
     const Vector& start, const Vector& end,
-    int knots, float ks, float d, float kd, int strength
-)
+    int knots, int strength,
+    float ks, float d, float kd)
 {
     if      (strength == 0)     strength = 1;
     else if (strength >= knots) strength = knots - 1;
@@ -53,8 +53,9 @@ Rope::Rope(
 }
 
 void Rope::paint() {
-    // using Shape iterator would require Shape object to be temporarily created
-    // by non-parametred Shape(). It would then get destroyed, so a ~Shape() call!!!
+    // Using Shape iterator would require Shape object to be temporarily created
+    // by non-parametred Shape().
+    // It would then get destroyed, causing a ~Shape() call!
     for (unsigned int i = 0; i < (*flow).size(); ++i) {
         (*flow)[i]->paint();
     }
