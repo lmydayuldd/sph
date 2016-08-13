@@ -58,14 +58,13 @@ void SimulationWindow::initialize()
     Machine::machines.push_back(
             new Walls(10.0)
     );//getDamping("static")));
-    Machine::machines.push_back(
-        new Rope(
-            Vector(-6, 3, 0), Vector(6, 3, 0),
-            30, 5,
-            //300, Settings::PARTICLE_RADIUS * 2, 120
-            500, Settings::PARTICLE_RADIUS * 2, 120
-        )
-    );
+//    Machine::machines.push_back(
+//        new Rope(
+//            Vector(-6, 3, 0), Vector(6, 3, 0),
+//            30, 5,
+//            300, Settings::PARTICLE_RADIUS * 2, 120
+//        )
+//    );
 //    Machine::machines.push_back(
 //        new Cloth(
 //            Vector(-2, -2, 0), Vector(2, 2, 0),
@@ -87,7 +86,7 @@ void SimulationWindow::render()
     currentTime = timer->diff();
     dt          = currentTime - formerTime;
     formerTime  = currentTime;
-    //std::cout << "~" << floor(1000000000 / dt) << " FPS" << std::endl;
+    std::cout << "~" << floor(1000000000 / dt) << " FPS" << std::endl;
 
     Computer::currentComputer->loop();
     move();

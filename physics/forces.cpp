@@ -2,6 +2,8 @@
 #include "physics/vector.h"
 #include "util/constants.h"
 
+#include <cstring> // for std::memset
+
 void Forces::universalGravitation(const Particle& p1, const Particle& p2)
 { // F1->2 = -G * m1 * m2 * r / |r|^2
     if (&p1 != &p2) {
@@ -12,11 +14,13 @@ void Forces::universalGravitation(const Particle& p1, const Particle& p2)
         if (! p1.stationary) *p1.F = *p1.F - r21 * (G_const * M/(d*d));
     }
 }
+
 void Forces::gravityEarth(const Particle& p)
 {
     Vector gravity = Vector(0, - G_earth, 0);
-    if (! p.stationary) *p.F = gravity * p.m;
+    if (! p.stationary) *p.F += gravity * p.m;
 }
+
 void Forces::Coulomb(const Particle& p1, const Particle& p2)
 {
     if (&p1 != &p2) {
@@ -34,7 +38,7 @@ void Forces::Friction(const Particle& p)
 {
     if (! p.stationary) {
         Vector friction
-                = Vector(*p.F).normal() * (-1 * coefficient_of_friction * p.F->y);
+            = Vector(*p.F).normal() * (-1 * coefficient_of_friction * p.F->y);
 
         *p.F = *p.F - friction;
     }

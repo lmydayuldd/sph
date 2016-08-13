@@ -20,10 +20,9 @@ VertexArray::VertexArray(vector<float> vertexData, ShapeType type)
 {
     //cout << QOpenGLContext::currentContext() << " ";
     vertexBuffer->create();
-    vertexBuffer->setUsagePattern(QOpenGLBuffer::StaticDraw); // DynamicDraw, StreamDraw, ...?
+    //vertexBuffer->setUsagePattern(QOpenGLBuffer::StaticDraw); // DynamicDraw, StreamDraw, ...?
     vertexBuffer->bind();
     vertexBuffer->allocate(vertexData.data(), vertexData.size() * sizeof(float));
-    vertexBuffer->write(0, vertexData.data(), vertexData.size() * sizeof(float));
 
     if (arrays.size() == 0) {
         arrays.push_back(this);

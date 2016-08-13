@@ -21,7 +21,11 @@ public:
         std::stringstream ss;
         for (unsigned int i = 0; i < sizeof...(args); ++i)
         {
+#ifdef DESKTOP_BUILD
             ss << "%" << std::to_string(i+1).c_str();
+#else
+            ss << "%" << "";
+#endif
         }
         QString message = QString(ss.str().c_str()).arg(args...);
         msgBox.setText(message);

@@ -11,9 +11,14 @@ public:
     Computer();
 
     static void evaluateForces(const Particle& p);
+    static void evaluateForces();
+    static void evaluateSPHForces();
     static void computeVectors(const Particle& p, float dt);
+    static void computeVectors(float dt);
     static void Euler(const Particle& p, float dt);
+    static void Euler(float dt);
     static void MidPoint(const Particle& p, float dt);
+    static void MidPoint(float dt);
     static void RangeKutta();
     static void RKV4();
 

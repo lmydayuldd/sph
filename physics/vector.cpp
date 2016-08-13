@@ -68,16 +68,19 @@ void Vector::setApplicationPoint(Vector application)
 bool Vector::operator==(const Vector& v) const {
     bool ret = true;
     if (this->x != v.x
-    || this->y != v.y
-    || this->z != v.z)
-//    || this->source != v.source
-//    || this->source->x != v.source->x
-//    || this->source->y != v.source->y
-//    || this->source->z != v.source->z)
+     || this->y != v.y
+     || this->z != v.z)
+//     || this->source != v.source
+//     || this->source->x != v.source->x
+//     || this->source->y != v.source->y
+//     || this->source->z != v.source->z)
     {
         ret = false;
     }
     return ret;
+}
+Vector Vector::operator-() const {
+    return Vector(- this->x, - this->y, - this->z);
 }
 Vector Vector::operator+(const Vector& v) const {
     return Vector(this->x+v.x, this->y+v.y, this->z+v.z);
@@ -85,17 +88,17 @@ Vector Vector::operator+(const Vector& v) const {
 Vector Vector::operator-(const Vector& v) const {
     return Vector(this->x-v.x, this->y-v.y, this->z-v.z);
 }
-Vector Vector::operator*(const Vector& v) const { // crossProduct
+Vector Vector::operator*(const Vector& v) const { // cross
     //return Vector(this->x*v.x, this->y*v.y, this->z*v.z);
     return Vector(
         this->y*v.z - this->z*v.y,
-        this->x*v.z - this->z*v.x,
+        this->z*v.x - this->x*v.z,
         this->x*v.y - this->y*v.x
     );
 }
-//Vector Vector::operator/(const Vector& v) const {
-//    return Vector(this->x/v.x, this->y/v.y, this->z/v.z);
-//}
+double Vector::operator/(const Vector& v) const { // dot
+    return dotProduct(v);
+}
 Vector Vector::operator+(double v) const {
     return Vector(this->x+v, this->y+v, this->z+v);
 }
@@ -108,8 +111,49 @@ Vector Vector::operator*(double v) const {
 Vector Vector::operator/(double v) const {
     return Vector(this->x/v, this->y/v, this->z/v);
 }
-Vector Vector::operator-() const {
-    return Vector(- this->x, - this->y, - this->z);
+Vector& Vector::operator+=(const Vector& v) {
+    this->x += v.x;
+    this->y += v.y;
+    this->z += v.z;
+    return *this;
+}
+Vector& Vector::operator-=(const Vector& v) {
+    this->x -= v.x;
+    this->y -= v.y;
+    this->z -= v.z;
+    return *this;
+}
+Vector& Vector::operator*=(const Vector& v) {
+    *this = Vector(
+        this->y*v.z - this->z*v.y,
+        this->z*v.x - this->x*v.z,
+        this->x*v.y - this->y*v.x
+    );
+    return *this;
+}
+Vector& Vector::operator+=(double v) {
+    this->x += v;
+    this->y += v;
+    this->z += v;
+    return *this;
+}
+Vector& Vector::operator-=(double v) {
+    this->x -= v;
+    this->y -= v;
+    this->z -= v;
+    return *this;
+}
+Vector& Vector::operator*=(double v) {
+    this->x *= v;
+    this->y *= v;
+    this->z *= v;
+    return *this;
+}
+Vector& Vector::operator/=(double v) {
+    this->x /= v;
+    this->y /= v;
+    this->z /= v;
+    return *this;
 }
 
 double Vector::cosxy(const Vector& v) const {
@@ -121,8 +165,6 @@ double Vector::distance(const Vector& v) const {
 double Vector::dotProduct(const Vector& v) const {
     return this->x*v.x + this->y*v.y + this->z*v.z;
 }
-//Vector Vector::crosssProduct(const Vector& v) const {
-//}
 
 double Vector::norm() const {
     return sqrt(this->dotProduct(*this));

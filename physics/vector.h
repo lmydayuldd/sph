@@ -23,24 +23,30 @@ public:
 
     void createView();
 
-    bool operator==(const Vector& v) const;
-    Vector operator+(const Vector& v) const;
-    Vector operator-(const Vector& v) const;
-    Vector operator*(const Vector& v) const; // crossProduct
-//    Vector operator/(const Vector& v) const;
-    Vector operator+(double v) const;
-    Vector operator-(double v) const;
-    Vector operator*(double v) const;
-    Vector operator/(double v) const;
-    Vector operator-() const;
+    virtual Vector operator-() const;
+    virtual bool operator==(const Vector& v) const;
+    virtual Vector operator+(const Vector& v) const;
+    virtual Vector operator-(const Vector& v) const;
+    virtual Vector operator*(const Vector& v) const; // cross
+    virtual double operator/(const Vector& v) const; // dot
+    virtual Vector operator+(double v) const;
+    virtual Vector operator-(double v) const;
+    virtual Vector operator*(double v) const;
+    virtual Vector operator/(double v) const;
+    virtual Vector& operator+=(const Vector& v);
+    virtual Vector& operator-=(const Vector& v);
+    virtual Vector& operator*=(const Vector& v);
+    virtual Vector& operator+=(double v);
+    virtual Vector& operator-=(double v);
+    virtual Vector& operator*=(double v);
+    virtual Vector& operator/=(double v);
 
-    double      cosxy(const Vector& v) const;
-    double   distance(const Vector& v) const;
-    double dotProduct(const Vector& v) const;
-//    Vector crossProduct(const Vector& v) const;
+    virtual double      cosxy(const Vector& v) const;
+    virtual double   distance(const Vector& v) const;
+    virtual double dotProduct(const Vector& v) const;
 
-    double   norm() const;
-    Vector normal() const;
+    virtual double   norm() const;
+    virtual Vector normal() const;
 
     void setApplicationPoint(Vector application);
     void setModelMatrix() override;

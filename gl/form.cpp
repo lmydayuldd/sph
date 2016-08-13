@@ -18,7 +18,8 @@ ShapeType Form::lastBoundFormType = NOTHING;
 Form::~Form()
 {
     delete gl;
-    if (find(forms.begin(), forms.end(), this) == forms.end()) {
+    if (find(forms.begin(), forms.end(), this) == forms.end())
+    {
         delete vertexArray;
     }
 }
@@ -50,13 +51,15 @@ Form::Form(
 
 void Form::printForms()
 {
-    if (forms.size() > 0) {
+    if (forms.size() > 0)
+    {
 #ifdef DESKTOP_BUILD
         string s = to_string(forms.size()) + " Forms:";
 #elif ANDROID_BUILD
         string s = "";
 #endif
-        for (unsigned int i = 0; i < forms.size(); ++i) {
+        for (unsigned int i = 0; i < forms.size(); ++i)
+        {
             s += " " + string(Enums::shapeName[forms[i]->type]);
         }
         cout << s << endl;
@@ -109,24 +112,39 @@ void Form::disableVertexAttribArrays()
 void Form::draw()
 {
     //vertexArray->vertexBuffer->bind();
-    bindUniforms(); // glEnableVertexAttribArray() calls are in here
-    bindAttributes();
+    bindUniforms();
+    bindAttributes(); // glEnableVertexAttribArray() calls are in here
         gl->glDrawArrays(shapeMode, 0, vertexCount);
-        //gl->glDrawElements(shapeMode, posCoords.length, GL_UNSIGNED_SHORT, vertexBuffer);
+//        gl->glDrawElements(
+//                shapeMode, posCoords.length, GL_UNSIGNED_SHORT, vertexBuffer);
     disableVertexAttribArrays();
 }
 
 void Form::move()
 {
-    vertexArray = new VertexArray(posCoords, type);
+    if (vertexArray == nullptr)
+    {
+        vertexArray = new VertexArray(posCoords, type);
+    }
+    else
+    {
+        vertexArray->vertexBuffer->bind();
+        vertexArray->vertexBuffer->write(0, posCoords.data(), posCoords.size() * sizeof(float));
+   }
 }
 
 void Form::recolor(float color[])
 {
 //    if      (shaderProgram instanceof AttributeColorShaderProgram) {
-        for (int i = POS_COORDS_PER_VERTEX; i < (int) posCoords.size(); i += ALL_COORDS_PER_VERTEX)
+        for (int i = POS_COORDS_PER_VERTEX;
+             i < (int) posCoords.size();
+             i += ALL_COORDS_PER_VERTEX)
+        {
             for (int j = 0; j < CLR_COORDS_PER_VERTEX; ++j)
+            {
                 posCoords[i + j] = color[j];
+            }
+        }
         move();
 //    }
 //    else if (shaderProgram instanceof UniformColorShaderProgram) {

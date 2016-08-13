@@ -10,11 +10,11 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = SPH
 TEMPLATE = app
 CONFIG += mobility c++11
-#QMAKE_CXXFLAGS += -std=c++11 -pthread
-#QMAKE_CXXFLAGS += -fopenmp
+QMAKE_CXXFLAGS += -std=c++11 -pthread -fopenmp
+#QMAKE_LFLAGS +=
 MOBILITY =
 
-#LIBS += -fopenmp
+LIBS += -pthread -fopenmp
 
 # Defines platform-specific preprocessor macro
 #   edit at Projects->QMake->additional arguments
