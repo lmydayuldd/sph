@@ -18,7 +18,8 @@ Sphere::Sphere(double radius, float color[])
     color[1] = 0.0f;
     for (float i = 0.0f; i < M_PI; i += step) {
         color[1] = color[1] + step / M_PI;
-        if (color[1] > 1.0f) color[1] -= fmod(color[1], 1);
+        if      (color[1] >= 1.0f) color[1] -= fmod(color[1], 1);
+        else if (color[1] <= 0.0f) color[1] += fmod(fabs(color[1]), 1);
         for (float j = 0.0f; j < 2*M_PI; j += step) {
             vertices.push_back(radius * cos(j) * sin(i) + center[0]);
             vertices.push_back(radius * sin(j) * sin(i) + center[1]);

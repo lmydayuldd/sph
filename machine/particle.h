@@ -15,6 +15,7 @@ public:
     int parentFlow;
     int id;
     std::vector<Particle*>* neighbours;
+    std::vector<unsigned int> cell;
     std::vector<Spring*> springs;
     Vector *r, *v, *a, *dr, *dv, *da, *F;
     double m, rho, charge, temperature, viscosity, pressure;
@@ -31,7 +32,7 @@ public:
     double v_max();
     void updateNeighbours();
     double kernelFunction(Particle* p2);
-    double kernelFunctionGradient(Particle* p2);
+    Vector kernelFunctionGradient(Particle* p2);
     void updateDensity();
     void updatePressure();
     void computePressureForces();

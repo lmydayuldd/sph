@@ -48,6 +48,8 @@ public:
     virtual double   norm() const;
     virtual Vector normal() const;
 
+    void limit(double max);
+
     void setApplicationPoint(Vector application);
     void setModelMatrix() override;
     void paint() override;

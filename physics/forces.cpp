@@ -91,6 +91,41 @@ void Forces::collide(const Particle& p1, const Particle& p2) { // Elastic Collis
     }
 }
 
+void Forces::SPHcollide(const Particle& p1, const Particle& p2) {
+    // add damp(en)ing!!!
+
+    double distanceFromCenter = p1.r->distance(*p2.r) - p2.radius;
+    if (distanceFromCenter < p1.radius) {
+        Vector sphereSurfaceNormal = (*p1.r - *p2.r).normal();
+        double moveOutOfSphere = distanceFromCenter - p1.radius;// - p2.dr.norm();
+//        if (! p2.stationary)
+//        {
+//            *p2.r += sphereSurfaceNormal * moveOutOfSphere;
+//        }
+
+        if (! p2.stationary)
+        {
+            *p2.v -=
+                (*p2.r - *p1.r) * (
+                    (*p2.v - *p1.v)
+                        .dotProduct(*p2.r - *p1.r)
+                        / pow(p2.r->distance(*p1.r), 2)
+                        * 2 * p1.m / (p1.m + p2.m)
+                ) / 10;
+        }
+        if (! p1.stationary)
+        {
+            *p1.v -=
+                (*p1.r - *p2.r) * (
+                    (*p1.v - *p2.v)
+                        .dotProduct(*p1.r - *p2.r)
+                        / pow(p1.r->distance(*p2.r), 2)
+                        * 2 * p2.m / (p1.m + p2.m)
+                ) / 10;
+        }
+    }
+}
+
 //void CollisionSphere::collide_new(Particle& p2) {
 //    double nextDistance = position.distance(p2.r + p2.v) - p2.radius; // d = |p1-p2|-r2
 //    if (nextDistance < radius) { // collision

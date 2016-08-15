@@ -173,6 +173,13 @@ Vector Vector::normal() const {
     return *this / this->norm();
 }
 
+void Vector::limit(double max) {
+    auto sgn = [](double x) -> double { return x < 0 ? -1 : 1; };
+    if (fabs(x) > max) x = sgn(x) * max;
+    if (fabs(y) > max) y = sgn(y) * max;
+    if (fabs(z) > max) z = sgn(z) * max;
+}
+
 void Vector::setModelMatrix()
 {
     double us = norm() * 0.2 * Settings::VECTOR_LENGTH_MULTIPLIER;

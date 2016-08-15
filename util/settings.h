@@ -5,17 +5,34 @@ class Settings {
 public:
     static const int BYTES_PER_FLOAT = 4; // used by VertexArray
 
+    // Graphics:
+
     static unsigned int SPHERE_DETAIL;
     static bool         PAINT_VECTORS;
     static float        VECTOR_LENGTH_MULTIPLIER;
 
+    // Simulation:
+
+    static float        dt;
+    static float        WAVES_VELOCITY;
+    static float        WAVES_DT;
+    static double       ARENA_DIAMETER;
     static unsigned int PARTICLE_COUNT;
     static bool         PARTICLES_REACT;
-    static bool         DIMENSIONS_3D;
-    static bool         PARTICLES_INITIAL_SPEED;
+
+    // Physics:
 
     static float PARTICLE_MASS;
     static float PARTICLE_RADIUS;
+
+    static unsigned int SPH_NEIGHBOUR_COUNT;
+    static double       SPH_SMOOTHING_LENGTH;
+    static double       SPH_MESH_CELL_DIAMETER;
+    static double       SPH_STIFFNESS_CONSTANT;
+    static double       SPH_DESIRED_REST_DENSITY;
+    static double       SPH_VISCOSITY;
+    static double       SPH_PRESSURE;
+    static double       SPH_TEMPERATURE;
 
     static bool   FORCES_EARTH_GRAVITY;
     static bool   FORCES_UNIVERSAL_GRAVITY;
@@ -25,10 +42,6 @@ public:
     static double FORCES_HOOKE_DAMP;
     static float  FORCES_FRICTION;
     static float  DAMPENING; // 1.0 - ELASTICITY
-
-    static float  dt;
-    static float  WAVES_VELOCITY;
-    static float  WAVES_DT;
 
 //    static void setWavesVelocity(int v);
 //    static void setWavesDT(float dt);

@@ -17,6 +17,7 @@ class Particle;
 #include "machine/rope.h"
 #include "machine/walls.h"
 #include "physics/computer.h"
+#include "physics/grid.h"
 #include "shader/shader.h"
 #include "util/constants.h"
 #include "util/debug_helper.h"
@@ -38,6 +39,7 @@ void SimulationWindow::initialize()
 {
     Shader::currentShader = new Shader();
     Computer::currentComputer = new Computer();
+    Grid::init();
 
     refreshRate = screen()->refreshRate();
     const qreal retinaScale = devicePixelRatio();
@@ -45,7 +47,7 @@ void SimulationWindow::initialize()
 
     //    Matrices::viewMatrix.translate(QVector3D(10, 10, 10));
     Matrices::camTZ = 12;
-    Matrices::camRY = 180;
+    Matrices::camRY = 0;
     Matrices::projectionMatrix.setToIdentity();
     Matrices::projectionMatrix.perspective(
                                     90.0f, width()/height(), 0.1f, 100.0f);
@@ -56,7 +58,7 @@ void SimulationWindow::initialize()
         Particle::flows[0][i] = new Particle(Particle::flows.size() - 1);
     }
     Machine::machines.push_back(
-            new Walls(10.0)
+            new Walls(Settings::ARENA_DIAMETER / 2)
     );//getDamping("static")));
 //    Machine::machines.push_back(
 //        new Rope(
@@ -245,29 +247,29 @@ void SimulationWindow::mouseReleaseEvent(QMouseEvent* event)
 
 void SimulationWindow::w()
 {
-    Matrices::camTX -= moveSpeed * sin(Matrices::camRY * degToRad)
-                                 * cos(Matrices::camRX * degToRad) * dt;
-    Matrices::camTY += moveSpeed * sin(Matrices::camRX * degToRad) * dt;
-    Matrices::camTZ += moveSpeed * cos(Matrices::camRY * degToRad)
-                                 * cos(Matrices::camRX * degToRad) * dt;
-}
-void SimulationWindow::s()
-{
     Matrices::camTX += moveSpeed * sin(Matrices::camRY * degToRad)
                                  * cos(Matrices::camRX * degToRad) * dt;
     Matrices::camTY -= moveSpeed * sin(Matrices::camRX * degToRad) * dt;
     Matrices::camTZ -= moveSpeed * cos(Matrices::camRY * degToRad)
                                  * cos(Matrices::camRX * degToRad) * dt;
 }
-void SimulationWindow::a()
+void SimulationWindow::s()
 {
-    Matrices::camTX += moveSpeed * cos(Matrices::camRY * degToRad) * dt;
-    Matrices::camTZ += moveSpeed * sin(Matrices::camRY * degToRad) * dt;
+    Matrices::camTX -= moveSpeed * sin(Matrices::camRY * degToRad)
+                                 * cos(Matrices::camRX * degToRad) * dt;
+    Matrices::camTY += moveSpeed * sin(Matrices::camRX * degToRad) * dt;
+    Matrices::camTZ += moveSpeed * cos(Matrices::camRY * degToRad)
+                                 * cos(Matrices::camRX * degToRad) * dt;
 }
-void SimulationWindow::d()
+void SimulationWindow::a()
 {
     Matrices::camTX -= moveSpeed * cos(Matrices::camRY * degToRad) * dt;
     Matrices::camTZ -= moveSpeed * sin(Matrices::camRY * degToRad) * dt;
+}
+void SimulationWindow::d()
+{
+    Matrices::camTX += moveSpeed * cos(Matrices::camRY * degToRad) * dt;
+    Matrices::camTZ += moveSpeed * sin(Matrices::camRY * degToRad) * dt;
 }
 void SimulationWindow::h()
 {

@@ -49,11 +49,12 @@ HEADERS += \
     machine/spring.h \
     machine/rope.h \
     machine/walls.h \
-    physics/geometry.h \
-    physics/forces.h \
     physics/computer.h \
-    physics/vector.h \
+    physics/forces.h \
+    physics/geometry.h \
+    physics/grid.h \
     shader/shader.h \
+    physics/vector.h \
     shape/arrow.h \
     shape/dot.h \
     shape/landschaft.h \
@@ -88,6 +89,7 @@ SOURCES += \
     main.cpp \
     physics/computer.cpp \
     physics/forces.cpp \
+    physics/grid.cpp \
     physics/vector.cpp \
     shader/shader.cpp \
     shape/arrow.cpp \

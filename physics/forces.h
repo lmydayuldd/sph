@@ -19,6 +19,7 @@ public:
     ); // F-> = -ks . x-> // d = targetSpringDistance
     // Elastic Collision
     static void collide(const Particle& p1, const Particle& p2);
+    static void SPHcollide(const Particle& p1, const Particle& p2);
 };
 
 #endif // FORCES_H

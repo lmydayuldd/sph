@@ -3,16 +3,19 @@
 #include <iostream>
 #include <random>
 
+#include <omp.h>
+
 #include "gl/matrices.h"
 #include "machine/spring.h"
+#include "physics/grid.h"
 #include "physics/vector.h"
 #include "shape/dot.h"
+#include "shape/line.h"
 #include "shape/sphere.h"
 #include "util/constants.h"
 #include "util/settings.h"
 
 using namespace std;
-#include "shape/line.h"
 
 std::vector<std::vector<Particle*>> Particle::flows;
 int Particle::count = 0;
@@ -40,29 +43,29 @@ Particle::Particle(int parentFlow)
     : parentFlow(parentFlow),
       id(++count),
       neighbours(nullptr),
+      cell(std::vector<unsigned int>{ std::numeric_limits<unsigned int>::max(),
+                                      std::numeric_limits<unsigned int>::max(),
+                                      std::numeric_limits<unsigned int>::max() }),
       m(Settings::PARTICLE_MASS),
-      rho(1000.0),
-      charge(1.0),
-      temperature(23.0),
-      viscosity(0.01), // 10^-6 but large values preffered for simulation
-      pressure(1.0),
-      smoothing_length(Settings::PARTICLE_RADIUS * 2),
+      rho(Settings::SPH_DESIRED_REST_DENSITY),
+      charge(Settings::FORCES_COULOMB),
+      temperature(Settings::SPH_TEMPERATURE),
+      viscosity(Settings::SPH_VISCOSITY),
+      pressure(Settings::SPH_PRESSURE),
+      smoothing_length(Settings::SPH_SMOOTHING_LENGTH),
       radius(Settings::PARTICLE_RADIUS),
       stationary(false)
 {
     r = new Vector(
-        (static_cast<float>(rand()) / static_cast<float>(RAND_MAX) - 1.0f) * (rand()%5),
-        (static_cast<float>(rand()) / static_cast<float>(RAND_MAX) - 1.0f) * (rand()%5),
+        (-10 + radius) + fmod(id-1, 20) * radius,//(static_cast<float>(rand()) / static_cast<float>(RAND_MAX) - 1.0f) * (rand()%5),
+        (-10 + radius) + (id-1)/20 * radius,//(static_cast<float>(rand()) / static_cast<float>(RAND_MAX) - 1.0f) * (rand()%5),
         0//(static_cast<float>(rand()) / static_cast<float>(RAND_MAX) - 1.0f) * (rand()%5)
     );
-    v = new Vector();
-    if (Settings::PARTICLES_INITIAL_SPEED) {
-        v = new Vector(
-            (static_cast<float>(rand()) / static_cast<float>(RAND_MAX) - 1.0f) * (rand()%30),
-            (static_cast<float>(rand()) / static_cast<float>(RAND_MAX) - 1.0f) * (rand()%30),
-            0//(static_cast<float>(rand()) / static_cast<float>(RAND_MAX) - 1.0f) * (rand()%30)
-        );
-    }
+    v = new Vector(
+        0,//(static_cast<float>(rand()) / static_cast<float>(RAND_MAX) - 1.0f) * (rand()%30),
+        0,//(static_cast<float>(rand()) / static_cast<float>(RAND_MAX) - 1.0f) * (rand()%30),
+        0//(static_cast<float>(rand()) / static_cast<float>(RAND_MAX) - 1.0f) * (rand()%30)
+    );
     a = new Vector();
     dr = new Vector();
     dv = new Vector();
@@ -74,13 +77,12 @@ Particle::Particle(int parentFlow)
 
 void Particle::createView()
 {
-//    float position[3] = {0, 0, 0};
-//    Dot dot(position, color);
-//    this->forms.push_back(dot.form);
-
-    float color[3] = {1, 0, 0};
+    float color[3] = {0.5, 0, 0};
     Sphere sphere(0.8, color);
     this->form = sphere.form;
+
+//    Dot dot(color);
+//    this->form = dot.form;
 }
 
 void Particle::springify(Particle* p2, float ks, float d, float kd)
@@ -108,7 +110,52 @@ double Particle::v_max()
 
 void Particle::updateNeighbours()
 {
-    unsigned int neighbour_count = 5; // 50
+    // naive
+
+//    unsigned int neighbour_count = Settings::SPH_NEIGHBOUR_COUNT;
+//    double neighbour_range = std::numeric_limits<double>::infinity();//2 * smoothing_length;
+
+//    unsigned int particle_count = Particle::flows[this->parentFlow].size();
+//    if (neighbours == nullptr)
+//    {
+//        neighbours = new std::vector<Particle*>();
+//    }
+//    else
+//    {
+//        neighbours->clear();
+//    }
+
+//    double last_min_distance = 0;
+//    for (unsigned int i = 0; i < neighbour_count && i < particle_count; ++i)
+//    {
+//        double min_distance = std::numeric_limits<double>::infinity();
+//        unsigned int min_index = std::numeric_limits<unsigned int>::max();
+//        for (unsigned int j = 0; j < particle_count; ++j)
+//        {
+//            if (this != Particle::flows[parentFlow][j])
+//            {
+//                double j_distance
+//                        = r->distance(*Particle::flows[parentFlow][j]->r);
+//                if (j_distance < min_distance && j_distance <= neighbour_range)
+//                {
+//                    if (j_distance > 0 && j_distance > last_min_distance)
+//                    {
+//                        min_distance = j_distance;
+//                        min_index = j;
+//                    }
+//                }
+//            }
+//        }
+//        if (min_index != std::numeric_limits<unsigned int>::max())
+//        {
+//            neighbours->push_back(Particle::flows[parentFlow][min_index]);
+//        }
+//        last_min_distance = min_distance;
+//    }
+
+    // mesh-supported
+
+    unsigned int neighbour_count = Settings::SPH_NEIGHBOUR_COUNT;
     double neighbour_range = std::numeric_limits<double>::infinity();//2 * smoothing_length;
 
     unsigned int particle_count = Particle::flows[this->parentFlow].size();
@@ -121,33 +168,31 @@ void Particle::updateNeighbours()
         neighbours->clear();
     }
 
-    double last_min_distance = 0;
-    for (unsigned int i = 0; i < neighbour_count && i < particle_count; ++i)
+    for (unsigned int i = std::max<unsigned int>(cell[0] - 1, 0);
+         i < std::min<unsigned int>(cell[0] + 1 + 1, Grid::cell_count); ++i)
     {
-        double min_distance = std::numeric_limits<double>::infinity();
-        unsigned int min_index = std::numeric_limits<unsigned int>::max();
-        for (unsigned int j = 0; j < particle_count; ++j)
+        for (unsigned int j = std::max<unsigned int>(cell[1] - 1, 0);
+             j < std::min<unsigned int>(cell[1] + 1 + 1, Grid::cell_count); ++j)
         {
-            if (this != Particle::flows[parentFlow][j])
+            for (unsigned int k = std::max<unsigned int>(cell[2] - 1, 0);
+                 k < std::min<unsigned int>(cell[2] + 1 + 1, Grid::cell_count); ++k)
             {
-                double j_distance
-                        = r->distance(*Particle::flows[parentFlow][j]->r);
-                if (j_distance < min_distance && j_distance <= neighbour_range)
+                for (unsigned int p = 0; p < Grid::grid[i][j][k].size(); ++p)
                 {
-                    if (j_distance > 0 && j_distance > last_min_distance)
+                    if (this != Grid::grid[i][j][k][p])
                     {
-                        min_distance = j_distance;
-                        min_index = j;
+                        if (neighbours->size() < Settings::SPH_NEIGHBOUR_COUNT)
+                        {
+                            neighbours->push_back(Grid::grid[i][j][k][p]);
+                        }
                     }
                 }
             }
         }
-        if (min_index != std::numeric_limits<unsigned int>::max())
-        {
-            neighbours->push_back(Particle::flows[parentFlow][min_index]);
-        }
-        last_min_distance = min_distance;
     }
+
+    // printout
+
     std::cout << id << ": ";
     for (unsigned int i = 0; i < neighbours->size(); ++i)
     {
@@ -164,8 +209,8 @@ double Particle::kernelFunction(Particle* p2)
     double h = smoothing_length;
 
     //double C_h = 1. / (6 * h);                  // for 1D
-    //double C_h = 15. / (14 * M_PI * pow(h, 2)); // for 2D
-    double C_h = 1. / (4 * M_PI * pow(h, 3));   // for 3D
+    double C_h = 15. / (14 * M_PI * pow(h, 2)); // for 2D
+    //double C_h = 1. / (4 * M_PI * pow(h, 3));   // for 3D
 
     double kernel = 0;
     //std::cout << "distance " << r->distance(*p2->r) << std::endl << std::flush;
@@ -179,19 +224,24 @@ double Particle::kernelFunction(Particle* p2)
     return kernel;
 }
 
-double Particle::kernelFunctionGradient(Particle* p2)
+Vector Particle::kernelFunctionGradient(Particle* p2)
 {
     double h = smoothing_length;
-    double C_h = 1. / (4 * M_PI * pow(h, 4));
+    //double C_h = -1. / (6 * pow(h, 2)); // for 1D
+    double C_h = -15. / (7 * M_PI * pow(h, 3)); // for 2D
+    //double C_h = -3. / ((4 * M_PI) * pow(h, 4)); // for 3D
 
     double gradient_W = 0;
     double q = r->distance(*p2->r) / h;
-    if      (q >= 0 && q < 1) gradient_W = C_h * (-0.75 * (pow(q, 2) - 4*q + 4));
-    else if (q >= 1 && q < 2) gradient_W = C_h * (-pow(q, 3) + 2*pow(q, 2) - 4*q + 8);
+//    if      (q >= 0 && q < 1) gradient_W = C_h * (-0.75 * (pow(q, 2) - 4*q + 4));
+//    else if (q >= 1 && q < 2) gradient_W = C_h * (-pow(q, 3) + 2*pow(q, 2) - 4*q + 8);
+//    else if (q >= 2)          gradient_W = 0;
+    if      (q >= 0 && q < 1) gradient_W = C_h * q * (9*q - 4);
+    else if (q >= 1 && q < 2) gradient_W = C_h * (q * (4 - 3*q) - 4);
     else if (q >= 2)          gradient_W = 0;
 
     //std::cout << "KernelFunction Gradient " << gradient_W_p1_p2 << std::endl << std::flush;
-    return gradient_W;
+    return (*p2->r - *r) / r->distance(*p2->r) * gradient_W;
 }
 
 void Particle::updateDensity()
@@ -209,8 +259,8 @@ void Particle::updateDensity()
 
 void Particle::updatePressure()
 {
-    double k = 300;      // stiffness constant // m/s
-    double rho_0 = 1000; // desired rest density
+    double k = Settings::SPH_STIFFNESS_CONSTANT;
+    double rho_0 = Settings::SPH_DESIRED_REST_DENSITY;
 
     pressure = k * (pow(rho/rho_0, 7) - 1);
     //std::cout << "Pressure " << pressure << std::endl << std::flush;
@@ -242,11 +292,11 @@ void Particle::computeViscosityForces()
     {
         Particle* n = (*neighbours)[i];
         viscosity_gradient_squared +=
-            kernelFunctionGradient(n)
-            * (n->m / n->rho)
+            (*r - *n->r)
+            * kernelFunctionGradient(n)
             * (viscosity - n->viscosity)
-            * (r - n->r)
-            / (pow(r - n->r, 2) + 0.01 * pow(smoothing_length, 2));
+            * (n->m / n->rho)
+            / ((*r - *n->r)/(*r - *n->r) + 0.01 * pow(smoothing_length, 2));
     }
     viscosity_gradient_squared *= 2;
 
