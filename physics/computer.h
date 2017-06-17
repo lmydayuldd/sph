@@ -13,6 +13,7 @@ public:
     static void evaluateForces(const Particle& p);
     static void evaluateForces();
     static void evaluateSPHForces();
+    static void collide();
     static void computeVectors(const Particle& p, float dt);
     static void computeVectors(float dt);
     static void Euler(const Particle& p, float dt);

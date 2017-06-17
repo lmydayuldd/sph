@@ -3,6 +3,7 @@
 
 class Spring;
 class Vector;
+class Octree;
 
 #include "machine/machine.h"
 
@@ -16,12 +17,17 @@ public:
     int id;
     std::vector<Particle*>* neighbours;
     std::vector<unsigned int> cell;
+    Octree* cube;
     std::vector<Spring*> springs;
     Vector *r, *v, *a, *dr, *dv, *da, *F;
+    Vector *r_former, *v_former;
     double m, rho, charge, temperature, viscosity, pressure;
     double smoothing_length;
     double radius;
     bool stationary;
+    bool *didCollide;
+    bool boundary;
+    float color[3];
 
     Particle();
     Particle(int parentFlow);
@@ -31,6 +37,7 @@ public:
     void springifyMutual(Particle* p2, float ks, float d, float kd);
     double v_max();
     void updateNeighbours();
+    void isBoundary();
     double kernelFunction(Particle* p2);
     Vector kernelFunctionGradient(Particle* p2);
     void updateDensity();

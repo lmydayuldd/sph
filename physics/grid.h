@@ -19,7 +19,7 @@ public:
 
     Grid();
 
-    static void update();
+    static void distributeParticles();
     static void fitParticle(Particle* p);
 };
 

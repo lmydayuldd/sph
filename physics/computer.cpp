@@ -25,27 +25,15 @@ void Computer::loop()
 {
 //#pragma omp parallel
 {
+    Grid::distributeParticles();
+
     //if (SimulationWindow::frame % 10 == 0) /////////////////////////////////////
     evaluateSPHForces();
     //evaluateForces();
 
     computeVectors(Settings::dt);
 
-    if (Settings::PARTICLES_REACT)
-        for (unsigned int i = 0; i < Particle::flows.size(); ++i)
-            for (unsigned int j = 0; j < Particle::flows.size(); ++j)
-#pragma omp for
-                for (unsigned int k = 0; k < Particle::flows[i].size(); ++k)
-                    for (unsigned int l = 0; l < Particle::flows[j].size(); ++l)
-                        if (! (k == l && i == j))
-                            //Forces::collide(*Particle::flows[i][k], *Particle::flows[j][l]);
-                            Forces::SPHcollide(*Particle::flows[i][k], *Particle::flows[j][l]);
-
-    for (unsigned int i = 0; i < Particle::flows.size(); ++i)
-#pragma omp for
-        for (unsigned int j = 0; j < Particle::flows[i].size(); ++j)
-            for (unsigned int k = 0; k < Machine::machines.size(); ++k)
-                Machine::machines[k]->collide(Particle::flows[i][j]);
+    collide();
 }
 }
 
@@ -96,43 +84,45 @@ void Computer::evaluateForces(const Particle& p)
 void Computer::evaluateForces()
 {
     for (unsigned int i = 0; i < Particle::flows.size(); ++i)
-#pragma omp for
+#pragma omp parallel for
         for (unsigned int j = 0; j < Particle::flows[i].size(); ++j)
             evaluateForces(*Particle::flows[i][j]);
 }
 
 void Computer::evaluateSPHForces()
 {
-//    double m = 0.;
-//    double rho = 0.;
-//    for (unsigned int i = 0; i < Particle::flows.size(); ++i)
-//    {
-//#pragma omp for
-//        for (unsigned int j = 0; j < Particle::flows[i].size(); ++j)
-//        {
-//            m += 1;
-//            rho += Particle::flows[i][j]->rho;
-//        }
-//    }
-//    m = rho / m / 1000;
-
+    double m = 0.;
+    double rho = 0.;
+    int count = 0;
     for (unsigned int i = 0; i < Particle::flows.size(); ++i)
+    {
 #pragma omp for
         for (unsigned int j = 0; j < Particle::flows[i].size(); ++j)
         {
+            count += 1;
+            rho += Particle::flows[i][j]->rho;
+        }
+    }
+    m = rho / count / Settings::SPH_DESIRED_REST_DENSITY;
+
+    for (unsigned int i = 0; i < Particle::flows.size(); ++i)
+#pragma omp parallel for
+        for (unsigned int j = 0; j < Particle::flows[i].size(); ++j)
+        {
             //Particle::flows[i][j]->m = m;
-            *Particle::flows[i][j]->F = Vector();
+            Particle::flows[i][j]->F->zero();
         }
 
-    Grid::update();
-
     for (unsigned int i = 0; i < Particle::flows.size(); ++i)
-#pragma omp for
+#pragma omp parallel for
         for (unsigned int j = 0; j < Particle::flows[i].size(); ++j)
+        {
             Particle::flows[i][j]->updateNeighbours();
+            Particle::flows[i][j]->isBoundary();
+        }
 
     for (unsigned int i = 0; i < Particle::flows.size(); ++i)
-#pragma omp for
+#pragma omp parallel for
         for (unsigned int j = 0; j < Particle::flows[i].size(); ++j)
         {
             Particle::flows[i][j]->updateDensity();
@@ -140,17 +130,40 @@ void Computer::evaluateSPHForces()
         }
 
     for (unsigned int i = 0; i < Particle::flows.size(); ++i)
-#pragma omp for
+#pragma omp parallel for
         for (unsigned int j = 0; j < Particle::flows[i].size(); ++j)
         {
             Particle::flows[i][j]->computePressureForces();
             Particle::flows[i][j]->computeViscosityForces();
             Particle::flows[i][j]->computeOtherForces();
-            *Particle::flows[i][j]->F /= 200;
+            //*Particle::flows[i][j]->F /= 1000; ////////////////////////
             Particle::flows[i][j]->F->limit(10); ////////////////////////
-            Particle::flows[i][j]->v->limit(10); ////////////////////////
-            //Particle::flows[i][j]->F->z = 0;
+            //Particle::flows[i][j]->v->limit(10); ////////////////////////
         }
+}
+
+void Computer::collide()
+{
+    if (Settings::PARTICLES_REACT)
+        for (unsigned int i = 0; i < Particle::flows.size(); ++i)
+            for (unsigned int j = 0; j < Particle::flows.size(); ++j)
+//#pragma omp for
+                for (unsigned int k = 0; k < Particle::flows[i].size(); ++k)
+                    for (unsigned int l = k; l < Particle::flows[j].size(); ++l)
+                        if (! (k == l && i == j))
+                            //Forces::collide(*Particle::flows[i][k], *Particle::flows[j][l]);
+                            Forces::SPHcollide(*Particle::flows[i][k], *Particle::flows[j][l]);
+
+    for (unsigned int i = 0; i < Particle::flows.size(); ++i)
+//#pragma omp for
+        for (unsigned int j = 0; j < Particle::flows[i].size(); ++j)
+            for (unsigned int k = 0; k < Machine::machines.size(); ++k)
+                Machine::machines[k]->collide(Particle::flows[i][j]);
+
+    for (unsigned int i = 0; i < Particle::flows.size(); ++i)
+//#pragma omp for
+        for (unsigned int j = 0; j < Particle::flows[i].size(); ++j)
+            *Particle::flows[i][j]->didCollide = false;
 }
 
 void Computer::computeVectors(const Particle& p, float dt)
@@ -166,14 +179,19 @@ void Computer::computeVectors(float dt)
 
 void Computer::Euler(const Particle& p, float dt)
 {
-    *p.dv  = *p.F * (1 / p.m) * dt;
+    *p.r_former = *p.r;
+    *p.v_former = *p.v;
+
+    *p.dv  = *p.F * (1. / p.m) * dt;
     *p.v  += *p.dv;
     *p.dr  = *p.v * dt;
+    //*p.dr = p.dr->normal() * Settings::SPH_PARTICLE_MAX_DR;
     *p.r  += *p.dr;
-    if (p.id == 1)
-    {
-        std::cout << *p.r << std::endl;
-    }
+
+//    if (p.id == 1)
+//    {
+//        std::cout << *p.r << std::endl;
+//    }
 }
 void Computer::Euler(float dt)
 {

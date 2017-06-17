@@ -136,10 +136,14 @@ void Form::move()
 void Form::recolor(float color[])
 {
 //    if      (shaderProgram instanceof AttributeColorShaderProgram) {
+        float step = M_PI / 23;
         for (int i = POS_COORDS_PER_VERTEX;
              i < (int) posCoords.size();
              i += ALL_COORDS_PER_VERTEX)
         {
+            color[1] += step / M_PI;
+            if      (color[1] >= 1.0f) color[1] -= fmod(color[1], 1);
+            else if (color[1] <= 0.0f) color[1] += fmod(fabs(color[1]), 1);
             for (int j = 0; j < CLR_COORDS_PER_VERTEX; ++j)
             {
                 posCoords[i + j] = color[j];

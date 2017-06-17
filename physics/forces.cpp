@@ -1,6 +1,7 @@
 #include "physics/forces.h"
 #include "physics/vector.h"
 #include "util/constants.h"
+#include "util/settings.h"
 
 #include <cstring> // for std::memset
 
@@ -51,11 +52,22 @@ void Forces::Hooke(const Particle& p1, const Particle& p2,
         Vector r12 = *p1.r - *p2.r;
         Vector v12 = *p1.v - *p2.v;
         double fs = ks * fabs(r12.norm() - d);
-        double fd = kd * v12.dotProduct(r12) / r12.norm();
+        double fd = kd * v12.dot(r12) / r12.norm();
         Vector fH = r12.normal() * (fs + fd);
         if (! p1.stationary) *p1.F = *p1.F - fH;
         if (! p2.stationary) *p2.F = *p2.F + fH;
     }
+}
+
+bool Forces::doCollide(const Particle& p1, const Particle& p2) { // Elastic Collision
+    bool doCollide = false;
+    double distanceFromCenter = p1.r->distance(*p2.r) - p2.radius;
+    if (distanceFromCenter < p1.radius) {
+        doCollide = true;
+        *p1.didCollide = true;
+        *p2.didCollide = true;
+    }
+    return doCollide;
 }
 
 void Forces::collide(const Particle& p1, const Particle& p2) { // Elastic Collision
@@ -71,7 +83,7 @@ void Forces::collide(const Particle& p1, const Particle& p2) { // Elastic Collis
         Vector p1_v_new = *p1.v - (
             (*p1.r - *p2.r) * (
                 (*p1.v - *p2.v)
-                    .dotProduct(*p1.r - *p2.r)
+                    .dot(*p1.r - *p2.r)
                     / pow(p1.r->distance(*p2.r), 2)
                     * 2 * p2.m / (p1.m + p2.m)
             )
@@ -80,7 +92,7 @@ void Forces::collide(const Particle& p1, const Particle& p2) { // Elastic Collis
             *p2.v = *p2.v - (
                 (*p2.r - *p1.r) * (
                     (*p2.v - *p1.v)
-                        .dotProduct(*p2.r - *p1.r)
+                        .dot(*p2.r - *p1.r)
                         / pow(p2.r->distance(*p1.r), 2)
                         * 2 * p1.m / (p1.m + p2.m)
                 )
@@ -94,36 +106,46 @@ void Forces::collide(const Particle& p1, const Particle& p2) { // Elastic Collis
 void Forces::SPHcollide(const Particle& p1, const Particle& p2) {
     // add damp(en)ing!!!
 
-    double distanceFromCenter = p1.r->distance(*p2.r) - p2.radius;
-    if (distanceFromCenter < p1.radius) {
-        Vector sphereSurfaceNormal = (*p1.r - *p2.r).normal();
-        double moveOutOfSphere = distanceFromCenter - p1.radius;// - p2.dr.norm();
-//        if (! p2.stationary)
-//        {
-//            *p2.r += sphereSurfaceNormal * moveOutOfSphere;
-//        }
+//    if (! *p1.didCollide && ! *p2.didCollide)
+//    {
+        double distanceFromCenter = p1.r->distance(*p2.r) - p2.radius;
+        if (distanceFromCenter < p1.radius) {
+            *p1.didCollide = true;
+            *p2.didCollide = true;
 
-        if (! p2.stationary)
-        {
-            *p2.v -=
-                (*p2.r - *p1.r) * (
-                    (*p2.v - *p1.v)
-                        .dotProduct(*p2.r - *p1.r)
-                        / pow(p2.r->distance(*p1.r), 2)
-                        * 2 * p1.m / (p1.m + p2.m)
-                ) / 10;
+//            Vector sphereSurfaceNormal = (*p1.r - *p2.r).normal();
+//            double moveOutOfSphere = distanceFromCenter - p1.radius;// - p2.dr.norm();
+
+            Vector p2_v(*p2.v);
+//            if (! p2.stationary)
+//            {
+//                *p2.r += sphereSurfaceNormal * std::min(moveOutOfSphere, Settings::SPH_PARTICLE_MAX_DR);
+//            }
+
+            if (! p2.stationary)
+            {
+                *p2.v -=
+                    (*p2.r - *p1.r) * (
+                        (*p2.v - *p1.v)
+                            .dot(*p2.r - *p1.r)
+                            / pow(p2.r->distance(*p1.r), 2)
+                            * 2 * p1.m / (p1.m + p2.m)
+                    );
+                *p2.v *= (1. - Settings::WATER_DAMPENING);
+            }
+            if (! p1.stationary)
+            {
+                *p1.v -=
+                    (*p1.r - *p2.r) * (
+                        (*p1.v - p2_v)
+                            .dot(*p1.r - *p2.r)
+                            / pow(p1.r->distance(*p2.r), 2)
+                            * 2 * p2.m / (p1.m + p2.m)
+                    );
+                *p1.v *= (1. - Settings::WATER_DAMPENING);
+            }
         }
-        if (! p1.stationary)
-        {
-            *p1.v -=
-                (*p1.r - *p2.r) * (
-                    (*p1.v - *p2.v)
-                        .dotProduct(*p1.r - *p2.r)
-                        / pow(p1.r->distance(*p2.r), 2)
-                        * 2 * p2.m / (p1.m + p2.m)
-                ) / 10;
-        }
-    }
+//    }
 }
 
 //void CollisionSphere::collide_new(Particle& p2) {

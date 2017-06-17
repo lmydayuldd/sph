@@ -28,7 +28,7 @@ public:
     virtual Vector operator+(const Vector& v) const;
     virtual Vector operator-(const Vector& v) const;
     virtual Vector operator*(const Vector& v) const; // cross
-    virtual double operator/(const Vector& v) const; // dot
+    //virtual double operator/(const Vector& v) const; // dot
     virtual Vector operator+(double v) const;
     virtual Vector operator-(double v) const;
     virtual Vector operator*(double v) const;
@@ -43,12 +43,13 @@ public:
 
     virtual double      cosxy(const Vector& v) const;
     virtual double   distance(const Vector& v) const;
-    virtual double dotProduct(const Vector& v) const;
+    virtual double dot(const Vector& v) const;
 
     virtual double   norm() const;
     virtual Vector normal() const;
 
     void limit(double max);
+    void zero();
 
     void setApplicationPoint(Vector application);
     void setModelMatrix() override;

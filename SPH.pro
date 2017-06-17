@@ -53,8 +53,9 @@ HEADERS += \
     physics/forces.h \
     physics/geometry.h \
     physics/grid.h \
-    shader/shader.h \
+    physics/octree.h \
     physics/vector.h \
+    shader/shader.h \
     shape/arrow.h \
     shape/dot.h \
     shape/landschaft.h \
@@ -90,6 +91,7 @@ SOURCES += \
     physics/computer.cpp \
     physics/forces.cpp \
     physics/grid.cpp \
+    physics/octree.cpp \
     physics/vector.cpp \
     shader/shader.cpp \
     shape/arrow.cpp \
@@ -102,6 +104,7 @@ SOURCES += \
     shape/triangle.cpp \
     util/debug_helper.cpp \
     util/enums.cpp \
+    util/operations.cpp \
     util/settings.cpp \
     util/timer.cpp \
     window/gl_window.cpp \

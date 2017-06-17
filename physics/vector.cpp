@@ -6,6 +6,7 @@
 #include "gl/matrices.h"
 #include "shape/arrow.h"
 #include "shape/line.h"
+#include "util/operations.h"
 #include "util/settings.h"
 
 using namespace std;
@@ -96,9 +97,9 @@ Vector Vector::operator*(const Vector& v) const { // cross
         this->x*v.y - this->y*v.x
     );
 }
-double Vector::operator/(const Vector& v) const { // dot
-    return dotProduct(v);
-}
+//double Vector::operator/(const Vector& v) const { // dot
+//    return dot(v);
+//}
 Vector Vector::operator+(double v) const {
     return Vector(this->x+v, this->y+v, this->z+v);
 }
@@ -157,27 +158,32 @@ Vector& Vector::operator/=(double v) {
 }
 
 double Vector::cosxy(const Vector& v) const {
-    return dotProduct(v) / (this->norm() * v.norm());
+    return dot(v) / (this->norm() * v.norm());
 }
 double Vector::distance(const Vector& v) const {
     return (*this - v).norm();
 }
-double Vector::dotProduct(const Vector& v) const {
+double Vector::dot(const Vector& v) const {
     return this->x*v.x + this->y*v.y + this->z*v.z;
 }
 
 double Vector::norm() const {
-    return sqrt(this->dotProduct(*this));
+    return sqrt(this->dot(*this));
 }
 Vector Vector::normal() const {
     return *this / this->norm();
 }
 
 void Vector::limit(double max) {
-    auto sgn = [](double x) -> double { return x < 0 ? -1 : 1; };
-    if (fabs(x) > max) x = sgn(x) * max;
-    if (fabs(y) > max) y = sgn(y) * max;
-    if (fabs(z) > max) z = sgn(z) * max;
+    if (fabs(x) > max) x = Op::sgn(x) * max;
+    if (fabs(y) > max) y = Op::sgn(y) * max;
+    if (fabs(z) > max) z = Op::sgn(z) * max;
+}
+
+void Vector::zero() {
+    x = 0;
+    y = 0;
+    z = 0;
 }
 
 void Vector::setModelMatrix()
