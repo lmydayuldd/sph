@@ -169,13 +169,13 @@ void Particle::updateNeighbours()
     }
 
     for (unsigned int i = std::max<unsigned int>(cell[0] - 1, 0);
-         i < std::min<unsigned int>(cell[0] + 1 + 1, Grid::cell_count); ++i)
+         i <= std::min<unsigned int>(cell[0] + 1, Grid::cell_count); ++i)
     {
         for (unsigned int j = std::max<unsigned int>(cell[1] - 1, 0);
-             j < std::min<unsigned int>(cell[1] + 1 + 1, Grid::cell_count); ++j)
+             j <= std::min<unsigned int>(cell[1] + 1, Grid::cell_count); ++j)
         {
             for (unsigned int k = std::max<unsigned int>(cell[2] - 1, 0);
-                 k < std::min<unsigned int>(cell[2] + 1 + 1, Grid::cell_count); ++k)
+                 k <= std::min<unsigned int>(cell[2] + 1, Grid::cell_count); ++k)
             {
                 for (unsigned int p = 0; p < Grid::grid[i][j][k].size(); ++p)
                 {
@@ -287,21 +287,22 @@ void Particle::computePressureForces()
 
 void Particle::computeViscosityForces()
 {
-    Vector viscosity_gradient_squared = Vector(); // approximated
+    Vector velocity_gradient_squared = Vector(); // approximated
     for (unsigned int i = 0; i < neighbours->size(); ++i)
     {
         Particle* n = (*neighbours)[i];
-        viscosity_gradient_squared +=
+        velocity_gradient_squared +=
             (*r - *n->r)
             * kernelFunctionGradient(n)
-            * (viscosity - n->viscosity)
+            * (v - n->v)
             * (n->m / n->rho)
-            / ((*r - *n->r)/(*r - *n->r) + 0.01 * pow(smoothing_length, 2));
+            / ((*r - *n->r).dot(*r - *n->r)
+               + 0.01 * pow(smoothing_length, 2));
     }
-    viscosity_gradient_squared *= 2;
+    velocity_gradient_squared *= 2;
 
     Vector F_v = Vector();
-    F_v = (*v) * viscosity_gradient_squared * m;
+    F_v = velocity_gradient_squared * viscosity * m;
     *F += F_v;
     //std::cout << "F_viscosity " << F_v << std::endl << std::flush;
 }
@@ -323,7 +324,7 @@ void Particle::setModelMatrix()
     // x y z // r theta phi // radius inclination azimuth // yaw roll pitch
     Vector dir = v->normal();
     Vector up = Vector(0, 1, 0);
-    double angle = - acos(dir.dotProduct(up)) * radToDeg;
+    double angle = - acos(dir.dot(up)) * radToDeg;
     if (fabs(angle) > 0.5)
     {
         Vector axis = (dir * up).normal();

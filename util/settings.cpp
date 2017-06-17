@@ -8,11 +8,11 @@ float        Settings::VECTOR_LENGTH_MULTIPLIER = 10.;
 
 // Simulation:
 
-float        Settings::dt              = 0.04;
+float        Settings::dt              = 0.04 * 3;
 float        Settings::WAVES_VELOCITY  = 4.0;
 float        Settings::WAVES_DT        = 0.05;
 double       Settings::ARENA_DIAMETER  = 20;
-unsigned int Settings::PARTICLE_COUNT  = 400;
+unsigned int Settings::PARTICLE_COUNT  = 800;
 bool         Settings::PARTICLES_REACT = true;
 
 // Physics:

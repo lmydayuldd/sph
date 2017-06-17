@@ -147,8 +147,8 @@ void Computer::evaluateSPHForces()
             Particle::flows[i][j]->computeViscosityForces();
             Particle::flows[i][j]->computeOtherForces();
             *Particle::flows[i][j]->F /= 200;
-            Particle::flows[i][j]->F->limit(10); ////////////////////////
-            Particle::flows[i][j]->v->limit(10); ////////////////////////
+            //Particle::flows[i][j]->F->limit(10); ////////////////////////
+            //Particle::flows[i][j]->v->limit(10); ////////////////////////
             //Particle::flows[i][j]->F->z = 0;
         }
 }

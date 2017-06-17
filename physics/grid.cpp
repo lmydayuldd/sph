@@ -47,6 +47,9 @@ void Grid::fitParticle(Particle* p)
     unsigned int x = (unsigned int) ((p->r->x + 10.) / cell_diameter);
     unsigned int y = (unsigned int) ((p->r->y + 10.) / cell_diameter);
     unsigned int z = (unsigned int) ((p->r->z + 10.) / cell_diameter);
+    if (x >= Grid::cell_count) x = Grid::cell_count - 1;
+    if (y >= Grid::cell_count) y = Grid::cell_count - 1;
+    if (z >= Grid::cell_count) z = Grid::cell_count - 1;
     p->cell[0] = x;
     p->cell[1] = y;
     p->cell[2] = z;

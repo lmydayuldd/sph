@@ -62,8 +62,8 @@ bool intersects(const Geometry::Sphere& sphere, const Geometry::Ray& ray)
 Vector intersectionPoint(const Geometry::Ray& ray, const Geometry::Plane& plane)
 {
     Vector rayToPlaneVector = plane.point - ray.source;
-    double scaleFactor = rayToPlaneVector.dotProduct(plane.normal)
-                        / ray.vector.dotProduct(plane.normal);
+    double scaleFactor = rayToPlaneVector.dot(plane.normal)
+                        / ray.vector.dot(plane.normal);
     Vector intersectionPoint = ray.source + ray.vector * scaleFactor;
     return intersectionPoint;
 }
