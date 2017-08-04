@@ -7,14 +7,13 @@
 QT += core gui opengl
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = SPH
-TEMPLATE = app
-CONFIG += mobility c++11
+TARGET          = SPH
+TEMPLATE        = app
+CONFIG         += mobility c++11
 QMAKE_CXXFLAGS += -std=c++11 -pthread -fopenmp
-#QMAKE_LFLAGS +=
-MOBILITY =
-
-LIBS += -pthread -fopenmp
+LIBS           += -pthread -fopenmp -LD:/dev/ms-mpi/Lib/x86 -lmsmpi
+INCLUDEPATH    += D:/dev/ms-mpi/Include
+MOBILITY        =
 
 # Defines platform-specific preprocessor macro
 #   edit at Projects->QMake->additional arguments
@@ -23,7 +22,7 @@ CONFIG(DESKTOP_BUILD): DEFINES += DESKTOP_BUILD
 CONFIG(ANDROID_BUILD): DEFINES += ANDROID_BUILD
 
 RESOURCES += \
-    D:/Dropbox/well/WFAIS/prog/Qt/SPH
+    E:/Dropbox/well/WFAIS/prog/Qt/SPH
 
 ############################################################
 # Project files ############################################
@@ -33,6 +32,9 @@ FORMS += \
     window/main_window.ui
 
 DISTFILES += \
+    map/sim_communicating_vessels.txt \
+    map/sim_dam_break.txt \
+    map/sim_droplet.txt \
     shader/vertex_shader.vsh \
     shader/fragment_shader.fsh \
     sph.qmodel
@@ -67,13 +69,14 @@ HEADERS += \
     util/debug_helper.h \
     util/enums.h \
     util/constants.h \
+    util/map.h \
     util/operations.h \
     util/parser.h \
     util/settings.h \
     util/timer.h \
     window/gl_window.h \
-    window/simulation_window.h \
-    window/main_window.h
+    window/main_window.h \
+    window/simulation_window.h
 
 SOURCES += \
     control/interaction.cpp \
@@ -107,6 +110,7 @@ SOURCES += \
     util/operations.cpp \
     util/settings.cpp \
     util/timer.cpp \
+    util/map.cpp \
     window/gl_window.cpp \
-    window/simulation_window.cpp \
-    window/main_window.cpp
+    window/main_window.cpp \
+    window/simulation_window.cpp

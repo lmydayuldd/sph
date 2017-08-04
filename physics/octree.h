@@ -14,9 +14,9 @@ public:
     static Octree *root;
     static double arena_diameter;
     static double cell_diameter;
-    static unsigned int cell_count;
-    static unsigned int max_depth;
-    unsigned int current_depth;
+    static unsigned cell_count;
+    static unsigned max_depth;
+    unsigned current_depth;
 
     Octree();
 
@@ -29,7 +29,7 @@ private:
     vector<Particle*> particles;
     double center[3];
 
-    Octree(unsigned int depth);
+    Octree(unsigned depth);
 
     void empty();
 };

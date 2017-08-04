@@ -29,13 +29,14 @@ public slots:
 protected:
     bool event(QEvent* event) Q_DECL_OVERRIDE;
     void exposeEvent(QExposeEvent* event) Q_DECL_OVERRIDE;
+//    QOpenGLPaintDevice* getPaintDevice();
 
 private:
     bool m_update_pending;
     bool m_animating;
 
-    QOpenGLContext* glContext;
     QOpenGLPaintDevice* paintDevice;
+    QOpenGLContext* glContext;
 };
 
 #endif // GL_WINDOW_H

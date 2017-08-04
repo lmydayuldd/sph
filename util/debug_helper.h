@@ -19,7 +19,7 @@ public:
         QMessageBox msgBox;
         msgBox.setWindowTitle(QString(title));
         std::stringstream ss;
-        for (unsigned int i = 0; i < sizeof...(args); ++i)
+        for (unsigned i = 0; i < sizeof...(args); ++i)
         {
 #ifdef DESKTOP_BUILD
             ss << "%" << std::to_string(i+1).c_str();

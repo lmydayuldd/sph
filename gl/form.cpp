@@ -49,6 +49,15 @@ Form::Form(
     forms.push_back(this);
 }
 
+//Form::Form(const Form &copy)
+//    : posCoords(copy.posCoords),
+//      clrCoords(copy.clrCoords),
+//      texCoords(copy.texCoords)
+//{
+//    gl = QOpenGLContext::currentContext()->functions();
+//    vertexArray = new VertexArray(posCoords, type);
+//}
+
 void Form::printForms()
 {
     if (forms.size() > 0)
@@ -58,7 +67,7 @@ void Form::printForms()
 #elif ANDROID_BUILD
         string s = "";
 #endif
-        for (unsigned int i = 0; i < forms.size(); ++i)
+        for (unsigned i = 0; i < forms.size(); ++i)
         {
             s += " " + string(Enums::shapeName[forms[i]->type]);
         }

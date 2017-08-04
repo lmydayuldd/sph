@@ -46,7 +46,7 @@ Rope::Rope(
     (*flow)[knots - 1]->stationary = true;
 
     float color[4] = {1, 1, 0, 0.5};
-    for (unsigned int i = 0; i < (*flow).size(); ++i) {
+    for (unsigned i = 0; i < (*flow).size(); ++i) {
         (*flow)[i]->v = new Vector();
         //flow[i].recolor(color);
     }
@@ -56,7 +56,7 @@ void Rope::paint() {
     // Using Shape iterator would require Shape object to be temporarily created
     // by non-parametred Shape().
     // It would then get destroyed, causing a ~Shape() call!
-    for (unsigned int i = 0; i < (*flow).size(); ++i) {
+    for (unsigned i = 0; i < (*flow).size(); ++i) {
         (*flow)[i]->paint();
     }
 }

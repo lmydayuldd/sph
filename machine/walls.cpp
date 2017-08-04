@@ -14,7 +14,7 @@ using namespace std;
 
 Walls::Walls(float lim)
     : lim(lim),
-      damping(Settings::WALL_DAMPENING)
+      damping(Settings::FORCES_DAMPEN_WALL)
 {
     linkView(RECTANGLE);
 }
@@ -55,22 +55,30 @@ void Walls::setModelMatrix()
 void Walls::paint()
 {
     setModelMatrix();
-
     Machine::paint();
 }
 
 void Walls::collide(Particle* p2) {
-    if ( p2->r->x < -lim || p2->r->x > lim ||
-         p2->r->y < -lim || p2->r->y > lim )
+    double lim_x = lim;
+    double lim_y = lim;
+    double lim_z_0 = 0.;
+    double lim_z_1 = Settings::ARENA_DIAMETER_Z;
+    if (Settings::ARENA_DIAMETER_Z == 0.)
     {
-        if      (p2->r->x < -lim) { p2->r->x = -lim; p2->v->x *= -1 * (1. - damping); }
-        else if (p2->r->x >  lim) { p2->r->x =  lim; p2->v->x *= -1 * (1. - damping); }
-        else if (p2->r->y < -lim) { p2->r->y = -lim; p2->v->y *= -1 * (1. - damping); }
-        else if (p2->r->y >  lim) { p2->r->y =  lim; p2->v->y *= -1 * (1. - damping); }
+        lim_z_0 = -1000.;
+        lim_z_1 = 1000.;
     }
-    if ( p2->r->x < -lim || p2->r->x > lim ||
-         p2->r->y < -lim || p2->r->y > lim )
+    for (int i = 0; i < 4; ++i) // TODO
     {
-        p2->r = p2->r_former;
+        if (p2->r->x - p2->radius <  -lim_x || p2->r->x + p2->radius >   lim_x
+         || p2->r->y - p2->radius <  -lim_y || p2->r->y + p2->radius >   lim_y
+         || p2->r->z - p2->radius < lim_z_0 || p2->r->z + p2->radius > lim_z_1) {
+                if      (p2->r->x - p2->radius <   -lim_x) { p2->r->x =   -lim_x + p2->radius; *p2->v -= Vector( 1,  0,  0) * (p2->v->dot(Vector( 1,  0,  0))) * (1 + Settings::FORCES_DAMPEN_WALL); }
+                else if (p2->r->x + p2->radius >    lim_x) { p2->r->x =    lim_x - p2->radius; *p2->v -= Vector(-1,  0,  0) * (p2->v->dot(Vector(-1,  0,  0))) * (1 + Settings::FORCES_DAMPEN_WALL); }
+                else if (p2->r->y - p2->radius <   -lim_y) { p2->r->y =   -lim_y + p2->radius; *p2->v -= Vector( 0,  1,  0) * (p2->v->dot(Vector( 0,  1,  0))) * (1 + Settings::FORCES_DAMPEN_WALL); }
+                else if (p2->r->y + p2->radius >    lim_y) { p2->r->y =    lim_y - p2->radius; *p2->v -= Vector( 0, -1,  0) * (p2->v->dot(Vector( 0, -1,  0))) * (1 + Settings::FORCES_DAMPEN_WALL); }
+                else if (p2->r->z - p2->radius <  lim_z_0) { p2->r->z =  lim_z_0 + p2->radius; *p2->v -= Vector( 0,  0,  1) * (p2->v->dot(Vector( 0,  0,  1))) * (1 + Settings::FORCES_DAMPEN_WALL); }
+                else if (p2->r->z + p2->radius >  lim_z_1) { p2->r->z =  lim_z_1 - p2->radius; *p2->v -= Vector( 0,  0, -1) * (p2->v->dot(Vector( 0,  0, -1))) * (1 + Settings::FORCES_DAMPEN_WALL); }
+        }
     }
 }

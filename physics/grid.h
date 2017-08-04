@@ -13,7 +13,7 @@ public:
     static vector<vector<vector<vector<Particle*>>>> grid;
     static double arena_diameter;
     static double cell_diameter;
-    static unsigned int cell_count;
+    static unsigned cell_count;
 
     static void init();
 

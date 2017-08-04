@@ -11,7 +11,9 @@ class SimulationWindow : public GLWindow
 {
 public:
     SimulationWindow();
+    ~SimulationWindow();
 
+    void prepareSimulation();
     void initialize() Q_DECL_OVERRIDE;
     void render() Q_DECL_OVERRIDE;
 
@@ -24,6 +26,8 @@ public:
     const float moveSpeed = 0.000000005f;//10.f;
     const float mouseSpeed = 0.3f;
     float cursorX, cursorY;
+
+    static bool key[sizeof(unsigned char) * 256];
 
 private:
     QPoint mousePoint;
@@ -44,7 +48,7 @@ private:
     void mouseReleaseEvent(QMouseEvent* e);
 
     static void cameraMan();
-    void move();
+    void interact();
     void w();
     void s();
     void a();

@@ -12,12 +12,14 @@ class Particle : public Machine
 public:
     static std::vector<std::vector<Particle*>> flows;
     static int count;
+    static std::vector<std::vector<bool>> collision;
+    static std::vector<std::vector<double>> collisionDistance;
     //std::vector<Particle*>* parentFlow;
     int parentFlow;
     int id;
-    std::vector<Particle*>* neighbours;
-    std::vector<unsigned int> cell;
-    Octree* cube;
+    std::vector<Particle*> *neighbours;
+    std::vector<unsigned> cell;
+    Octree *cube;
     std::vector<Spring*> springs;
     Vector *r, *v, *a, *dr, *dv, *da, *F;
     Vector *r_former, *v_former;
@@ -28,6 +30,7 @@ public:
     bool *didCollide;
     bool boundary;
     float color[3];
+    double *dt_left;
 
     Particle();
     Particle(int parentFlow);

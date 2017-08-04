@@ -10,6 +10,7 @@ namespace Geometry {
     class Ray;
     class Sphere;
     class Plane;
+    class Line;
 }
 
 class Geometry::Ray {
@@ -37,6 +38,15 @@ public:
     Plane(Vector& point, Vector& normal) {
         this->point  = point;
         this->normal = normal;
+    }
+};
+
+class Geometry::Line {
+public:
+    Vector p1, p2;
+    Line(Vector& p1, Vector& p2) {
+        this->p1 = p1;
+        this->p2 = p2;
     }
 };
 

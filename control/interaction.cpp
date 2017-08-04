@@ -8,8 +8,11 @@
 #include "util/operations.h"
 #include "util/settings.h"
 
-Particle* Interaction::pressedParticle = nullptr;
-Vector* Interaction::lockedPressedParticlePosition = nullptr;
+Particle *Interaction::pressedParticle = nullptr;
+Vector *Interaction::lockedPressedParticlePosition = nullptr;
+Vector *Interaction::pressedPoint = nullptr;
+bool Interaction::pause = true;
+bool Interaction::rewind = false;
 
 void Interaction::handleTouchPress(float normalizedX, float normalizedY)
 {
@@ -26,10 +29,10 @@ void Interaction::handleTouchPress(float normalizedX, float normalizedY)
         }*/
 
         double minProximity = std::numeric_limits<double>::infinity();
-        Particle* closest = nullptr;
-        for (unsigned int i = 0; i < Particle::flows.size(); ++i)
+        Particle *closest(nullptr);
+        for (unsigned i = 0; i < Particle::flows.size(); ++i)
         {
-            for (Particle* p : Particle::flows[i])
+            for (Particle *p : Particle::flows[i])
             {
                 Geometry::Sphere particleBoundingSphere
                         = Geometry::Sphere(*p->r, p->radius);
@@ -42,10 +45,7 @@ void Interaction::handleTouchPress(float normalizedX, float normalizedY)
                 }
             }
         }
-        //if ( minProximity < 0.1 ) {
-            delete pressedParticle;
-            pressedParticle = closest;
-        //}
+        pressedParticle = closest;
     //}
 
 //    if (typeid(Computer::currentComputer) == typeid(Wave2DComputer)) {
@@ -53,7 +53,7 @@ void Interaction::handleTouchPress(float normalizedX, float normalizedY)
 //        vector<Shape> shapes = Wave2DComputer.landschaft.shapes;
 //        int x = 0, y = 0;
 //        for (auto s = begin(shapes); s != end(shapes); ++s) {
-//            for (unsigned int j = 0; j < (*s).posCoords.size(); j += 24) { ////////////////////////////////////////
+//            for (unsigned j = 0; j < (*s).posCoords.size(); j += 24) { ////////////////////////////////////////
 //                Sphere quadrantBoundingSphere = Sphere(
 //                    Vector((*s).posCoords[j], (*s).posCoords[j+1], (*s).posCoords[j+2]),
 //                    Computer::currentComputer->dx
@@ -74,32 +74,46 @@ void Interaction::handleTouchDrag(float normalizedX, float normalizedY)
 {
     Geometry::Ray ray = convertNormalized2DPointToRay(normalizedX, normalizedY);
     //if (typeid(Computer::currentComputer) == typeid(ParticleComputer)) {
-        if (! Settings::DRAG_OR_FORCE) {
-            if (pressedParticle != nullptr)
-            {
-                // Define a plane 1. parallel to default view plane
-                // and 2. crossing our Particle
-                Vector pressedParticlePosition = Vector(*pressedParticle->r);
-                Vector straightVector = Vector(0, 0, 1);
-                Geometry::Plane plane
-                       = Geometry::Plane(pressedParticlePosition, straightVector);
-                // Find out where the touched point intersects the
-                // aforementioned plane. We'll move the particle along it.
-                Vector touchedPoint = intersectionPoint(ray, plane);
-                delete lockedPressedParticlePosition;
+        if (pressedParticle != nullptr)
+        {
+            // Define a plane 1. parallel to default view plane
+            // and 2. crossing our Particle
+            Vector pressedParticlePosition(*pressedParticle->r);
+            Vector straightVector(0, 0, 1);
+            Geometry::Plane plane
+                   = Geometry::Plane(pressedParticlePosition, straightVector);
+
+            // Find out where the touched point intersects the
+            // aforementioned plane. We'll move the particle along it.
+            Vector touchedPoint = intersectionPoint(ray, plane);
+
+            if       (Settings::CONTROL_MODE == ONE_DRAG) {
                 lockedPressedParticlePosition
                     = new Vector(touchedPoint.x, touchedPoint.y, pressedParticle->r->z);
                 holdPressedParticle();
             }
-        }
-        else {
-            if (pressedParticle != nullptr)
-            {
-                Particle* n;
-                for (unsigned int i = 0; i < pressedParticle->neighbours->size(); ++i)
+            else if (Settings::CONTROL_MODE == LOCAL_DRAG) {
+                lockedPressedParticlePosition
+                    = new Vector(touchedPoint.x, touchedPoint.y, pressedParticle->r->z);
+                for (unsigned i = 0; i < Particle::flows[0].size(); ++i)
                 {
-                    n = pressedParticle->neighbours->at(i);
-                    *n->v += (*n->r - *pressedParticle->r).normal() * 0.05;
+                    if (Particle::flows[0][i]->cell[0] == pressedParticle->cell[0]
+                     && Particle::flows[0][i]->cell[1] == pressedParticle->cell[1]
+                     && Particle::flows[0][i]->cell[2] == pressedParticle->cell[2]) {
+                        *Particle::flows[0][i]->r
+                            = *lockedPressedParticlePosition - *Particle::flows[0][i]->r;
+                    }
+                }
+            }
+            else if (Settings::CONTROL_MODE == FORCE_DRAG) {
+                Particle *n(nullptr);
+                if (pressedParticle->neighbours != nullptr) // TODO, in particle, neigh vector can't ever be null, but rather empty
+                {
+                    for (unsigned i = 0; i < pressedParticle->neighbours->size(); ++i)
+                    {
+                        n = pressedParticle->neighbours->at(i);
+                        *n->v += (*n->r - *pressedParticle->r).normal() * 0.05;
+                    }
                 }
             }
         }

@@ -6,6 +6,9 @@ class Vector;
 #include "machine/machine.h"
 
 class Cloth : public Machine {
+
+// LEGACY //////////////////////////////////////////////////////////////////////
+
 private:
     std::vector<Particle*>* flow;
     int knots;

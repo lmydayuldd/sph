@@ -27,7 +27,7 @@ void Machine::linkView(ShapeType formShapeType)
         }
         else
         {
-            for (unsigned int i = 0; i < Form::forms.size(); ++i)
+            for (unsigned i = 0; i < Form::forms.size(); ++i)
             {
                 if (Form::forms[i]->type == formShapeType)
                 {

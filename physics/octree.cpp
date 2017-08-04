@@ -5,9 +5,9 @@
 #include "util/settings.h"
 
 double Octree::arena_diameter = Settings::ARENA_DIAMETER;
-double Octree::cell_diameter = Settings::SPH_MESH_CELL_DIAMETER;
-unsigned int Octree::cell_count = arena_diameter / cell_diameter;
-unsigned int Octree::max_depth = floor(log(cell_count));
+double Octree::cell_diameter = Settings::MESH_CELL_DIAMETER;
+unsigned Octree::cell_count = arena_diameter / cell_diameter;
+unsigned Octree::max_depth = floor(log(cell_count));
 Octree* Octree::root = nullptr;
 
 Octree::Octree()
@@ -19,9 +19,9 @@ Octree::Octree()
     Octree(0);
 }
 
-Octree::Octree(unsigned int depth)
+Octree::Octree(unsigned depth)
 {
-    for (unsigned int i = 0; i < 8; ++i)
+    for (unsigned i = 0; i < 8; ++i)
     {
         depth += 1;
         if (depth < max_depth) {
@@ -39,7 +39,7 @@ Octree::Octree(unsigned int depth)
 void Octree::empty()
 {
     particles.clear();
-    for (unsigned int i = 0; i < 8; ++i)
+    for (unsigned i = 0; i < 8; ++i)
     {
         corners[i]->empty();
     }
@@ -49,9 +49,9 @@ void Octree::distributeParticles()
 {
     root->empty();
 
-    for (unsigned int i = 0; i < Particle::flows.size(); ++i)
+    for (unsigned i = 0; i < Particle::flows.size(); ++i)
     {
-        for (unsigned int j = 0; j < Particle::flows[i].size(); ++j)
+        for (unsigned j = 0; j < Particle::flows[i].size(); ++j)
         {
             root->fitParticle(Particle::flows[i][j]);
         }
@@ -60,7 +60,7 @@ void Octree::distributeParticles()
 
 void Octree::fitParticle(Particle* p)
 {
-    unsigned int corner = 0;
+    unsigned corner = 0;
     if (p->r->x <= center[0]) corner  = 0; // L
     else                      corner  = 4; // R
     if (p->r->y <= center[1]) corner += 0; // D
@@ -82,7 +82,7 @@ void Octree::fitParticle(Particle* p)
 vector<Particle*> Octree::getNeighbours(Particle* p)
 {
     vector<Particle*> neighbours;
-    for (unsigned int i = 0; i < particles.size(); ++i)
+    for (unsigned i = 0; i < particles.size(); ++i)
     {
         if (particles[i] != p) {
             neighbours.push_back(particles[i]);

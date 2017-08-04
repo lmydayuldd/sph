@@ -28,7 +28,7 @@ VertexArray::VertexArray(vector<float> vertexData, ShapeType type)
         arrays.push_back(this);
     }
     else {
-        for (unsigned int i = 0; i < arrays.size(); ++i) {
+        for (unsigned i = 0; i < arrays.size(); ++i) {
             if (arrays[i]->type == type) {
                 arrays[i] = this;
                 break; //////////////////////////////
@@ -48,7 +48,7 @@ void VertexArray::printArrays()
 #elif ANDROID_BUILD
         string s = "";
 #endif
-        for (unsigned int i = 0; i < arrays.size(); ++i) {
+        for (unsigned i = 0; i < arrays.size(); ++i) {
             s += " " + string(Enums::shapeName[arrays[i]->type]);
         }
         cout << s << endl;
