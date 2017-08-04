@@ -1,5 +1,8 @@
 #include <gl/matrices.h>
 
+#include <cmath>
+#include "util/settings.h"
+
 QMatrix4x4 Matrices::modelMatrix            = QMatrix4x4();
 QMatrix4x4 Matrices::viewMatrix             = QMatrix4x4();
 QMatrix4x4 Matrices::modelViewMatrix        = QMatrix4x4();
@@ -7,7 +10,7 @@ QMatrix4x4 Matrices::projectionMatrix       = QMatrix4x4();
 QMatrix4x4 Matrices::viewProjectionMatrix   = QMatrix4x4();
 QMatrix4x4 Matrices::viewProjectionInverted = QMatrix4x4();
 QMatrix4x4 Matrices::mvpMatrix              = QMatrix4x4();
-float Matrices::defaultCam[] = {0, 0, 5, 0, 0, 0, 0, 1, 0};
+float Matrices::defaultCam[] = {0, 0, /*5*/ (float) Settings::ARENA_DIAMETER / 4, 0, 0, 0, 0, 1, 0};
 float Matrices::cam[]        = {0, 0, 5, 0, 0, 0, 0, 1, 0};
 float Matrices::camRX = 0.f;
 float Matrices::camRY = 0.f;

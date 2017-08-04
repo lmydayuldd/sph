@@ -18,8 +18,10 @@ public:
         double ks, double d, double kd
     ); // F-> = -ks . x-> // d = targetSpringDistance
     // Elastic Collision
+    static bool doCollide(const Particle& p1, const Particle& p2);
+    static void collisionDetect();
     static void collide(const Particle& p1, const Particle& p2);
-    static void SPHcollide(const Particle& p1, const Particle& p2);
+    static void collide(const Particle& p1, std::vector<Particle*>*);
 };
 
 #endif // FORCES_H

@@ -6,6 +6,7 @@
 #include "gl/matrices.h"
 #include "shape/arrow.h"
 #include "shape/line.h"
+#include "util/operations.h"
 #include "util/settings.h"
 
 using namespace std;
@@ -97,7 +98,7 @@ Vector Vector::operator*(const Vector& v) const { // cross
     );
 }
 //double Vector::operator/(const Vector& v) const { // dot
-//    return dotProduct(v);
+//    return dot(v);
 //}
 Vector Vector::operator+(double v) const {
     return Vector(this->x+v, this->y+v, this->z+v);
@@ -174,10 +175,15 @@ Vector Vector::normal() const {
 }
 
 void Vector::limit(double max) {
-    auto sgn = [](double x) -> double { return x < 0 ? -1 : 1; };
-    if (fabs(x) > max) x = sgn(x) * max;
-    if (fabs(y) > max) y = sgn(y) * max;
-    if (fabs(z) > max) z = sgn(z) * max;
+    if (fabs(x) > max) x = Op::sgn(x) * max;
+    if (fabs(y) > max) y = Op::sgn(y) * max;
+    if (fabs(z) > max) z = Op::sgn(z) * max;
+}
+
+void Vector::zero() {
+    x = 0;
+    y = 0;
+    z = 0;
 }
 
 void Vector::setModelMatrix()

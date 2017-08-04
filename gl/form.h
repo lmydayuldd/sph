@@ -38,6 +38,7 @@ public:
         std::vector<float> texCoords, int TEX_COORDS_PER_VERTEX, int textureResource,
         ShapeType type
     );
+//    Form (const Form &copy);
     ~Form();
 
     static void printForms();

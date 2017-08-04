@@ -5,6 +5,9 @@
 #include "gl/form.h"
 #include "shape/line.h"
 
+#include "util/settings.h"
+#include "physics/grid.h"
+
 using namespace std;
 using namespace shapeSpace;
 
@@ -35,6 +38,28 @@ Rectangle::Rectangle(float lim, float color[])
     vertices.insert(vertices.end(), l2.vertices.begin(), l2.vertices.end());
     vertices.insert(vertices.end(), l3.vertices.begin(), l3.vertices.end());
     vertices.insert(vertices.end(), l4.vertices.begin(), l4.vertices.end());
+
+    // TODO
+    //   this should be placed elsewhere
+    //   it doesn't concern rectangle
+    //   it doesn't even concert arena
+    //   it concerns the particle neighbourhood grid
+    for (unsigned i = 0; i <= Grid::cell_count; i += 1)
+    {
+        vector<float> v1 = { lim                                  ,
+                            -lim + (float) (i*Grid::cell_diameter),
+                            -lim                                  ,
+                            -lim + (float) (i*Grid::cell_diameter)};
+        vector<float> v2 = {-lim + (float) (i*Grid::cell_diameter),
+                             lim                                  ,
+                            -lim + (float) (i*Grid::cell_diameter),
+                            -lim                                  };
+        Line l1 = Line(v1, vector<float> {color[0], color[1], color[2]});
+        Line l2 = Line(v2, vector<float> {color[0], color[1], color[2]});
+        vertices.insert(vertices.end(), l1.vertices.begin(), l1.vertices.end());
+        vertices.insert(vertices.end(), l2.vertices.begin(), l2.vertices.end());
+    }
+
     makeForm();
 }
 

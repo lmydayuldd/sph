@@ -30,6 +30,11 @@ void GLWindow::initialize()
 {
 }
 
+//QOpenGLPaintDevice* GLWindow::getPaintDevice()
+//{
+//    return paintDevice;
+//}
+
 void GLWindow::render()
 {
     if (! paintDevice)

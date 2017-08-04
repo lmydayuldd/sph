@@ -8,6 +8,8 @@
 
 using namespace std;
 
+// LEGACY //////////////////////////////////////////////////////////////////////
+
 Cloth::~Cloth()
 {
 }
@@ -64,7 +66,7 @@ Cloth::Cloth(
         }
     }
 
-    for (unsigned int i = 0; i < (*flow).size(); ++i)
+    for (unsigned i = 0; i < (*flow).size(); ++i)
     {
         (*flow)[i]->v = new Vector();
 //        p.recolor(color);
@@ -78,7 +80,7 @@ void Cloth::createView()
     vector<float> primaryClothSingularity
             = vector<float>(36 * (knots - 1) * (knots - 1));
 
-    for (unsigned int i = 0; i < primaryClothSingularity.size(); i += 6)
+    for (unsigned i = 0; i < primaryClothSingularity.size(); i += 6)
     {
         primaryClothSingularity[i+0] = 0; // pos
         primaryClothSingularity[i+1] = 0;
@@ -107,7 +109,7 @@ void Cloth::paint()
     setModelMatrix();
     Machine::paint();
 
-    for (unsigned int i = 0; i < (*flow).size(); ++i)
+    for (unsigned i = 0; i < (*flow).size(); ++i)
     {
         (*flow)[i]->paint();
     }

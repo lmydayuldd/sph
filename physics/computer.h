@@ -13,16 +13,23 @@ public:
     static void evaluateForces(const Particle& p);
     static void evaluateForces();
     static void evaluateSPHForces();
+    static void collide();
     static void computeVectors(const Particle& p, float dt);
     static void computeVectors(float dt);
     static void Euler(const Particle& p, float dt);
     static void Euler(float dt);
-    static void MidPoint(const Particle& p, float dt);
-    static void MidPoint(float dt);
-    static void RangeKutta();
-    static void RKV4();
+    static void MidPoint(const Particle& p, float dt); // RK2?
+    static void MidPoint(float dt); // RK2? // Runge-Kutta
+    static void getVolume();
 
     void loop();
+
+    // FUTURE //////////////////////////////////////////////////////////////////////
+
+    static void RKV4();
+
+    // LEGACY //////////////////////////////////////////////////////////////////////
+
     void flagUp(int i, int j, int flag);
     bool flagIs(int i, int j, int flag);
 };
