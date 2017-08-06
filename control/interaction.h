@@ -18,17 +18,6 @@ public:
     static void handleTouchDrag(float normalizedX, float normalizedY);
     static void holdPressedParticle();
     static void handleTouchDrop();
-
-    enum Key : unsigned char {
-        W, S, A, D, DUCK,
-        CTRL, LMB, RMB,
-        SPACE, BACKSPACE, ESCAPE,
-        PARALLEL,
-        RENDER, CONTROL
-    };
-    enum DragMode : unsigned char {
-        ONE_DRAG, LOCAL_DRAG, FORCE_DRAG
-    };
 };
 
 #endif // INTERACTION_H

@@ -1,11 +1,11 @@
 #include "window/simulation_window.h"
 
+#include <QApplication>
+#include <QDesktopServices>
 #include <QScreen>
+#include <QString>
 #include <QKeyEvent>
 #include <QMouseEvent>
-#include <QString>
-#include <QPainter>
-#include <QApplication>
 
 #include <iostream>
 
@@ -28,6 +28,7 @@ class Particle;
 #include "util/constants.h"
 #include "util/debug_helper.h"
 #include "util/map.h"
+#include "util/strings.h"
 #include "util/timer.h"
 #include "util/settings.h"
 
@@ -54,6 +55,8 @@ void SimulationWindow::prepareSimulation()
 {
     omp_set_num_threads(Settings::PARALLEL_OMP_THREADS);
 
+    Strings::init(); // TODO // called Strings but reponsible for dirs also...
+
     Grid::init();
 
     Map::generate();
@@ -69,9 +72,7 @@ void SimulationWindow::prepareSimulation()
         }
     }
 
-    Machine::machines.push_back(
-            new Walls(Settings::ARENA_DIAMETER / 2)
-    );//getDamping("static")));
+    Machine::machines.push_back(new Walls(Settings::ARENA_DIAMETER / 2));
 //    Machine::machines.push_back(
 //        new Rope(
 //            Vector(-6, 3, 0), Vector(6, 3, 0),
@@ -85,66 +86,28 @@ void SimulationWindow::prepareSimulation()
 //            6, 300, 0.001, 12, -1
 //        )
 //    );
-
-    if (Settings::GHOST_LAYER_GAGE > 0)
-    {
-//#pragma omp parallel for if(Settings::PARALLEL_OMP)
-        for (unsigned i = 0; i < Particle::flows[0].size(); ++i)
-        {
-            Particle::flows[0][i]->r->x += Settings::GHOST_LAYER_GAGE
-                                         * Settings::PARTICLES_INIT_DIST;
-            Particle::flows[0][i]->r->y += Settings::GHOST_LAYER_GAGE
-                                         * Settings::PARTICLES_INIT_DIST;
-        }
-        Particle *ghostParticle;
-        for (unsigned i = 0; i < Grid::cell_count; ++i)
-        {
-//#pragma omp parallel for if(Settings::PARALLEL_OMP)
-            for (unsigned j = 0; j < Grid::cell_count; ++j)
-            {
-                if (i < Settings::GHOST_LAYER_GAGE
-                 || j < Settings::GHOST_LAYER_GAGE
-                 || i >= Grid::cell_count - Settings::GHOST_LAYER_GAGE
-                 || j >= Grid::cell_count - Settings::GHOST_LAYER_GAGE)
-                {
-                    ghostParticle = new Particle(0);
-                    ghostParticle->stationary = true;
-                    ghostParticle->r->x = - Settings::ARENA_DIAMETER/2
-                                          + Settings::PARTICLE_RADIUS
-                                          + i * Settings::PARTICLES_INIT_DIST;
-                    ghostParticle->r->y =   Settings::ARENA_DIAMETER/2
-                                          - Settings::PARTICLE_RADIUS
-                                          - j * Settings::PARTICLES_INIT_DIST;
-    //#pragma omp atomic // critical
-                    Particle::flows[0].push_back(ghostParticle);
-                }
-            }
-        }
-    }
 }
 
 void SimulationWindow::initialize()
 {
-    Shader::currentShader = new Shader();
-    Computer::currentComputer = new Computer();
+    glEnable(GL_CULL_FACE);
+    glEnable(GL_DEPTH_TEST);
 
-    refreshRate = screen()->refreshRate(); // frame // fps // frequency // period
     const qreal retinaScale = devicePixelRatio();
     glViewport(0, 0, width() * retinaScale, height() * retinaScale);
+    refreshRate = screen()->refreshRate(); // frame // fps // frequency // period
+    QCursor::setPos(geometry().x() + width()/2, geometry().y() + height()/2);
 
-    //    Matrices::viewMatrix.translate(QVector3D(10, 10, 10));
+//    Matrices::viewMatrix.translate(QVector3D(10, 10, 10));
     Matrices::camTZ = 12;
     Matrices::camRY = 0;
     Matrices::projectionMatrix.setToIdentity();
-    Matrices::projectionMatrix.perspective(
-                                    90.0f, width()/height(), 0.1f, 100.0f);
+    Matrices::projectionMatrix.perspective(90.f, width()/height(), 0.1f, 100.f);
+
+    Shader::currentShader = new Shader();
+    Computer::currentComputer = new Computer();
 
     prepareSimulation();
-
-    QCursor::setPos(geometry().x() + width()/2, geometry().y() + height()/2);
-
-    glEnable(GL_CULL_FACE);
-    glEnable(GL_DEPTH_TEST);
 }
 
 void SimulationWindow::render()
@@ -155,32 +118,36 @@ void SimulationWindow::render()
     currentTime = timer->diff();
     dt          = currentTime - formerTime;
     formerTime  = currentTime;
+
     if (Interaction::rewind)
     {
         dt *= -1;
     }
-    if (! Interaction::pause || SimulationWindow::key[Interaction::RENDER]) {
+
+    if (! Interaction::pause || SimulationWindow::key[RENDER]) {
         std::cout << round(dt/1000000.0) << "ms <- Frame time." << std::endl;
-        std::cout << "~" << round(1000000000 / dt) << " FPS" << std::endl;
+        std::cout << "~" << round(1000000000/dt) << " FPS" << std::endl;
         std::cout << "-- Frame " << frame-1 << " end ---------------------------" << std::endl << std::endl;
+        std::cout << "-- Frame " << frame << " start --------------------------" << std::endl;
     }
 
-    if (! Interaction::pause || SimulationWindow::key[Interaction::RENDER])
-        std::cout << "-- Frame " << frame << " start --------------------------" << std::endl;
-#pragma omp parallel if(Settings::PARALLEL_OMP)
+    #pragma omp parallel if(Settings::PARALLEL_OMP)
     {
-#pragma omp master
-    if (! Interaction::pause || SimulationWindow::key[Interaction::RENDER])
-        std::cout << omp_get_num_threads() << " threads." << std::endl;
+        #pragma omp master
+        if (! Interaction::pause || SimulationWindow::key[RENDER])
+            std::cout << omp_get_num_threads() << " threads." << std::endl;
     }
+
     interact(); //////////////////////////////////////////////
-    if (! Interaction::pause || SimulationWindow::key[Interaction::RENDER])
+    if (! Interaction::pause || SimulationWindow::key[RENDER])
     {
         Computer::currentComputer->loop();
     }
 
-#pragma omp master
-{
+    Timer timer = Timer();
+    long long int formerTime = 0;
+    formerTime = timer.diff();
+
     Shader::currentShader->program->bind();
     {
         Matrices::viewMatrix.setToIdentity();
@@ -188,9 +155,9 @@ void SimulationWindow::render()
         Matrices::viewProjectionInverted.setToIdentity();
         Matrices::setViewMatrix();
         Matrices::viewProjectionMatrix
-                = Matrices::projectionMatrix * Matrices::viewMatrix;
+            = Matrices::projectionMatrix * Matrices::viewMatrix;
         Matrices::viewProjectionInverted
-                = Matrices::viewProjectionMatrix.inverted();
+            = Matrices::viewProjectionMatrix.inverted();
 
 //#pragma omp parallel for if(Settings::PARALLEL_OMP)
         for (unsigned i = 0; i < Particle::flows[0].size(); ++i)
@@ -203,43 +170,33 @@ void SimulationWindow::render()
             Machine::machines[i]->paint();
         }
     }
-    if (frame % 30 == 0 && frame/30 < 50)
-    {
-//        char pixels[width() * height() * 4];
-//        glReadPixels(0, 0, width(), height(), GL_RGBA, GL_UNSIGNED_BYTE, pixels);
-//        QFile *file = new QFile(QString("raw_screenshot_%1.bmp").arg(frame/30));
-//        file->open(QIODevice::WriteOnly);
-//        file->write(pixels, width() * height() * 4);
-//        file->close();
-//        delete file;
-
-//        QImage img(size(), QImage::Format_ARGB32);
-//        //img.fill(Qt::white);
-//        QPainter painter(&img);
-//        painter.setRenderHint(QPainter::Antialiasing);
-//        render(&painter);
-//        img.save(QString("raw_screenshot_%1.bmp").arg(frame/30));
-
-        QPixmap pixMap = QPixmap::grabWindow(winId(), x() - width()/2, y() - height()/2, width(), height());
-        QImage img = pixMap.toImage();
-        QPainter painter(&img);
-        img.save(QString("raw_screenshot_%1.bmp").arg(frame/30));
-    }
     Shader::currentShader->program->release();
-}
 
-#pragma omp master
-    if (! Interaction::pause || SimulationWindow::key[Interaction::RENDER])
+    if (! Interaction::pause || SimulationWindow::key[RENDER])
+        std::cout << (timer.diff() - formerTime)/1000000
+                  << "ms <- Frame drawing time." << std::endl;
+
+    if (! Interaction::pause || SimulationWindow::key[RENDER])
+    {
         ++frame;
+    }
+
+    if (! Interaction::pause)
+    {
+        QPixmap pixMap = screen()->grabWindow(0, x(), y(), width(), height());
+        QImage img = pixMap.toImage();
+        QString dst = Strings::DIR_FRAMES + QString("frame_%1.bmp").arg(frame);
+        img.save(dst);
+    }
 }
 
 void SimulationWindow::interact()
 {
-    if (key[Interaction::W])    w();
-    if (key[Interaction::S])    s();
-    if (key[Interaction::A])    a();
-    if (key[Interaction::D])    d();
-    if (key[Interaction::DUCK]) l();
+    if (key[W])    w();
+    if (key[S])    s();
+    if (key[A])    a();
+    if (key[D])    d();
+    if (key[DUCK]) l();
     Interaction::holdPressedParticle();
 }
 
@@ -247,22 +204,22 @@ void SimulationWindow::keyPressEvent(QKeyEvent* e)
 {
     switch (e->key())
     {
-        case Qt::Key_W         : key[Interaction::W]         = true; break;
-        case Qt::Key_Up        : key[Interaction::W]         = true; break;
-        case Qt::Key_S         : key[Interaction::S]         = true; break;
-        case Qt::Key_Down      : key[Interaction::S]         = true; break;
-        case Qt::Key_A         : key[Interaction::A]         = true; break;
-        case Qt::Key_Left      : key[Interaction::A]         = true; break;
-        case Qt::Key_D         : key[Interaction::D]         = true; break;
-        case Qt::Key_Right     : key[Interaction::D]         = true; break;
-        case Qt::Key_V         : key[Interaction::DUCK]      = true; break;
-        case Qt::Key_Control   : key[Interaction::CTRL]      = true; break;
-        case Qt::Key_Space     : key[Interaction::SPACE]     = true; break;
-        case Qt::Key_Backspace : key[Interaction::BACKSPACE] = true; break;
-        case Qt::Key_Escape    : key[Interaction::ESCAPE]    = true; break;
-        case Qt::Key_P         : key[Interaction::PARALLEL]  = true; break;
-//        case Qt::Key_R         : key[Interaction::RENDER]    = true; break;
-        case Qt::Key_C         : key[Interaction::CONTROL]   = true; break;
+        case Qt::Key_W         : key[W]         = true; break;
+        case Qt::Key_Up        : key[W]         = true; break;
+        case Qt::Key_S         : key[S]         = true; break;
+        case Qt::Key_Down      : key[S]         = true; break;
+        case Qt::Key_A         : key[A]         = true; break;
+        case Qt::Key_Left      : key[A]         = true; break;
+        case Qt::Key_D         : key[D]         = true; break;
+        case Qt::Key_Right     : key[D]         = true; break;
+        case Qt::Key_V         : key[DUCK]      = true; break;
+        case Qt::Key_Control   : key[CTRL]      = true; break;
+        case Qt::Key_Space     : key[SPACE]     = true; break;
+        case Qt::Key_Backspace : key[BACKSPACE] = true; break;
+        case Qt::Key_Escape    : key[ESCAPE]    = true; break;
+        case Qt::Key_P         : key[PARALLEL]  = true; break;
+//        case Qt::Key_R         : key[RENDER]    = true; break;
+        case Qt::Key_C         : key[CONTROL]   = true; break;
     }
 }
 
@@ -272,45 +229,48 @@ void SimulationWindow::keyReleaseEvent(QKeyEvent *e)
     {
         switch (e->key())
         {
-            case Qt::Key_W         : key[Interaction::W]     = false; break;
-            case Qt::Key_S         : key[Interaction::S]     = false; break;
-            case Qt::Key_A         : key[Interaction::A]     = false; break;
-            case Qt::Key_D         : key[Interaction::D]     = false; break;
-            case Qt::Key_V         : key[Interaction::DUCK]  = false; break;
+            case Qt::Key_W         : key[W]     = false; break;
+            case Qt::Key_S         : key[S]     = false; break;
+            case Qt::Key_A         : key[A]     = false; break;
+            case Qt::Key_D         : key[D]     = false; break;
+            case Qt::Key_V         : key[DUCK]  = false; break;
             case Qt::Key_Control   :
-                key[Interaction::CTRL] = false;
+                key[CTRL] = false;
                 Interaction::handleTouchDrop();
             break;
             case Qt::Key_Space     :
-                key[Interaction::SPACE] = false;
+                key[SPACE] = false;
                 Interaction::pause ^= true;
             break;
             case Qt::Key_Backspace :
-                key[Interaction::BACKSPACE] = false;
+                key[BACKSPACE] = false;
                 Interaction::rewind ^= true;
             break;
             case Qt::Key_Escape    :
-                key[Interaction::ESCAPE] = false;
+                key[ESCAPE] = false;
                 QApplication::quit();
+                saveVideo();
+                QDesktopServices::openUrl(Strings::DIR_FRAMES);
             break;
             case Qt::Key_P         :
-                key[Interaction::PARALLEL] = false;
+                key[PARALLEL] = false;
                 Settings::PARALLEL_OMP ^= true;
             break;
             case Qt::Key_R         :
-                key[Interaction::RENDER] = true;
+                key[RENDER] = true;
                 if (Interaction::pause)
+                {
                     render();
-                key[Interaction::RENDER] = false;
+                }
+                key[RENDER] = false;
             break;
             case Qt::Key_C         :
-                key[Interaction::CONTROL] = false;
-                if      (Settings::CONTROL_MODE == Interaction::ONE_DRAG)
-                    Settings::CONTROL_MODE = Interaction::LOCAL_DRAG;
-                else if (Settings::CONTROL_MODE == Interaction::LOCAL_DRAG)
-                    Settings::CONTROL_MODE = Interaction::FORCE_DRAG;
-                else if (Settings::CONTROL_MODE == Interaction::FORCE_DRAG)
-                    Settings::CONTROL_MODE = Interaction::ONE_DRAG;
+                key[CONTROL] = false;
+                switch (Settings::CONTROL_MODE) {
+                    case ONE_DRAG   : Settings::CONTROL_MODE = LOCAL_DRAG; break;
+                    case LOCAL_DRAG : Settings::CONTROL_MODE = FORCE_DRAG; break;
+                    case FORCE_DRAG : Settings::CONTROL_MODE = ONE_DRAG;   break;
+                }
             break;
         }
     }
@@ -324,7 +284,7 @@ void SimulationWindow::mouseMoveEvent(QMouseEvent* event)
     dy = ( width() / 2) - mousePoint.x();
     dx = (height() / 2) - mousePoint.y();
 
-    if (! key[Interaction::CTRL])
+    if (! key[CTRL])
     {
         Matrices::camRX -= dx * mouseSpeed;
         Matrices::camRY -= dy * mouseSpeed;
@@ -336,7 +296,7 @@ void SimulationWindow::mouseMoveEvent(QMouseEvent* event)
     }
     else
     {
-        if (key[Interaction::LMB])
+        if (key[LMB])
         {
             Interaction::handleTouchDrag(normalizedX, normalizedY);
         }
@@ -349,16 +309,16 @@ void SimulationWindow::mousePressEvent(QMouseEvent* event)
     normalizedX =    (mousePoint.x() / (float) width())  * 2 - 1;
     normalizedY = - ((mousePoint.y() / (float) height()) * 2 - 1);
 
-    if (key[Interaction::CTRL])
+    if (key[CTRL])
     {
-        switch(event->button())
+        switch (event->button())
         {
             case Qt::LeftButton :
-                key[Interaction::LMB] = true;
+                key[LMB] = true;
                 Interaction::handleTouchPress(normalizedX, normalizedY);
             break;
             case Qt::RightButton :
-                key[Interaction::RMB] = true;
+                key[RMB] = true;
             break;
             default : break;
         }
@@ -366,19 +326,19 @@ void SimulationWindow::mousePressEvent(QMouseEvent* event)
 }
 void SimulationWindow::mouseReleaseEvent(QMouseEvent* event)
 {
-    if (key[Interaction::CTRL])
+    if (key[CTRL])
     {
-        switch(event->button())
+        switch (event->button())
         {
             case Qt::LeftButton :
-                key[Interaction::LMB] = false;
+                key[LMB] = false;
 //                DebugHelper::showVariable("normx", normalizedX);
 //                DebugHelper::showVariable("normy", normalizedY);
 //                DebugHelper::showVariables("aaaa", 12, 13, 15);
                 Interaction::handleTouchDrop();
             break;
             case Qt::RightButton :
-                key[Interaction::RMB] = false;
+                key[RMB] = false;
             break;
             default : break;
         }
@@ -435,4 +395,9 @@ void SimulationWindow::r()
     Matrices::camRX = 0;
     Matrices::camRY = 0;
     Matrices::setViewMatrix();
+}
+
+void SimulationWindow::saveVideo()
+{
+
 }

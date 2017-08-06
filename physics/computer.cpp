@@ -25,14 +25,12 @@ Computer::Computer()
 
 void Computer::loop()
 {
-//#pragma omp parallel if(Settings::PARALLEL_OMP)
-{
     Timer timer = Timer();
     long long int formerTime = 0;
 
     formerTime = timer.diff();
     Grid::distributeParticles();
-    if (! Interaction::pause || SimulationWindow::key[Interaction::RENDER])
+    if (! Interaction::pause || SimulationWindow::key[RENDER])
         std::cout << (timer.diff() - formerTime)/1000000
                   << "ms <- Distribute particles time." << std::endl;
 
@@ -42,73 +40,72 @@ void Computer::loop()
 
     formerTime = timer.diff();
     collide();
-    if (! Interaction::pause || SimulationWindow::key[Interaction::RENDER])
+    if (! Interaction::pause || SimulationWindow::key[RENDER])
         std::cout << round((timer.diff() - formerTime)/1000000.0)
                   << "ms <- Collide time." << std::endl;
 
     formerTime = timer.diff();
     computeVectors(Settings::dt);
-    if (! Interaction::pause || SimulationWindow::key[Interaction::RENDER])
+    if (! Interaction::pause || SimulationWindow::key[RENDER])
         std::cout << round((timer.diff() - formerTime)/1000000.0)
                   << "ms <- Compute vectors time." << std::endl;
 
 //    Grid::distributeParticles();
-//    if (! Interaction::pause || SimulationWindow::key[Interaction::RENDER])
+//    if (! Interaction::pause || SimulationWindow::key[RENDER])
 //        std::cout << (timer.diff() - formerTime)/1000000
 //                  << "ms <- Distribute particles time." << std::endl;
 
 //    formerTime = timer.diff();
 //    collide();
-//    if (! Interaction::pause || SimulationWindow::key[Interaction::RENDER])
+//    if (! Interaction::pause || SimulationWindow::key[RENDER])
 //        std::cout << round((timer.diff() - formerTime)/1000000.0)
 //                  << "ms <- Collide time." << std::endl;
 
     Computer::getVolume();
-}
 }
 
 void Computer::evaluateForces(const Particle& p)
 {
     *p.F = Vector();
 
-#pragma omp sections
-{
-#pragma omp section
-{
-    if (Settings::FORCES_GRAVITY_EARTH)
-        Forces::gravityEarth(p);
-}
-
-#pragma omp section
-{
-//    if (Settings::FORCES_UNIVERSAL_GRAVITY)
-//        for (unsigned i = 0; i < Particle::flows[p.parentFlow].size(); ++i)
-//            Forces::universalGravitation(p, *Particle::flows[p.parentFlow][i]);
-}
-
-#pragma omp section
-{
-//    if (Settings::FORCES_COULOMB)
-//        for (unsigned i = 0; i < Particle::flows[p.parentFlow].size(); ++i)
-//            Forces::Coulomb(p, *Particle::flows[p.parentFlow][i]);
-}
-
-#pragma omp section
-{
-//    //if (p.r.v[1] == -1.0f && p.v.v[1] == 0.0f) Forces.Friction(p);
-}
-
-#pragma omp section
-{
-    //for (Spring* s : p.springs)
-    for (unsigned i = 0; i < p.springs.size(); ++i)
+    #pragma omp sections
     {
-        Spring* s = p.springs[i];
-        /*if (s.ks != 0 && s.kd != 0)*/
-            Forces::Hooke(p, *s->p2, s->ks, s->d, s->kd);
+        #pragma omp section
+        {
+            if (Settings::FORCES_GRAVITY_EARTH)
+                Forces::gravityEarth(p);
+        }
+
+        #pragma omp section
+        {
+        //    if (Settings::FORCES_UNIVERSAL_GRAVITY)
+        //        for (unsigned i = 0; i < Particle::flows[p.parentFlow].size(); ++i)
+        //            Forces::universalGravitation(p, *Particle::flows[p.parentFlow][i]);
+        }
+
+        #pragma omp section
+        {
+        //    if (Settings::FORCES_COULOMB)
+        //        for (unsigned i = 0; i < Particle::flows[p.parentFlow].size(); ++i)
+        //            Forces::Coulomb(p, *Particle::flows[p.parentFlow][i]);
+        }
+
+        #pragma omp section
+        {
+        //    //if (p.r.v[1] == -1.0f && p.v.v[1] == 0.0f) Forces.Friction(p);
+        }
+
+        #pragma omp section
+        {
+            //for (Spring* s : p.springs)
+            for (unsigned i = 0; i < p.springs.size(); ++i)
+            {
+                Spring* s = p.springs[i];
+                /*if (s.ks != 0 && s.kd != 0)*/
+                    Forces::Hooke(p, *s->p2, s->ks, s->d, s->kd);
+            }
+        }
     }
-}
-}
 }
 
 void Computer::evaluateForces()
@@ -121,6 +118,7 @@ void Computer::evaluateForces()
 
 void Computer::evaluateSPHForces()
 {
+    // TODO
 //    double m = 0.;
 //    double rho = 0.;
 //    int count = 0;
@@ -134,49 +132,56 @@ void Computer::evaluateSPHForces()
 //        }
 //    }
 //    m = rho / count / Settings::DESIRED_REST_DENSITY;
-//    std::cout << m << std::flush;
+//    std::cout << m << " <- mass" << std::endl << std::flush;
 
     Timer timer = Timer();
     long long int formerTime = 0;
 
     formerTime = timer.diff();
     for (unsigned i = 0; i < Particle::flows.size(); ++i)
+    {
 #pragma omp parallel for if(Settings::PARALLEL_OMP)
         for (unsigned j = 0; j < Particle::flows[i].size(); ++j)
         {
             //Particle::flows[i][j]->m = m;
             Particle::flows[i][j]->F->zero();
         }
-    if (! Interaction::pause || SimulationWindow::key[Interaction::RENDER])
+    }
+    if (! Interaction::pause || SimulationWindow::key[RENDER])
         std::cout << round((timer.diff() - formerTime)/1000000.0)
                   << "ms <- Zero forces time." << std::endl;
 
     formerTime = timer.diff();
     for (unsigned i = 0; i < Particle::flows.size(); ++i)
+    {
 #pragma omp parallel for if(Settings::PARALLEL_OMP)
         for (unsigned j = 0; j < Particle::flows[i].size(); ++j)
         {
             Particle::flows[i][j]->updateNeighbours();
             Particle::flows[i][j]->isBoundary();
         }
-    if (! Interaction::pause || SimulationWindow::key[Interaction::RENDER])
+    }
+    if (! Interaction::pause || SimulationWindow::key[RENDER])
         std::cout << round((timer.diff() - formerTime)/1000000.0)
                   << "ms <- Update neighbours & find boundaries time." << std::endl;
 
     formerTime = timer.diff();
     for (unsigned i = 0; i < Particle::flows.size(); ++i)
+    {
 #pragma omp parallel for if(Settings::PARALLEL_OMP)
         for (unsigned j = 0; j < Particle::flows[i].size(); ++j)
         {
             Particle::flows[i][j]->updateDensity();
             Particle::flows[i][j]->updatePressure();
         }
-    if (! Interaction::pause || SimulationWindow::key[Interaction::RENDER])
+    }
+    if (! Interaction::pause || SimulationWindow::key[RENDER])
         std::cout << round((timer.diff() - formerTime)/1000000.0)
                   << "ms <- Update rho & p time." << std::endl;
 
     formerTime = timer.diff();
     for (unsigned i = 0; i < Particle::flows.size(); ++i)
+    {
 #pragma omp parallel for if(Settings::PARALLEL_OMP)
         for (unsigned j = 0; j < Particle::flows[i].size(); ++j)
         {
@@ -187,7 +192,8 @@ void Computer::evaluateSPHForces()
             Particle::flows[i][j]->F->limit(5); //////////////////////// TODO
             //Particle::flows[i][j]->v->limit(10); ////////////////////////
         }
-    if (! Interaction::pause || SimulationWindow::key[Interaction::RENDER])
+    }
+    if (! Interaction::pause || SimulationWindow::key[RENDER])
         std::cout << round((timer.diff() - formerTime)/1000000.)
                   << "ms <- Compute p, viscosity & other Fs time." << std::endl;
 }
@@ -216,10 +222,10 @@ void Computer::collide()
     if (Settings::PARTICLES_REACT)
         for (unsigned i = 0; i < Particle::flows.size(); ++i)
             for (unsigned j = 0; j < Particle::flows.size(); ++j)
-#pragma omp parallel for \
-            schedule(guided, 4) \
-            if(Settings::PARALLEL_OMP)
-            //collapse(2)
+                #pragma omp parallel for \
+                            schedule(guided, 4) \
+                            if(Settings::PARALLEL_OMP)
+                            //collapse(2)
                 for (unsigned k = 0; k < Particle::flows[i].size(); ++k)
                     for (unsigned l = k; l < Particle::flows[j].size(); ++l)
                         if (! (k == l && i == j))
@@ -230,8 +236,8 @@ void Computer::collide()
     if (c == 2)
     if (Settings::PARTICLES_REACT)
         for (unsigned i = 0; i < Particle::flows.size(); ++i)
-//#pragma omp parallel for collapse(2) schedule(guided) \
-//                     if(Settings::PARALLEL_OMP)
+            //#pragma omp parallel for collapse(2) schedule(guided) \
+            //                     if(Settings::PARALLEL_OMP)
             for (unsigned j = 0; j < Particle::flows[i].size(); ++j)
                 for (unsigned k = 0; k < Particle::flows[i][j]->neighbours->size(); ++k)
                     Forces::collide(*Particle::flows[i][j],

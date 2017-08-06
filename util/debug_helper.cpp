@@ -16,6 +16,7 @@ void DebugHelper::showText(const char* text)
 template void DebugHelper::showVariable<int>(const char*, int);
 template void DebugHelper::showVariable<float>(const char*, float);
 template void DebugHelper::showVariable<double>(const char*, double);
+
 template<typename T>
 void DebugHelper::showVariable(const char* title, T value)
 {

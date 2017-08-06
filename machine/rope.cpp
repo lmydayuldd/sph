@@ -1,4 +1,4 @@
-#include "rope.h"
+#include "machine/rope.h"
 
 #include "physics/vector.h"
 
@@ -53,12 +53,10 @@ Rope::Rope(
 }
 
 void Rope::paint() {
-    // Using Shape iterator would require Shape object to be temporarily created
-    // by non-parametred Shape().
+    // Using Shape iterator would require Shape object to be
+    // temporarily created by non-parametred Shape().
     // It would then get destroyed, causing a ~Shape() call!
     for (unsigned i = 0; i < (*flow).size(); ++i) {
         (*flow)[i]->paint();
     }
 }
-
-void Rope::collide(Particle* p2) {}

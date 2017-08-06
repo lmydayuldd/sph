@@ -56,6 +56,7 @@ private:
     void h();
     void l();
     void r();
+    void saveVideo();
 };
 
 #endif // SIMULATION_WINDOW_H

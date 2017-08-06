@@ -24,7 +24,6 @@ public:
     );
 
     virtual void paint() override;
-    virtual void collide(Particle* p2) override;
 };
 
 #endif // ROPE_H

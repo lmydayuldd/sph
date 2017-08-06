@@ -7,6 +7,11 @@ class Settings {
 public:
     static const int BYTES_PER_FLOAT = 4; // used by VertexArray
 
+    // Environment:
+
+    static unsigned WINDOW_WIDTH;
+    static unsigned WINDOW_HEIGHT;
+
     // Graphics:
 
     static bool     DOT_OR_SPHERE;

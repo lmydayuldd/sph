@@ -1,10 +1,9 @@
-#include "shape/triangle.h"
-
 #include <cmath>
 
 #include <QOpenGLFunctions>
 
-#include <gl/form.h>
+#include "gl/form.h"
+#include "shape/triangle.h"
 
 Triangle::Triangle(float side)
     : side(side)

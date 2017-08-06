@@ -1,3 +1,4 @@
+#include "util/enums.h"
 #include "util/map.h"
 #include "util/settings.h"
 #include "control/interaction.h"
@@ -6,6 +7,11 @@
 #include <cmath>
 
 using namespace std;
+
+// Environment:
+
+unsigned     Settings::WINDOW_WIDTH             = 720;
+unsigned     Settings::WINDOW_HEIGHT            = 540;
 
 // Graphics:
 
@@ -18,7 +24,7 @@ double       Settings::VECTOR_LENGTH_MULTIPLIER = 30.; // 10.
 
 // Controls:
 
-unsigned char Settings::CONTROL_MODE = Interaction::ONE_DRAG;
+unsigned char Settings::CONTROL_MODE = ONE_DRAG;
 
 // Simulation:
 
@@ -26,7 +32,7 @@ double        Settings::dt                   = 0.16 * 3; // 0.48
 double        Settings::ARENA_DIAMETER       = 30.; // 20.
 double        Settings::ARENA_DIAMETER_Z     = 0.;
 unsigned      Settings::PARTICLE_COUNT       = 1800; // 1200
-unsigned char Settings::MAP_SETUP            = Map::DAM_BREAK_NON_MAP;
+unsigned char Settings::MAP_SETUP            = DAM_BREAK_NON_MAP;
 unsigned      Settings::GHOST_LAYER_GAGE     = 0;
 bool          Settings::PARALLEL_MPI         = false;
 bool          Settings::PARALLEL_OMP         = true;

@@ -31,7 +31,8 @@ void Landschaft::sculpt(vector<vector<float>> heightMap) {
         );
     }
 
-    if (! (heightMap.size()-1 == (unsigned) this->width && heightMap[0].size()-1 == (unsigned) this->height)) {
+    if (! (heightMap.size()-1 == (unsigned) this->width
+           && heightMap[0].size()-1 == (unsigned) this->height)) {
         vertices.clear();
         sculpt(heightMap);
         return; //////////////////////////////////////////////////////////////////////////////

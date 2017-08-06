@@ -7,13 +7,14 @@
 QT += core gui opengl
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET          = SPH
-TEMPLATE        = app
-CONFIG         += mobility c++11
-QMAKE_CXXFLAGS += -std=c++11 -pthread -fopenmp
-LIBS           += -pthread -fopenmp -LD:/dev/ms-mpi/Lib/x86 -lmsmpi
-INCLUDEPATH    += D:/dev/ms-mpi/Include
-MOBILITY        =
+TARGET                  = SPH
+TEMPLATE                = app
+CONFIG                 += mobility c++11
+QMAKE_CXXFLAGS         += -std=c++11 -pthread -fopenmp
+QMAKE_CXXFLAGS_WARN_ON += -Wextra
+LIBS                   += -pthread -fopenmp -LD:/dev/ms-mpi/Lib/x86 -lmsmpi
+INCLUDEPATH            += D:/dev/ms-mpi/Include
+MOBILITY                =
 
 # Defines platform-specific preprocessor macro
 #   edit at Projects->QMake->additional arguments
@@ -34,9 +35,10 @@ FORMS += \
 DISTFILES += \
     map/sim_communicating_vessels.txt \
     map/sim_dam_break.txt \
+    map/sim_dam_fall.txt \
     map/sim_droplet.txt \
-    shader/vertex_shader.vsh \
     shader/fragment_shader.fsh \
+    shader/vertex_shader.vsh \
     sph.qmodel
 
 HEADERS += \
@@ -73,6 +75,7 @@ HEADERS += \
     util/operations.h \
     util/parser.h \
     util/settings.h \
+    util/strings.h \
     util/timer.h \
     window/gl_window.h \
     window/main_window.h \
@@ -109,6 +112,7 @@ SOURCES += \
     util/enums.cpp \
     util/operations.cpp \
     util/settings.cpp \
+    util/strings.cpp \
     util/timer.cpp \
     util/map.cpp \
     window/gl_window.cpp \

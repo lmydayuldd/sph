@@ -18,11 +18,6 @@ private:
     static unsigned ghostCount;
 
 public:
-    enum Setup : unsigned char {
-        RANDOM_NON_MAP, DAM_BREAK_NON_MAP, DAM_BREAK_3D_NON_MAP,
-        DAM_BREAK, DROPLET, VESSELS, DAM_FALL
-    };
-
     static void generate();
 
     Map();

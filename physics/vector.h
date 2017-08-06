@@ -54,7 +54,6 @@ public:
     void setApplicationPoint(Vector application);
     void setModelMatrix() override;
     void paint() override;
-    void collide(Particle* p2) override;
 };
 
 #endif // VECTOR_H

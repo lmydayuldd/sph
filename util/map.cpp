@@ -33,9 +33,11 @@ void Map::import(unsigned char mapSetup)
     reset();
 
     QString fileName;
-    if      (mapSetup == DAM_BREAK) fileName = ":/map/sim_dam_break.txt";
-    else if (mapSetup == DROPLET)   fileName = ":/map/sim_droplet.txt";
-    else if (mapSetup == VESSELS)   fileName = ":/map/sim_communicating_vessels.txt";
+    switch (mapSetup) {
+        case DAM_BREAK : fileName = ":/map/sim_dam_break.txt";             break;
+        case DROPLET   : fileName = ":/map/sim_droplet.txt";               break;
+        case VESSELS   : fileName = ":/map/sim_communicating_vessels.txt"; break;
+    }
 
     QFile file(fileName);
     if (file.open(QIODevice::ReadOnly))
@@ -57,7 +59,9 @@ void Map::import(unsigned char mapSetup)
 
     map = std::vector<std::vector<char>>(mapHeight);
     for (unsigned i = 0; i < mapHeight; ++i)
+    {
         map.push_back(std::vector<char>(mapWidth));
+    }
 
     if (file.open(QIODevice::ReadOnly))
     {
@@ -145,6 +149,43 @@ void Map::generate()
                                 - i * Settings::PARTICLES_INIT_DIST,
                             0
                           );
+                }
+            }
+        }
+    }
+
+    if (Settings::GHOST_LAYER_GAGE > 0)
+    {
+//#pragma omp parallel for if(Settings::PARALLEL_OMP)
+        for (unsigned i = 0; i < Particle::flows[0].size(); ++i)
+        {
+            Particle::flows[0][i]->r->x += Settings::GHOST_LAYER_GAGE
+                                         * Settings::PARTICLES_INIT_DIST;
+            Particle::flows[0][i]->r->y += Settings::GHOST_LAYER_GAGE
+                                         * Settings::PARTICLES_INIT_DIST;
+        }
+        Particle *ghostParticle;
+        for (unsigned i = 0; i < Grid::cell_count; ++i)
+        {
+//#pragma omp parallel for if(Settings::PARALLEL_OMP)
+            for (unsigned j = 0; j < Grid::cell_count; ++j)
+            {
+                if (i < Settings::GHOST_LAYER_GAGE
+                 || j < Settings::GHOST_LAYER_GAGE
+                 || i >= Grid::cell_count - Settings::GHOST_LAYER_GAGE
+                 || j >= Grid::cell_count - Settings::GHOST_LAYER_GAGE)
+                {
+                    ghostParticle = new Particle(0);
+                    ghostParticle->stationary = true;
+                    ghostParticle->r->x = - Settings::ARENA_DIAMETER/2
+                                          + Settings::PARTICLE_RADIUS
+                                          + i * Settings::PARTICLES_INIT_DIST;
+                    ghostParticle->r->y =   Settings::ARENA_DIAMETER/2
+                                          - Settings::PARTICLE_RADIUS
+                                          - j * Settings::PARTICLES_INIT_DIST;
+//#pragma omp atomic // critical
+                    Particle::flows[0].push_back(ghostParticle);
+                    Settings::PARTICLE_COUNT += 1;
                 }
             }
         }

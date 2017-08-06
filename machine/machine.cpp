@@ -14,7 +14,6 @@ Machine::Machine()
 
 Machine::~Machine()
 {
-    //delete form;
 }
 
 void Machine::linkView(ShapeType formShapeType)
@@ -65,9 +64,6 @@ void Machine::paint()
         form->draw();
     }
 }
-
-void Machine::createView() {}
-void Machine::setModelMatrix() {}
 
 void Machine::recolor(float color[])
 {

@@ -159,5 +159,3 @@ void Cloth::move()
         form->move();
     }
 }
-
-void Cloth::collide(Particle* p2) {}

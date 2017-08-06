@@ -37,8 +37,7 @@ void Grid::distributeParticles()
 
     for (unsigned i = 0; i < Particle::flows.size(); ++i)
     {
-#pragma omp parallel for \
-            if(Settings::PARALLEL_OMP)
+        #pragma omp parallel for if(Settings::PARALLEL_OMP)
         for (unsigned j = 0; j < Particle::flows[i].size(); ++j)
         {
             fitParticle(Particle::flows[i][j]);

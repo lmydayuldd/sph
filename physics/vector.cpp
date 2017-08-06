@@ -190,16 +190,12 @@ void Vector::setModelMatrix()
 {
     double us = norm() * 0.2 * Settings::VECTOR_LENGTH_MULTIPLIER;
     Matrices::modelMatrix.scale(QVector3D(us, us, us));
-    //Matrices::modelMatrix.translate(x_0, y_0, z_0);
 }
 
 void Vector::paint()
 {
     if (Settings::PAINT_VECTORS) {
         setModelMatrix();
-
         Machine::paint();
     }
 }
-
-void Vector::collide(Particle* p2) {}

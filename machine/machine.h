@@ -13,17 +13,17 @@ class Machine
 {
 public:
     static std::vector<Machine*> machines;
-    Form* form;
+    Form *form;
 
     Machine();
     virtual ~Machine();
 
     void linkView(ShapeType formShapeType);
     void recolor(float color[]);
-    virtual void setModelMatrix();
+    virtual void setModelMatrix() {}
     virtual void paint();
-    virtual void createView();
-    virtual void collide(Particle* p2) = 0;
+    virtual void createView() {}
+    virtual void collide(Particle *p2) {} // = 0; // for pure virtual function
 };
 
 #endif // MACHINE_H

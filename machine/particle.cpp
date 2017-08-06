@@ -80,14 +80,14 @@ Particle::Particle(int parentFlow)
 {
     switch (Settings::MAP_SETUP)
     {
-        case Map::DAM_BREAK_NON_MAP :
+        case DAM_BREAK_NON_MAP :
             r = new Vector(
                 (-Settings::ARENA_DIAMETER/2 + radius) + fmod(id-1, 20) * Settings::PARTICLES_INIT_DIST,//(static_cast<float>(rand()) / static_cast<float>(RAND_MAX) - 1.0f) * (rand()%5),
                 (-Settings::ARENA_DIAMETER/2 + radius) + (id-1)/20 * Settings::PARTICLES_INIT_DIST,//(static_cast<float>(rand()) / static_cast<float>(RAND_MAX) - 1.0f) * (rand()%5),
                 0//(static_cast<float>(rand()) / static_cast<float>(RAND_MAX) - 1.0f) * (rand()%5)
             );
         break;
-        case Map::RANDOM_NON_MAP :
+        case RANDOM_NON_MAP :
             r = new Vector(
                 (-Settings::ARENA_DIAMETER/2 + radius) + (static_cast<float>(rand()) / static_cast<float>(RAND_MAX)) * Settings::ARENA_DIAMETER,
                 (-Settings::ARENA_DIAMETER/2 + radius) + (static_cast<float>(rand()) / static_cast<float>(RAND_MAX)) * Settings::ARENA_DIAMETER,
@@ -500,5 +500,3 @@ void Particle::paint()
         v->paint();
     }
 }
-
-void Particle::collide(Particle* p2) {}

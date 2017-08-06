@@ -139,7 +139,7 @@ void Form::move()
     {
         vertexArray->vertexBuffer->bind();
         vertexArray->vertexBuffer->write(0, posCoords.data(), posCoords.size() * sizeof(float));
-   }
+    }
 }
 
 void Form::recolor(float color[])

@@ -3,7 +3,6 @@
 
 #include <vector>
 
-//class Form;
 #include "gl/form.h"
 
 class Shape

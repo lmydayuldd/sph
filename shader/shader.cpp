@@ -4,7 +4,7 @@
 #include "gl/matrices.h"
 #include "util/parser.h"
 
-Shader* Shader::currentShader;
+Shader *Shader::currentShader;
 
 Shader::~Shader()
 {

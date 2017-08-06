@@ -30,7 +30,6 @@ public:
     virtual void createView() override;
     virtual void setModelMatrix() override;
     virtual void paint() override;
-    virtual void collide(Particle* p2) override;
 };
 
 #endif // CLOTH_H
