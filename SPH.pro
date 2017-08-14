@@ -13,20 +13,33 @@ CONFIG                       += mobility c++11
 MOBILITY                      =
 *-g++:QMAKE_CXXFLAGS         += -std=c++11 -pthread -fopenmp
 win32-msvc*:QMAKE_CXXFLAGS   += /openmp
-#*-g++:QMAKE_LFLAGS         += -fopenmp
-#win32-msvc*:QMAKE_LFLAGS   += /openmp
 *-g++:QMAKE_CXXFLAGS_WARN_ON += -Wextra
-win32-msvc*:QMAKE_CXXFLAGS   += /sdl # TODO, it ignores some errors
+#win32-msvc*:QMAKE_CXXFLAGS   += /sdl # TODO, it ignores some errors
 
 # Defines platform-specific preprocessor macro.
-#   Edit at Projects->QMake->additional arguments
-#   (set to CONFIG+="X_BUILD COMPILER_Y") required first.
+#   Edit at "Projects -> QMake -> additional arguments"
+#   (by setting to CONFIG+="X_BUILD COMPILER_Y").
 CONFIG(DESKTOP_BUILD) : DEFINES += DESKTOP_BUILD
 CONFIG(ANDROID_BUILD) : DEFINES += ANDROID_BUILD
 CONFIG(COMPILER_MSVC) : DEFINES += COMPILER_MSVC
 CONFIG(COMPILER_GPP)  : DEFINES += COMPILER_GPP
 
 #CONFIG += release # TODO
+
+*-g++ {
+    # Qt Creator seems to have a problem providing qwindows.dll / qwindowsd.dll
+    CONFIG(debug, debug|release) {
+        QWINDOWS_DLL_SRC = $$shell_path(D:\dev\Qt\5.9.1\mingw53_32\plugins\platforms\qwindowsd.dll)
+        QWINDOWS_DLL_DST = $$shell_path($${OUT_PWD}/debug/platforms/)
+    }
+    else {
+        QWINDOWS_DLL_SRC = $$shell_path(D:\dev\Qt\5.9.1\mingw53_32\plugins\platforms\qwindows.dll)
+        QWINDOWS_DLL_DST = $$shell_path($${OUT_PWD}/release/platforms/)
+    }
+    QMAKE_POST_LINK += $${QMAKE_MKDIR} $${QWINDOWS_DLL_DST} & \
+                       $${QMAKE_COPY} $${QWINDOWS_DLL_SRC} $${QWINDOWS_DLL_DST}
+    export(QMAKE_POST_LINK)
+}
 
 ############################################################
 # OMP, MPI & CUDA ##########################################
@@ -43,25 +56,15 @@ win32-msvc* {
     CUDA_DIR = "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0" # CUDA Toolkit
     CUDA_SDK = "C:\ProgramData\NVIDIA Corporation\CUDA Samples\v8.0" # CUDA SDK
 
-    CUDA_SRCS += physics/cuda.cu# \
-                 #physics/cuda_h.cu
-
     INCLUDEPATH += $$CUDA_DIR/include \ # CUDA
                    $$CUDA_SDK/common/inc
+    CUDA_SRCS += physics/cuda.cu
 
     QMAKE_LIBDIR += $$CUDA_DIR/lib/x64 \
                     $$CUDA_SDK/common/lib/x64
-
-    #LIBS += /openmp # OpenMP
     LIBS += -lcudart -lcuda -lcublas # CUDA
-
-    CUDA_LIBS += \#-LD:/dev/ms-mpi/Lib/x86 -lmsmpi \ # MPI (Microsoft)
-                 -lcudart -lcuda -lcublas # CUDA
+    CUDA_LIBS += -lcudart -lcuda -lcublas # CUDA
 }
-
-#*-g++:CUDA_LIBS += -lpthread \
-#                   -lfopenmp # OpenMP
-#win32-msvc*:CUDA_LIBS += /openmp # OpenMP
 
 win32-msvc* {
     # for CDB debugger

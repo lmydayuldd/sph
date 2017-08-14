@@ -20,10 +20,18 @@ class Particle;
 #include "util/timer.h"
 #include "window/simulation_window.h" // for current frame number
 
-Computer* Computer::currentComputer;
+Computer *Computer::currentComputer;
 
-//#define LOOP_TYPE unsigned
-#define LOOP_TYPE int
+#ifdef COMPILER_GPP
+    #define LOOP_TYPE unsigned
+#elif COMPILER_MSVC
+    #define LOOP_TYPE int
+#endif
+
+#define LOG_TIME(MSG) \
+    if (! Settings::NO_PRINTOUT) \
+        if (! Interaction::pause || SimulationWindow::key[RENDER]) \
+            std::cout << (timer.diff() - formerTime)/1000000 << (MSG) << std::endl;
 
 Computer::Computer()
 {
@@ -36,9 +44,7 @@ void Computer::loop()
 
     formerTime = timer.diff();
     Grid::distributeParticles();
-    if (! Interaction::pause || SimulationWindow::key[RENDER])
-        std::cout << (timer.diff() - formerTime)/1000000
-                  << "ms <- Distribute particles time." << std::endl;
+    LOG_TIME("ms <- Distribute particles time.");
 
     //if (SimulationWindow::frame % 10 == 0) /////////////////////////////////////
     evaluateSPHForces();
@@ -46,26 +52,19 @@ void Computer::loop()
 
     formerTime = timer.diff();
     collide();
-    if (! Interaction::pause || SimulationWindow::key[RENDER])
-        std::cout << round((timer.diff() - formerTime)/1000000.0)
-                  << "ms <- Collide time." << std::endl;
+    LOG_TIME("ms <- Collide time.");
 
     formerTime = timer.diff();
     computeVectors(Settings::dt);
-    if (! Interaction::pause || SimulationWindow::key[RENDER])
-        std::cout << round((timer.diff() - formerTime)/1000000.0)
-                  << "ms <- Compute vectors time." << std::endl;
+    LOG_TIME("ms <- Compute vectors time.");
 
+//    formerTime = timer.diff();
 //    Grid::distributeParticles();
-//    if (! Interaction::pause || SimulationWindow::key[RENDER])
-//        std::cout << (timer.diff() - formerTime)/1000000
-//                  << "ms <- Distribute particles time." << std::endl;
+//    LOG_TIME("ms <- Distribute particles time.");
 
 //    formerTime = timer.diff();
 //    collide();
-//    if (! Interaction::pause || SimulationWindow::key[RENDER])
-//        std::cout << round((timer.diff() - formerTime)/1000000.0)
-//                  << "ms <- Collide time." << std::endl;
+//    LOG_TIME("ms <- Collide time.");
 
     Computer::getVolume();
 }
@@ -124,21 +123,23 @@ void Computer::evaluateForces()
 
 void Computer::evaluateSPHForces()
 {
-    // TODO
-//    double m = 0.;
-//    double rho = 0.;
-//    int count = 0;
-//    for (unsigned i = 0; i < Particle::flows.size(); ++i)
-//    {
-//#pragma omp for
-//        for (unsigned j = 0; j < Particle::flows[i].size(); ++j)
-//        {
-//            count += 1;
-//            rho += Particle::flows[i][j]->rho;
-//        }
-//    }
-//    m = rho / count / Settings::DESIRED_REST_DENSITY;
-//    std::cout << m << " <- mass" << std::endl << std::flush;
+    double m = 0.;
+    if (Settings::CALCULATE_MASS)
+    {
+        double rho = 0.;
+        int count = 0;
+        for (unsigned i = 0; i < Particle::flows.size(); ++i)
+        {
+            #pragma omp for
+            for (LOOP_TYPE j = 0; j < Particle::flows[i].size(); ++j)
+            {
+                count += 1;
+                rho += Particle::flows[i][j]->rho;
+            }
+        }
+        m = rho / count / Settings::DESIRED_REST_DENSITY;
+        std::cout << m << " <- mass" << std::endl << std::flush;
+    }
 
     Timer timer = Timer();
     long long int formerTime = 0;
@@ -146,16 +147,17 @@ void Computer::evaluateSPHForces()
     formerTime = timer.diff();
     for (unsigned i = 0; i < Particle::flows.size(); ++i)
     {
-#pragma omp parallel for if(Settings::PARALLEL_OMP)
+        #pragma omp parallel for if(Settings::PARALLEL_OMP)
         for (LOOP_TYPE j = 0; j < Particle::flows[i].size(); ++j)
         {
-            //Particle::flows[i][j]->m = m;
+            if (Settings::CALCULATE_MASS)
+            {
+                Particle::flows[i][j]->m = m;
+            }
             Particle::flows[i][j]->F->zero();
         }
     }
-    if (! Interaction::pause || SimulationWindow::key[RENDER])
-        std::cout << round((timer.diff() - formerTime)/1000000.0)
-                  << "ms <- Zero forces time." << std::endl;
+    LOG_TIME("ms <- Zero forces time.");
 
     formerTime = timer.diff();
     for (unsigned i = 0; i < Particle::flows.size(); ++i)
@@ -167,9 +169,7 @@ void Computer::evaluateSPHForces()
             Particle::flows[i][j]->isBoundary();
         }
     }
-    if (! Interaction::pause || SimulationWindow::key[RENDER])
-        std::cout << round((timer.diff() - formerTime)/1000000.0)
-                  << "ms <- Update neighbours & find boundaries time." << std::endl;
+    LOG_TIME("ms <- Update neighbours & find boundaries time.");
 
     formerTime = timer.diff();
     for (unsigned i = 0; i < Particle::flows.size(); ++i)
@@ -181,9 +181,7 @@ void Computer::evaluateSPHForces()
             Particle::flows[i][j]->updatePressure();
         }
     }
-    if (! Interaction::pause || SimulationWindow::key[RENDER])
-        std::cout << round((timer.diff() - formerTime)/1000000.0)
-                  << "ms <- Update rho & p time." << std::endl;
+    LOG_TIME("ms <- Update rho & p time.");
 
     formerTime = timer.diff();
     for (unsigned i = 0; i < Particle::flows.size(); ++i)
@@ -199,17 +197,13 @@ void Computer::evaluateSPHForces()
             //Particle::flows[i][j]->v->limit(10); ////////////////////////
         }
     }
-    if (! Interaction::pause || SimulationWindow::key[RENDER])
-        std::cout << round((timer.diff() - formerTime)/1000000.)
-                  << "ms <- Compute p, viscosity & other Fs time." << std::endl;
+    LOG_TIME("ms <- Compute p, viscosity & other Fs time.");
 }
 
 void Computer::collide()
 {
-    for (unsigned i = 0; i < Particle::collision.size(); ++i)
-    {
-        for (unsigned j = 0; j < Particle::collision[i].size(); ++j)
-        {
+    for (unsigned i = 0; i < Particle::collision.size(); ++i) {
+        for (unsigned j = 0; j < Particle::collision[i].size(); ++j) {
             Particle::collision[i][j] = false;
             Particle::collisionDistance[i][j] = std::numeric_limits<double>::infinity();
         }
@@ -231,21 +225,22 @@ void Computer::collide()
         if (Settings::PARALLEL_GPU) {
             c = 0;
         }
-#endif
 
         if (c == 0) {
             GPUCollideAll();
         }
+#endif
 
         if (c == 1)
-        for (unsigned i = 0; i < Particle::flows.size(); ++i) {
-            for (unsigned j = 0; j < Particle::flows.size(); ++j) {
+        for (LOOP_TYPE i = 0; i < Particle::flows.size(); ++i) {
+            for (LOOP_TYPE j = 0; j < Particle::flows.size(); ++j) {
+#ifdef COMPILER_GPP
                 #pragma omp parallel for \
-                            schedule(guided, 4) \
-                            if(Settings::PARALLEL_OMP)
+                            if(Settings::PARALLEL_OMP) \
+                            schedule(guided, 4)// \
                             //collapse(2)
                 for (LOOP_TYPE k = 0; k < Particle::flows[i].size(); ++k) {
-                    for (unsigned l = k; l < Particle::flows[j].size(); ++l) {
+                    for (LOOP_TYPE l = k; l < Particle::flows[j].size(); ++l) {
                         if (! (k == l && i == j)) {
                             //if (! Particle::flows[i][k]->didCollide)
                                 Forces::collide(*Particle::flows[i][k],
@@ -253,6 +248,35 @@ void Computer::collide()
                         }
                     }
                 }
+#elif COMPILER_MSVC
+//                #pragma omp parallel for \
+//                            if(Settings::PARALLEL_OMP)
+//                for (LOOP_TYPE n = 0; n < Particle::flows[i].size() * Particle::flows[j].size(); ++n) {
+//                    LOOP_TYPE k = 0;
+//                    LOOP_TYPE l = 0;
+//                    for (LOOP_TYPE x = n, y = Particle::flows[j].size(); ; ) {
+//                        if (x >= y) { x -= y; --y; ++k; }
+//                        else        { l = x; break; }
+//                    }
+//                    if (! (k == l && i == j)) {
+//                        //if (! Particle::flows[i][k]->didCollide)
+//                            Forces::collide(*Particle::flows[i][k],
+//                                            *Particle::flows[j][l]);
+//                    }
+//                }
+                #pragma omp parallel for \
+                            if(Settings::PARALLEL_OMP) \
+                            schedule(guided, 4)
+                for (LOOP_TYPE k = 0; k < Particle::flows[i].size(); ++k) {
+                    for (LOOP_TYPE l = k; l < Particle::flows[j].size(); ++l) {
+                        if (! (k == l && i == j)) {
+                            //if (! Particle::flows[i][k]->didCollide)
+                                Forces::collide(*Particle::flows[i][k],
+                                                *Particle::flows[j][l]);
+                        }
+                    }
+                }
+#endif
             }
         }
 
@@ -284,15 +308,20 @@ void Computer::collide()
 
     for (unsigned i = 0; i < Particle::flows.size(); ++i)
     {
-//#pragma omp parallel for collapse(2) if(Settings::PARALLEL_OMP)
-//        for (LOOP_TYPE j = 0; j < Particle::flows[i].size(); ++j)
-//            for (unsigned k = 0; k < Machine::machines.size(); ++k)
+#ifdef COMPILER_GPP
+        #pragma omp parallel for collapse(2) if(Settings::PARALLEL_OMP)
+        for (unsigned j = 0; j < Particle::flows[i].size(); ++j)
+            for (unsigned k = 0; k < Machine::machines.size(); ++k)
+                Machine::machines[k]->collide(Particle::flows[i][j]);
+#elif COMPILER_MSVC
+        #pragma omp parallel for if(Settings::PARALLEL_OMP)
         for (LOOP_TYPE n = 0; n < Particle::flows[i].size() * Machine::machines.size(); ++n)
         {
             int j = n / Machine::machines.size();
             int k = n % Machine::machines.size();
             Machine::machines[k]->collide(Particle::flows[i][j]);
         }
+#endif
     }
 
     for (unsigned i = 0; i < Particle::flows.size(); ++i)
@@ -369,13 +398,19 @@ void Computer::MidPoint(float dt) // RK2?
 void Computer::getVolume()
 {
     int volume = 0;
-#pragma omp parallel for \
-            if(Settings::PARALLEL_OMP)
-            //collapse(3)
-            //reduction(+:volume)
-//    for (LOOP_TYPE i = 0; i < Grid::cell_count; ++i)
-//        for (LOOP_TYPE j = 0; j < Grid::cell_count; ++j)
-//            for (LOOP_TYPE k = 0; k < Grid::cell_count; ++k)
+
+    #ifdef COMPILER_GPP
+    #pragma omp parallel for \
+                if(Settings::PARALLEL_OMP) \
+                collapse(3) \
+                reduction(+:volume)
+    for (LOOP_TYPE i = 0; i < Grid::cell_count; ++i)
+        for (LOOP_TYPE j = 0; j < Grid::cell_count; ++j)
+            for (LOOP_TYPE k = 0; k < Grid::cell_count; ++k)
+                if (Grid::grid[i][j][k].size() > 0)
+                    ++volume;
+    #elif COMPILER_MSVC
+    #pragma omp parallel for if(Settings::PARALLEL_OMP)
     for (LOOP_TYPE n = 0; n < Grid::cell_count * Grid::cell_count * Grid::cell_count; ++n)
     {
         int i =  n / (Grid::cell_count * Grid::cell_count);
@@ -385,6 +420,8 @@ void Computer::getVolume()
             ++volume;
         }
     }
+    #endif
+
     std::cout << volume << "cbs <- Volume." << std::endl << std::flush;
 }
 

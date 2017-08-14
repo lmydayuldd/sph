@@ -1,3 +1,4 @@
+#include "util/settings.h"
 #include "util/strings.h"
 
 #include <QDir>
@@ -10,11 +11,14 @@ QString Strings::DIR_FRAMES;
 
 void Strings::init()
 {
-    QDir(Strings::DESKTOP + QString("/frames/")).removeRecursively();
-    QDir().mkdir(Strings::DESKTOP + QString("/frames/"));
-    DIR_FRAMES
-        = QStandardPaths::locate(QStandardPaths::DesktopLocation, "frames/",
-                                 QStandardPaths::LocateDirectory);
+    if (! Settings::NO_SCREENS)
+    {
+        QDir(Strings::DESKTOP + QString("/frames/")).removeRecursively();
+        QDir().mkdir(Strings::DESKTOP + QString("/frames/"));
+        DIR_FRAMES
+            = QStandardPaths::locate(QStandardPaths::DesktopLocation, "frames/",
+                                     QStandardPaths::LocateDirectory);
+    }
 }
 
 Strings::Strings()

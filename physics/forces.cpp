@@ -1,13 +1,14 @@
 #include "physics/forces.h"
+
 #include "physics/vector.h"
 #include "util/constants.h"
 #include "util/operations.h"
 #include "util/settings.h"
 
-#include <cstring> // for std::memset
+//#include <cstring> // for std::memset
 #include <limits>
 
-void Forces::universalGravitation(const Particle& p1, const Particle& p2)
+void Forces::universalGravitation(const Particle &p1, const Particle &p2)
 { // F1->2 = -G * m1 * m2 * r / |r|^2
     if (&p1 != &p2) {
         double M = p1.m * p2.m;
@@ -18,13 +19,13 @@ void Forces::universalGravitation(const Particle& p1, const Particle& p2)
     }
 }
 
-void Forces::gravityEarth(const Particle& p)
+void Forces::gravityEarth(const Particle &p)
 {
     Vector gravity = Vector(0, - G_earth, 0);
     if (! p.stationary) *p.F += gravity * p.m;
 }
 
-void Forces::Coulomb(const Particle& p1, const Particle& p2)
+void Forces::Coulomb(const Particle &p1, const Particle &p2)
 {
     if (&p1 != &p2) {
         if (! p1.stationary) {
@@ -37,7 +38,7 @@ void Forces::Coulomb(const Particle& p1, const Particle& p2)
     }
 }
 
-void Forces::Friction(const Particle& p)
+void Forces::Friction(const Particle &p)
 {
     if (! p.stationary) {
         Vector friction
@@ -47,7 +48,7 @@ void Forces::Friction(const Particle& p)
     }
 }
 
-void Forces::Hooke(const Particle& p1, const Particle& p2,
+void Forces::Hooke(const Particle &p1, const Particle &p2,
                    double ks, double d, double kd)
 { // F-> = -ks . x-> // d = targetSpringDistance
     if (! p1.stationary || ! p2.stationary) {
@@ -61,7 +62,7 @@ void Forces::Hooke(const Particle& p1, const Particle& p2,
     }
 }
 
-bool Forces::doCollide(const Particle& p1, const Particle& p2) { // Elastic Collision
+bool Forces::doCollide(const Particle &p1, const Particle &p2) { // Elastic Collision
     bool doCollide = false;
     double distanceBorder = p1.r->distance(*p2.r) - p1.radius - p2.radius;
     if (distanceBorder < 0.) {
@@ -84,7 +85,7 @@ void Forces::collisionDetect()
             doCollide(*Particle::flows[0][i], *Particle::flows[0][j]);
 }
 
-void Forces::collide(const Particle& p1, const Particle& p2) {
+void Forces::collide(const Particle &p1, const Particle &p2) {
     //if (! *p1.didCollide)
     {
         if (doCollide(p1, p2)) {
@@ -167,7 +168,7 @@ void Forces::collide(const Particle& p1, const Particle& p2) {
     }
 }
 
-void Forces::collide(const Particle& p1, std::vector<Particle*>* with) {
+void Forces::collide(const Particle &p1, std::vector<Particle*>* with) {
     //std::vector<Particle*> *neighbours = p1.neighbours;
     //with = neighbours; /////////////////////////////////
     //std::vector<Particle*> *parentFlow = &Particle::flows[p1.parentFlow];

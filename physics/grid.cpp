@@ -7,8 +7,11 @@
 #include "util/operations.h"
 #include "util/settings.h"
 
-//#define LOOP_TYPE unsigned
-#define LOOP_TYPE int
+#ifdef COMPILER_GPP
+    #define LOOP_TYPE unsigned
+#elif COMPILER_MSVC
+    #define LOOP_TYPE int
+#endif
 
 vector<vector<vector<vector<Particle*>>>> Grid::grid;
 double Grid::arena_diameter = Settings::ARENA_DIAMETER;

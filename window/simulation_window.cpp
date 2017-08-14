@@ -199,10 +199,13 @@ void SimulationWindow::render()
 
     if (! Interaction::pause)
     {
-        QPixmap pixMap = screen()->grabWindow(0, x(), y(), width(), height());
-        QImage img = pixMap.toImage();
-        QString dst = Strings::DIR_FRAMES + QString("frame_%1.bmp").arg(frame);
-        img.save(dst);
+        if (! Settings::NO_SCREENS)
+        {
+            QPixmap pixMap = screen()->grabWindow(0, x(), y(), width(), height());
+            QImage img = pixMap.toImage();
+            QString dst = Strings::DIR_FRAMES + QString("frame_%1.bmp").arg(frame);
+            img.save(dst);
+        }
     }
 
     if (! Interaction::pause || SimulationWindow::key[RENDER])
@@ -270,8 +273,10 @@ void SimulationWindow::keyReleaseEvent(QKeyEvent *e)
             case Qt::Key_Escape    :
                 key[ESCAPE] = false;
                 QApplication::quit();
-                saveVideo();
-                QDesktopServices::openUrl(Strings::DIR_FRAMES);
+                if (! Settings::NO_SCREENS) {
+                    saveVideo();
+                    QDesktopServices::openUrl(Strings::DIR_FRAMES);
+                }
             break;
             case Qt::Key_P         :
                 key[PARALLEL] = false;

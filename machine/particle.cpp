@@ -18,8 +18,11 @@
 #include "util/map.h"
 #include "util/settings.h"
 
-//#define LOOP_TYPE unsigned
-#define LOOP_TYPE int
+#ifdef COMPILER_GPP
+    #define LOOP_TYPE unsigned
+#elif COMPILER_MSVC
+    #define LOOP_TYPE int
+#endif
 
 using namespace std;
 

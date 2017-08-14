@@ -11,6 +11,8 @@ public:
 
     static unsigned WINDOW_WIDTH;
     static unsigned WINDOW_HEIGHT;
+    static bool     NO_PRINTOUT;
+    static bool     NO_SCREENS;
 
     // Graphics:
 
@@ -34,6 +36,7 @@ public:
     static unsigned      PARTICLE_COUNT;
     static unsigned char MAP_SETUP;
     static unsigned      GHOST_LAYER_GAGE;
+    static bool          CALCULATE_MASS;
     static bool          PARALLEL_GPU;
     static bool          PARALLEL_MPI;
     static bool          PARALLEL_OMP;
@@ -41,6 +44,7 @@ public:
     static unsigned      PARTICLES_X;
     static unsigned      PARTICLES_Y;
     static unsigned      PARTICLES_Z;
+    static double        WORLD_ROTATION;
 
     // Physics:
 

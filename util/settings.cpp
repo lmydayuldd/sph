@@ -12,6 +12,8 @@ using namespace std;
 
 unsigned     Settings::WINDOW_WIDTH             = 720;
 unsigned     Settings::WINDOW_HEIGHT            = 540;
+bool         Settings::NO_PRINTOUT              = false;
+bool         Settings::NO_SCREENS               = false; // eliminates inconsistent framerate
 
 // Graphics:
 
@@ -35,13 +37,15 @@ double        Settings::ARENA_DIAMETER_Z     = 0.;
 unsigned      Settings::PARTICLE_COUNT       = 1800; // 1200
 unsigned char Settings::MAP_SETUP            = DAM_BREAK_NON_MAP;
 unsigned      Settings::GHOST_LAYER_GAGE     = 0;
-bool          Settings::PARALLEL_GPU         = true;
+bool          Settings::CALCULATE_MASS       = false; // TODO
+bool          Settings::PARALLEL_GPU         = false;
 bool          Settings::PARALLEL_MPI         = false;
 bool          Settings::PARALLEL_OMP         = true;
 unsigned      Settings::PARALLEL_OMP_THREADS = 8;
 unsigned      Settings::PARTICLES_X          = 0;
 unsigned      Settings::PARTICLES_Y          = 0;
 unsigned      Settings::PARTICLES_Z          = 0;
+double        Settings::WORLD_ROTATION       = 0.;
 
 // Physics:
 
