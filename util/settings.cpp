@@ -13,7 +13,7 @@ using namespace std;
 unsigned     Settings::WINDOW_WIDTH             = 720;
 unsigned     Settings::WINDOW_HEIGHT            = 540;
 bool         Settings::NO_PRINTOUT              = false;
-bool         Settings::NO_SCREENS               = false; // eliminates inconsistent framerate
+bool         Settings::NO_SCREENS_NO_VIDEO      = false; // eliminates inconsistent framerate
 
 // Graphics:
 

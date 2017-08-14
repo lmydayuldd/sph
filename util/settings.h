@@ -12,7 +12,7 @@ public:
     static unsigned WINDOW_WIDTH;
     static unsigned WINDOW_HEIGHT;
     static bool     NO_PRINTOUT;
-    static bool     NO_SCREENS;
+    static bool     NO_SCREENS_NO_VIDEO;
 
     // Graphics:
 

@@ -11,7 +11,7 @@ QString Strings::DIR_FRAMES;
 
 void Strings::init()
 {
-    if (! Settings::NO_SCREENS)
+    if (! Settings::NO_SCREENS_NO_VIDEO)
     {
         QDir(Strings::DESKTOP + QString("/frames/")).removeRecursively();
         QDir().mkdir(Strings::DESKTOP + QString("/frames/"));
