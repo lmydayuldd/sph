@@ -8,7 +8,7 @@
 class Shape
 {
 public:
-    Form* form;
+    Form *form;
     std::vector<float> vertices;
     int posCoordsPerVertex = 0;
     int clrCoordsPerVertex = 0;

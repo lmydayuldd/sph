@@ -83,13 +83,13 @@ bool Vector::operator==(const Vector& v) const {
 Vector Vector::operator-() const {
     return Vector(- this->x, - this->y, - this->z);
 }
-Vector Vector::operator+(const Vector& v) const {
+Vector Vector::operator+(const Vector &v) const {
     return Vector(this->x+v.x, this->y+v.y, this->z+v.z);
 }
-Vector Vector::operator-(const Vector& v) const {
+Vector Vector::operator-(const Vector &v) const {
     return Vector(this->x-v.x, this->y-v.y, this->z-v.z);
 }
-Vector Vector::operator*(const Vector& v) const { // cross
+Vector Vector::operator*(const Vector &v) const { // cross
     //return Vector(this->x*v.x, this->y*v.y, this->z*v.z);
     return Vector(
         this->y*v.z - this->z*v.y,
@@ -112,19 +112,19 @@ Vector Vector::operator*(double v) const {
 Vector Vector::operator/(double v) const {
     return Vector(this->x/v, this->y/v, this->z/v);
 }
-Vector& Vector::operator+=(const Vector& v) {
+Vector& Vector::operator+=(const Vector &v) {
     this->x += v.x;
     this->y += v.y;
     this->z += v.z;
     return *this;
 }
-Vector& Vector::operator-=(const Vector& v) {
+Vector& Vector::operator-=(const Vector &v) {
     this->x -= v.x;
     this->y -= v.y;
     this->z -= v.z;
     return *this;
 }
-Vector& Vector::operator*=(const Vector& v) {
+Vector& Vector::operator*=(const Vector &v) {
     *this = Vector(
         this->y*v.z - this->z*v.y,
         this->z*v.x - this->x*v.z,
@@ -157,13 +157,13 @@ Vector& Vector::operator/=(double v) {
     return *this;
 }
 
-double Vector::cosxy(const Vector& v) const {
+double Vector::cosxy(const Vector &v) const {
     return dot(v) / (this->norm() * v.norm());
 }
-double Vector::distance(const Vector& v) const {
+double Vector::distance(const Vector &v) const {
     return (*this - v).norm();
 }
-double Vector::dot(const Vector& v) const {
+double Vector::dot(const Vector &v) const {
     return this->x*v.x + this->y*v.y + this->z*v.z;
 }
 

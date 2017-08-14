@@ -56,7 +56,7 @@ void GLWindow::renderLater()
     }
 }
 
-bool GLWindow::event(QEvent* event)
+bool GLWindow::event(QEvent *event)
 {
     switch (event->type())
     {
@@ -69,7 +69,7 @@ bool GLWindow::event(QEvent* event)
     }
 }
 
-void GLWindow::exposeEvent( QExposeEvent *event )
+void GLWindow::exposeEvent(QExposeEvent *event)
 {
     Q_UNUSED(event);
 

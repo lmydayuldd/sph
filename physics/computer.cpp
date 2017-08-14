@@ -1,7 +1,10 @@
-#include "computer.h"
+#include "physics/computer.h"
 
 #include <iostream>
+
 #include <omp.h>
+
+extern void GPUCollideAll();
 
 class Particle;
 
@@ -18,6 +21,9 @@ class Particle;
 #include "window/simulation_window.h" // for current frame number
 
 Computer* Computer::currentComputer;
+
+//#define LOOP_TYPE unsigned
+#define LOOP_TYPE int
 
 Computer::Computer()
 {
@@ -64,7 +70,7 @@ void Computer::loop()
     Computer::getVolume();
 }
 
-void Computer::evaluateForces(const Particle& p)
+void Computer::evaluateForces(const Particle &p)
 {
     *p.F = Vector();
 
@@ -97,10 +103,10 @@ void Computer::evaluateForces(const Particle& p)
 
         #pragma omp section
         {
-            //for (Spring* s : p.springs)
+            //for (Spring *s : p.springs)
             for (unsigned i = 0; i < p.springs.size(); ++i)
             {
-                Spring* s = p.springs[i];
+                Spring *s = p.springs[i];
                 /*if (s.ks != 0 && s.kd != 0)*/
                     Forces::Hooke(p, *s->p2, s->ks, s->d, s->kd);
             }
@@ -112,7 +118,7 @@ void Computer::evaluateForces()
 {
     for (unsigned i = 0; i < Particle::flows.size(); ++i)
 #pragma omp parallel for if(Settings::PARALLEL_OMP)
-        for (unsigned j = 0; j < Particle::flows[i].size(); ++j)
+        for (LOOP_TYPE j = 0; j < Particle::flows[i].size(); ++j)
             evaluateForces(*Particle::flows[i][j]);
 }
 
@@ -141,7 +147,7 @@ void Computer::evaluateSPHForces()
     for (unsigned i = 0; i < Particle::flows.size(); ++i)
     {
 #pragma omp parallel for if(Settings::PARALLEL_OMP)
-        for (unsigned j = 0; j < Particle::flows[i].size(); ++j)
+        for (LOOP_TYPE j = 0; j < Particle::flows[i].size(); ++j)
         {
             //Particle::flows[i][j]->m = m;
             Particle::flows[i][j]->F->zero();
@@ -155,7 +161,7 @@ void Computer::evaluateSPHForces()
     for (unsigned i = 0; i < Particle::flows.size(); ++i)
     {
 #pragma omp parallel for if(Settings::PARALLEL_OMP)
-        for (unsigned j = 0; j < Particle::flows[i].size(); ++j)
+        for (LOOP_TYPE j = 0; j < Particle::flows[i].size(); ++j)
         {
             Particle::flows[i][j]->updateNeighbours();
             Particle::flows[i][j]->isBoundary();
@@ -169,7 +175,7 @@ void Computer::evaluateSPHForces()
     for (unsigned i = 0; i < Particle::flows.size(); ++i)
     {
 #pragma omp parallel for if(Settings::PARALLEL_OMP)
-        for (unsigned j = 0; j < Particle::flows[i].size(); ++j)
+        for (LOOP_TYPE j = 0; j < Particle::flows[i].size(); ++j)
         {
             Particle::flows[i][j]->updateDensity();
             Particle::flows[i][j]->updatePressure();
@@ -183,7 +189,7 @@ void Computer::evaluateSPHForces()
     for (unsigned i = 0; i < Particle::flows.size(); ++i)
     {
 #pragma omp parallel for if(Settings::PARALLEL_OMP)
-        for (unsigned j = 0; j < Particle::flows[i].size(); ++j)
+        for (LOOP_TYPE j = 0; j < Particle::flows[i].size(); ++j)
         {
             Particle::flows[i][j]->computePressureForces();
             Particle::flows[i][j]->computeViscosityForces();
@@ -201,11 +207,13 @@ void Computer::evaluateSPHForces()
 void Computer::collide()
 {
     for (unsigned i = 0; i < Particle::collision.size(); ++i)
+    {
         for (unsigned j = 0; j < Particle::collision[i].size(); ++j)
         {
             Particle::collision[i][j] = false;
             Particle::collisionDistance[i][j] = std::numeric_limits<double>::infinity();
         }
+    }
 
 //#pragma omp parallel for \
 //            collapse(2) \
@@ -216,55 +224,85 @@ void Computer::collide()
 
 //////////////////////////////////////////////////////////////
 
-    int c = 1;
+    if (Settings::PARTICLES_REACT) {
+        int c = 1;
 
-    if (c == 1)
-    if (Settings::PARTICLES_REACT)
-        for (unsigned i = 0; i < Particle::flows.size(); ++i)
-            for (unsigned j = 0; j < Particle::flows.size(); ++j)
+#ifdef COMPILER_MSVC
+        if (Settings::PARALLEL_GPU) {
+            c = 0;
+        }
+#endif
+
+        if (c == 0) {
+            GPUCollideAll();
+        }
+
+        if (c == 1)
+        for (unsigned i = 0; i < Particle::flows.size(); ++i) {
+            for (unsigned j = 0; j < Particle::flows.size(); ++j) {
                 #pragma omp parallel for \
                             schedule(guided, 4) \
                             if(Settings::PARALLEL_OMP)
                             //collapse(2)
-                for (unsigned k = 0; k < Particle::flows[i].size(); ++k)
-                    for (unsigned l = k; l < Particle::flows[j].size(); ++l)
-                        if (! (k == l && i == j))
+                for (LOOP_TYPE k = 0; k < Particle::flows[i].size(); ++k) {
+                    for (unsigned l = k; l < Particle::flows[j].size(); ++l) {
+                        if (! (k == l && i == j)) {
                             //if (! Particle::flows[i][k]->didCollide)
                                 Forces::collide(*Particle::flows[i][k],
                                                 *Particle::flows[j][l]);
+                        }
+                    }
+                }
+            }
+        }
 
-    if (c == 2)
-    if (Settings::PARTICLES_REACT)
-        for (unsigned i = 0; i < Particle::flows.size(); ++i)
+        if (c == 2)
+        for (unsigned i = 0; i < Particle::flows.size(); ++i) {
             //#pragma omp parallel for collapse(2) schedule(guided) \
             //                     if(Settings::PARALLEL_OMP)
-            for (unsigned j = 0; j < Particle::flows[i].size(); ++j)
-                for (unsigned k = 0; k < Particle::flows[i][j]->neighbours->size(); ++k)
+            for (unsigned j = 0; j < Particle::flows[i].size(); ++j) {
+                for (unsigned k = 0; k < Particle::flows[i][j]->neighbours->size(); ++k) {
                     Forces::collide(*Particle::flows[i][j],
                                     *Particle::flows[i][j]->neighbours->at(k));
+                }
+            }
+        }
 
-    if (c == 3)
-    if (Settings::PARTICLES_REACT)
-        for (unsigned i = 0; i < Particle::flows.size(); ++i)
-            for (unsigned j = 0; j < Particle::flows[i].size(); ++j)
+        if (c == 3)
+        for (unsigned i = 0; i < Particle::flows.size(); ++i) {
+            for (unsigned j = 0; j < Particle::flows[i].size(); ++j) {
     //            if (! Particle::flows[i][j]->didCollide)
                     Forces::collide(*Particle::flows[i][j],
                                     //Particle::flows[i][j]->neighbours);
                                     // UNSAFE!!! address of vector cell!!! TODO //////
                                     &Particle::flows[Particle::flows[i][j]->parentFlow]);
+            }
+        }
+    }
 
 //////////////////////////////////////////////////////////////
 
     for (unsigned i = 0; i < Particle::flows.size(); ++i)
-#pragma omp parallel for collapse(2) if(Settings::PARALLEL_OMP)
-        for (unsigned j = 0; j < Particle::flows[i].size(); ++j)
-            for (unsigned k = 0; k < Machine::machines.size(); ++k)
-                Machine::machines[k]->collide(Particle::flows[i][j]);
+    {
+//#pragma omp parallel for collapse(2) if(Settings::PARALLEL_OMP)
+//        for (LOOP_TYPE j = 0; j < Particle::flows[i].size(); ++j)
+//            for (unsigned k = 0; k < Machine::machines.size(); ++k)
+        for (LOOP_TYPE n = 0; n < Particle::flows[i].size() * Machine::machines.size(); ++n)
+        {
+            int j = n / Machine::machines.size();
+            int k = n % Machine::machines.size();
+            Machine::machines[k]->collide(Particle::flows[i][j]);
+        }
+    }
 
     for (unsigned i = 0; i < Particle::flows.size(); ++i)
-#pragma omp parallel for if(Settings::PARALLEL_OMP)
-        for (unsigned j = 0; j < Particle::flows[i].size(); ++j)
+    {
+        #pragma omp parallel for if(Settings::PARALLEL_OMP)
+        for (LOOP_TYPE j = 0; j < Particle::flows[i].size(); ++j)
+        {
             *Particle::flows[i][j]->didCollide = false;
+        }
+    }
 }
 
 void Computer::computeVectors(const Particle& p, float dt)
@@ -301,7 +339,7 @@ void Computer::Euler(float dt)
 {
     for (unsigned i = 0; i < Particle::flows.size(); ++i)
 #pragma omp parallel for if(Settings::PARALLEL_OMP)
-        for (unsigned j = 0; j < Particle::flows[i].size(); ++j)
+        for (LOOP_TYPE j = 0; j < Particle::flows[i].size(); ++j)
             Euler(*Particle::flows[i][j], dt);
 }
 void Computer::MidPoint(const Particle& p, float dt) // RK2?
@@ -314,17 +352,17 @@ void Computer::MidPoint(float dt) // RK2?
 {
     for (unsigned i = 0; i < Particle::flows.size(); ++i)
 #pragma omp parallel for if(Settings::PARALLEL_OMP)
-        for (unsigned j = 0; j < Particle::flows[i].size(); ++j)
+        for (LOOP_TYPE j = 0; j < Particle::flows[i].size(); ++j)
             Euler(*Particle::flows[i][j], dt * 0.5);
 
     for (unsigned i = 0; i < Particle::flows.size(); ++i)
 #pragma omp parallel for if(Settings::PARALLEL_OMP)
-        for (unsigned j = 0; j < Particle::flows[i].size(); ++j)
+        for (LOOP_TYPE j = 0; j < Particle::flows[i].size(); ++j)
             evaluateForces(*Particle::flows[i][j]);
 
     for (unsigned i = 0; i < Particle::flows.size(); ++i)
 #pragma omp parallel for if(Settings::PARALLEL_OMP)
-        for (unsigned j = 0; j < Particle::flows[i].size(); ++j)
+        for (LOOP_TYPE j = 0; j < Particle::flows[i].size(); ++j)
             Euler(*Particle::flows[i][j], dt);
 }
 
@@ -332,14 +370,21 @@ void Computer::getVolume()
 {
     int volume = 0;
 #pragma omp parallel for \
-            collapse(3) \
-            reduction(+:volume) \
             if(Settings::PARALLEL_OMP)
-    for (unsigned i = 0; i < Grid::cell_count; ++i)
-        for (unsigned j = 0; j < Grid::cell_count; ++j)
-            for (unsigned k = 0; k < Grid::cell_count; ++k)
-                if (Grid::grid[i][j][k].size() > 0)
-                    ++volume;
+            //collapse(3)
+            //reduction(+:volume)
+//    for (LOOP_TYPE i = 0; i < Grid::cell_count; ++i)
+//        for (LOOP_TYPE j = 0; j < Grid::cell_count; ++j)
+//            for (LOOP_TYPE k = 0; k < Grid::cell_count; ++k)
+    for (LOOP_TYPE n = 0; n < Grid::cell_count * Grid::cell_count * Grid::cell_count; ++n)
+    {
+        int i =  n / (Grid::cell_count * Grid::cell_count);
+        int j = (n % (Grid::cell_count * Grid::cell_count)) / Grid::cell_count;
+        int k = (n % (Grid::cell_count * Grid::cell_count)) % Grid::cell_count;
+        if (Grid::grid[i][j][k].size() > 0) {
+            ++volume;
+        }
+    }
     std::cout << volume << "cbs <- Volume." << std::endl << std::flush;
 }
 

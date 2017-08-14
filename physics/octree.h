@@ -21,8 +21,8 @@ public:
     Octree();
 
     static void distributeParticles();
-    void fitParticle(Particle* p);
-    vector<Particle*> getNeighbours(Particle* p);
+    void fitParticle(Particle *p);
+    vector<Particle*> getNeighbours(Particle *p);
 
 private:
     Octree *corners[8];

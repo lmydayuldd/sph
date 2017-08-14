@@ -17,7 +17,7 @@ public:
     void initialize() Q_DECL_OVERRIDE;
     void render() Q_DECL_OVERRIDE;
 
-    static Timer* timer;
+    static Timer *timer;
     static int frame;
     static int refreshRate;
     static long long int formerTime;
@@ -41,11 +41,11 @@ private:
     float previousDistance;
     float t = 1.0f;
 
-    void keyPressEvent(QKeyEvent* e);
-    void keyReleaseEvent(QKeyEvent* e);
-    void mouseMoveEvent(QMouseEvent* e);
-    void mousePressEvent(QMouseEvent* e);
-    void mouseReleaseEvent(QMouseEvent* e);
+    void keyPressEvent(QKeyEvent *e);
+    void keyReleaseEvent(QKeyEvent *e);
+    void mouseMoveEvent(QMouseEvent *e);
+    void mousePressEvent(QMouseEvent *e);
+    void mouseReleaseEvent(QMouseEvent *e);
 
     static void cameraMan();
     void interact();

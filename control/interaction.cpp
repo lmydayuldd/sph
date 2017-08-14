@@ -21,8 +21,8 @@ void Interaction::handleTouchPress(float normalizedX, float normalizedY)
         /*for (Flow f : Flow.flows) for (Particle p : f.particles) {
             // Now test if this ray intersects with the mallet
             // by creating a bounding sphere that wraps the mallet.
-            Sphere particleBoundingSphere = new Sphere( new Vector( p.r ), p.radius );
-            if ( intersects(particleBoundingSphere, ray) ) {
+            Sphere particleBoundingSphere = new Sphere(new Vector(p.r), p.radius);
+            if (intersects(particleBoundingSphere, ray)) {
                 pressedParticle = p;
                 break;
             }

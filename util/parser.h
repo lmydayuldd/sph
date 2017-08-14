@@ -10,12 +10,12 @@
 class Parser
 {
 public:
-    static const char* parse(const char* filename)
+    static const char* parse(const char *filename)
     {
         try
         {
-            std::ifstream file( filename );
-            file.exceptions( std::ifstream::failbit | std::ifstream::badbit );
+            std::ifstream file(filename);
+            file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
             if (file)
             {
                 std::stringstream ss_buf;

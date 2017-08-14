@@ -8,9 +8,9 @@ using namespace std;
 Arrow::Arrow()
 {
     vector<float> color = {1, 1, 0};
-    vector<float> a = {0, 0,  0.0, 1.0};
-    vector<float> b = {0, 1, -0.1, 0.9};
-    vector<float> c = {0, 1,  0.1, 0.9};
+    vector<float> a = {0, 0,  0.0f, 1.0f};
+    vector<float> b = {0, 1, -0.1f, 0.9f};
+    vector<float> c = {0, 1,  0.1f, 0.9f};
     Line l1 = Line(a, color);
     Line l2 = Line(b, color);
     Line l3 = Line(c, color);

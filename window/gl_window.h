@@ -13,10 +13,10 @@ class GLWindow
     Q_OBJECT
 
 public:
-    explicit GLWindow(QWindow* parent = 0);
+    explicit GLWindow(QWindow *parent = 0);
     ~GLWindow();
 
-    virtual void render(QPainter* painter);
+    virtual void render(QPainter *painter);
     virtual void render();
     virtual void initialize();
 
@@ -27,8 +27,8 @@ public slots:
     void renderNow();
 
 protected:
-    bool event(QEvent* event) Q_DECL_OVERRIDE;
-    void exposeEvent(QExposeEvent* event) Q_DECL_OVERRIDE;
+    bool event(QEvent *event) Q_DECL_OVERRIDE;
+    void exposeEvent(QExposeEvent *event) Q_DECL_OVERRIDE;
 //    QOpenGLPaintDevice* getPaintDevice();
 
 private:

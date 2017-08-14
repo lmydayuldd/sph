@@ -8,7 +8,7 @@
 #include "window/gl_window.h"
 #include "window/simulation_window.h"
 
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
 

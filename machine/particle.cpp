@@ -18,6 +18,9 @@
 #include "util/map.h"
 #include "util/settings.h"
 
+//#define LOOP_TYPE unsigned
+#define LOOP_TYPE int
+
 using namespace std;
 
 std::vector<std::vector<Particle*>> Particle::flows;
@@ -215,19 +218,19 @@ void Particle::updateNeighbours()
         // (? having brought no disadvantages at the same time ?)
         Particle *p = nullptr;
 #pragma omp parallel for \
-            collapse(3) \
-            firstprivate(p) \
             if(Settings::PARALLEL_OMP)
-        for (unsigned i = std::max<int>((int)cell[0] - 1, 0);
+//            collapse(3)
+//            firstprivate(p) // TODO
+        for (LOOP_TYPE i = std::max<int>((int)cell[0] - 1, 0);
              i <= std::min<unsigned>(cell[0] + 1, Grid::cell_count - 1);
              ++i) {
-            for (unsigned j = std::max<int>((int)cell[1] - 1, 0);
+            for (LOOP_TYPE j = std::max<int>((int)cell[1] - 1, 0);
                  j <= std::min<unsigned>(cell[1] + 1, Grid::cell_count - 1);
                  ++j) {
-                for (unsigned k = std::max<int>((int)cell[2] - 1, 0);
+                for (LOOP_TYPE k = std::max<int>((int)cell[2] - 1, 0);
                      k <= std::min<unsigned>(cell[2] + 1, Grid::cell_count - 1);
                      ++k) {
-                    for (unsigned l = 0;
+                    for (LOOP_TYPE l = 0;
                          l < Grid::grid[i][j][k].size();
                          ++l)
                     {

@@ -14,9 +14,9 @@ public:
     virtual ~MockParticle() { Die(); }
 
     MOCK_METHOD4(springify,
-                 void(Particle* p2, float ks, float d, float kd));
+                 void(Particle *p2, float ks, float d, float kd));
     MOCK_METHOD4(springifyMutual,
-                 void(Particle* p2, float ks, float d, float kd));
+                 void(Particle *p2, float ks, float d, float kd));
     MOCK_METHOD0(createView, void());
     MOCK_METHOD0(setModelMatrix, void());
     MOCK_METHOD0(paint, void());

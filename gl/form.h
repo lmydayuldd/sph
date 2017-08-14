@@ -17,7 +17,7 @@ private:
     int vertexStride    = 0;
     int shapeMode       = 0;
     int textureResource = 0;
-    QOpenGLFunctions* gl;
+    QOpenGLFunctions *gl;
 
     void bindUniforms();
     void bindAttributes();
@@ -26,7 +26,7 @@ private:
 public:
     static std::vector<Form*> forms;
     static ShapeType lastBoundFormType;
-    VertexArray* vertexArray;
+    VertexArray *vertexArray;
     std::vector<float> posCoords;
     std::vector<float> clrCoords;
     std::vector<float> texCoords;

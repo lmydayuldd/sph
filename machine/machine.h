@@ -23,7 +23,7 @@ public:
     virtual void setModelMatrix() {}
     virtual void paint();
     virtual void createView() {}
-    virtual void collide(Particle *p2) {} // = 0; // for pure virtual function
+    virtual void collide(Particle *p2) { p2 = nullptr; p2 = p2; } // = 0; // for pure virtual function
 };
 
 #endif // MACHINE_H

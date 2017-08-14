@@ -8,7 +8,7 @@ double Octree::arena_diameter = Settings::ARENA_DIAMETER;
 double Octree::cell_diameter = Settings::MESH_CELL_DIAMETER;
 unsigned Octree::cell_count = arena_diameter / cell_diameter;
 unsigned Octree::max_depth = floor(log(cell_count));
-Octree* Octree::root = nullptr;
+Octree *Octree::root = nullptr;
 
 Octree::Octree()
 {

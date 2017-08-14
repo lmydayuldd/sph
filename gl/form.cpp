@@ -5,10 +5,11 @@
 
 #include <QOpenGLFunctions>
 
-#include "shader/shader.h"
 #include "gl/handles.h"
 #include "gl/vertex_array.h"
 #include "gl/matrices.h"
+#include "shader/shader.h"
+#include "util/constants.h"
 
 using namespace std;
 

@@ -28,11 +28,13 @@ public:
     // Simulation:
 
     static double        dt;
+    static unsigned      ITERATIONS_PER_FRAME;
     static double        ARENA_DIAMETER;
     static double        ARENA_DIAMETER_Z;
     static unsigned      PARTICLE_COUNT;
     static unsigned char MAP_SETUP;
     static unsigned      GHOST_LAYER_GAGE;
+    static bool          PARALLEL_GPU;
     static bool          PARALLEL_MPI;
     static bool          PARALLEL_OMP;
     static unsigned      PARALLEL_OMP_THREADS;

@@ -5,6 +5,7 @@
 #include <QOpenGLFunctions>
 
 #include "gl/form.h"
+#include "util/constants.h"
 #include "util/settings.h"
 
 using namespace std;

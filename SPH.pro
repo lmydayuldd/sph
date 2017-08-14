@@ -7,27 +7,168 @@
 QT += core gui opengl
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET                  = SPH
-TEMPLATE                = app
-CONFIG                 += mobility c++11
-QMAKE_CXXFLAGS         += -std=c++11 -pthread -fopenmp
-QMAKE_CXXFLAGS_WARN_ON += -Wextra
-LIBS                   += -pthread -fopenmp -LD:/dev/ms-mpi/Lib/x86 -lmsmpi
-INCLUDEPATH            += D:/dev/ms-mpi/Include
-MOBILITY                =
+TARGET                        = SPH
+TEMPLATE                      = app
+CONFIG                       += mobility c++11
+MOBILITY                      =
+*-g++:QMAKE_CXXFLAGS         += -std=c++11 -pthread -fopenmp
+win32-msvc*:QMAKE_CXXFLAGS   += /openmp
+#*-g++:QMAKE_LFLAGS         += -fopenmp
+#win32-msvc*:QMAKE_LFLAGS   += /openmp
+*-g++:QMAKE_CXXFLAGS_WARN_ON += -Wextra
+win32-msvc*:QMAKE_CXXFLAGS   += /sdl # TODO, it ignores some errors
 
-# Defines platform-specific preprocessor macro
-#   edit at Projects->QMake->additional arguments
-#   (set to CONFIG+=_BUILD) required first
-CONFIG(DESKTOP_BUILD): DEFINES += DESKTOP_BUILD
-CONFIG(ANDROID_BUILD): DEFINES += ANDROID_BUILD
+# Defines platform-specific preprocessor macro.
+#   Edit at Projects->QMake->additional arguments
+#   (set to CONFIG+="X_BUILD COMPILER_Y") required first.
+CONFIG(DESKTOP_BUILD) : DEFINES += DESKTOP_BUILD
+CONFIG(ANDROID_BUILD) : DEFINES += ANDROID_BUILD
+CONFIG(COMPILER_MSVC) : DEFINES += COMPILER_MSVC
+CONFIG(COMPILER_GPP)  : DEFINES += COMPILER_GPP
 
-RESOURCES += \
-    E:/Dropbox/well/WFAIS/prog/Qt/SPH
+#CONFIG += release # TODO
+
+############################################################
+# OMP, MPI & CUDA ##########################################
+############################################################
+
+INCLUDEPATH += D:/dev/ms-mpi/Include # MPI (Microsoft)
+
+CONFIG(COMPILER_GPP)  : LIBS += -LD:/dev/ms-mpi/Lib/x86 -lmsmpi # MPI (Microsoft)
+CONFIG(COMPILER_MSVC) : LIBS += -LD:/dev/ms-mpi/Lib/x64 -lmsmpi # MPI (Microsoft)
+
+*-g++:LIBS += -pthread -fopenmp # OpenMP
+
+win32-msvc* {
+    CUDA_DIR = "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0" # CUDA Toolkit
+    CUDA_SDK = "C:\ProgramData\NVIDIA Corporation\CUDA Samples\v8.0" # CUDA SDK
+
+    CUDA_SRCS += physics/cuda.cu# \
+                 #physics/cuda_h.cu
+
+    INCLUDEPATH += $$CUDA_DIR/include \ # CUDA
+                   $$CUDA_SDK/common/inc
+
+    QMAKE_LIBDIR += $$CUDA_DIR/lib/x64 \
+                    $$CUDA_SDK/common/lib/x64
+
+    #LIBS += /openmp # OpenMP
+    LIBS += -lcudart -lcuda -lcublas # CUDA
+
+    CUDA_LIBS += \#-LD:/dev/ms-mpi/Lib/x86 -lmsmpi \ # MPI (Microsoft)
+                 -lcudart -lcuda -lcublas # CUDA
+}
+
+#*-g++:CUDA_LIBS += -lpthread \
+#                   -lfopenmp # OpenMP
+#win32-msvc*:CUDA_LIBS += /openmp # OpenMP
+
+win32-msvc* {
+    # for CDB debugger
+    INCLUDEPATH += "C:\Program Files (x86)\Windows Kits\10\Lib\10.0.14393.0\ucrt"
+    LIBS += -L"C:\Program Files (x86)\Windows Kits\10\Lib\10.0.14393.0\ucrt\x64"
+
+    VISUAL_STUDIO_COMPILER = $$shell_quote("C:\Program Files (x86)\Microsoft Visual Studio\Shared\14.0\VC\bin")
+    MSVCRT_LINK_FLAG_DEBUG = "/MDd" # /MD dynamic shared DLL, /MT static, /LD dynamic DLL
+    MSVCRT_LINK_FLAG_RELEASE = "/MD" # /MDd dynamic shared DLL, /MTd static, /LD dynamic DLL
+    CUDA_ARCH = arch=compute_61,code=sm_61
+    NVCC_FLAGS = --use_fast_math
+    CUDA_INCL += $$CUDA_DIR/include \ # CUDA
+                 $$CUDA_SDK/common/inc \ # CUDA
+                 $$_PRO_FILE_PWD_
+    CUDA_INCL = $$join(CUDA_INCL,'" -I"','-I"','"')
+}
+
+############################################################
+# Configuration of the Intermediate CUDA Compiler ##########
+############################################################
+
+win32-msvc* {
+    cudaIntr.clean = cudaIntrObj/*.o
+    win32:cudaIntr.clean = cudaIntrObj/*.obj
+}
+
+############################################################
+# Configuration of the CUDA Compiler #######################
+############################################################
+
+win32-msvc* {
+    CONFIG(debug, debug|release) {
+        # Debug mode
+        cuda_d.input = CUDA_SRCS
+        cuda_d.output = ${QMAKE_FILE_BASE}_link.o
+        equals(VISUAL_STUDIO_COMPILER, "MDd") {
+            linux:cuda_d.output = ${QMAKE_FILE_BASE}_link.obj
+            win32:cuda_d.output = ${QMAKE_FILE_BASE}_link.o
+            NVCC_FLAGS += --shared -cudart shared
+        }
+        equals(VISUAL_STUDIO_COMPILER, "MTd") {
+            win32:cuda_d.output = ${QMAKE_FILE_BASE}_link.a
+        }
+        equals(VISUAL_STUDIO_COMPILER, "LDd") {
+            win32:cuda_d.output = ${QMAKE_FILE_BASE}_link.dll
+        }
+        QMAKE_EXTRA_COMPILERS += cuda_d
+        cuda_d.dependency_type = TYPE_C
+        cuda_d.commands = $$CUDA_DIR/bin/nvcc.exe --verbose \
+                              $$CUDA_INCL $$CUDA_LIBS \
+                              $$NVCC_FLAGS \
+                              -D_DEBUG \
+                              --machine 64 -gencode $$CUDA_ARCH \
+                              -ccbin $$VISUAL_STUDIO_COMPILER \ # MSVC CL.exe directory
+                              -Xcompiler $$MSVCRT_LINK_FLAG_RELEASE \ # dynamic/static release
+                              -Xcompiler "/wd4819,/EHsc,/W3,/nologo,/Od,/Zi,/RTC1" \
+                              -c -o ${QMAKE_FILE_OUT} \ # output files
+                              # -dc instead, for multiple .cu files
+                              ${QMAKE_FILE_NAME} # input files
+    }
+    else {
+        # Release mode
+        cuda.input = CUDA_SRCS
+        cuda.output = ${QMAKE_FILE_BASE}_link.o
+        equals(VISUAL_STUDIO_COMPILER, "MD") {
+            linux:cuda.output = ${QMAKE_FILE_BASE}_link.obj
+            win32:cuda.output = ${QMAKE_FILE_BASE}_link.o
+            NVCC_FLAGS += --shared -cudart shared
+        }
+        equals(VISUAL_STUDIO_COMPILER, "MT") {
+            win32:cuda.output = ${QMAKE_FILE_BASE}_link.a
+        }
+        equals(VISUAL_STUDIO_COMPILER, "LD") {
+            win32:cuda.output = ${QMAKE_FILE_BASE}_link.dll
+        }
+        QMAKE_EXTRA_COMPILERS += cuda
+        cuda.dependency_type = TYPE_C
+        cuda.commands = $$CUDA_DIR/bin/nvcc.exe --verbose \
+                            $$CUDA_INCL $$CUDA_LIBS \
+                            $$NVCC_FLAGS \
+                            --machine 64 -gencode $$CUDA_ARCH \
+                            -ccbin $$VISUAL_STUDIO_COMPILER \ # MSVC CL.exe directory
+                            -Xcompiler $$MSVCRT_LINK_FLAG_RELEASE \ # dynamic/static release
+                            -Xcompiler "/wd4819,/EHsc,/W3,/nologo,/Od,/Zi,/RTC1" \
+                            -c -o ${QMAKE_FILE_OUT} \ # output files
+                            # -dc instead, for multiple .cu files
+                            ${QMAKE_FILE_NAME} # input files
+    }
+}
+
+############################################################
+# OpenCV ###################################################
+############################################################
+
+#LIBS += -LD:/dev/opencv/build/bin \
+#            libopencv_core240d \
+#            libopencv_highgui240d \
+#            libopencv_imgproc240d \
+#            libopencv_features2d240d \
+#            libopencv_calib3d240d
 
 ############################################################
 # Project files ############################################
 ############################################################
+
+RESOURCES += \
+    E:/Dropbox/well/WFAIS/prog/Qt/SPH
 
 FORMS += \
     window/main_window.ui
@@ -39,7 +180,9 @@ DISTFILES += \
     map/sim_droplet.txt \
     shader/fragment_shader.fsh \
     shader/vertex_shader.vsh \
-    sph.qmodel
+    \
+    sph.qmodel \
+    physics/cuda_header.cu
 
 HEADERS += \
     control/interaction.h \

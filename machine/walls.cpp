@@ -58,7 +58,7 @@ void Walls::paint()
     Machine::paint();
 }
 
-void Walls::collide(Particle* p2) {
+void Walls::collide(Particle *p2) {
     double lim_x = lim;
     double lim_y = lim;
     double lim_z_0 = 0.;

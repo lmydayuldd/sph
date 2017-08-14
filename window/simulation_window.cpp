@@ -2,6 +2,7 @@
 
 #include <QApplication>
 #include <QDesktopServices>
+#include <QDir>
 #include <QScreen>
 #include <QString>
 #include <QKeyEvent>
@@ -11,6 +12,9 @@
 
 #include <omp.h>
 #include "mpi.h"
+#ifdef COMPILER_MSVC
+#include <cuda.h>
+#endif
 
 class Particle;
 
@@ -44,6 +48,20 @@ SimulationWindow::SimulationWindow()
 {
 //     MPI_Init(NULL, NULL);
 //     MPI_Finalize();
+
+////////////////////////////////////////////////////////////////////////////////
+
+#ifdef COMPILER_MSVC
+    int deviceCount = 0;
+    int cudaDevice = 0;
+    char cudaDeviceName[100];
+    cuInit(0);
+    cuDeviceGetCount(&deviceCount);
+    cuDeviceGet(&cudaDevice, 0);
+    cuDeviceGetName(cudaDeviceName, 100, cudaDevice);
+    qDebug() << "Number of devices: " << deviceCount;
+    qDebug() << "Device name:" << cudaDeviceName;
+#endif
 }
 
 SimulationWindow::~SimulationWindow()
@@ -141,7 +159,10 @@ void SimulationWindow::render()
     interact(); //////////////////////////////////////////////
     if (! Interaction::pause || SimulationWindow::key[RENDER])
     {
-        Computer::currentComputer->loop();
+        for (unsigned i = 0; i < Settings::ITERATIONS_PER_FRAME; ++i)
+        {
+            Computer::currentComputer->loop();
+        }
     }
 
     Timer timer = Timer();
@@ -176,17 +197,17 @@ void SimulationWindow::render()
         std::cout << (timer.diff() - formerTime)/1000000
                   << "ms <- Frame drawing time." << std::endl;
 
-    if (! Interaction::pause || SimulationWindow::key[RENDER])
-    {
-        ++frame;
-    }
-
     if (! Interaction::pause)
     {
         QPixmap pixMap = screen()->grabWindow(0, x(), y(), width(), height());
         QImage img = pixMap.toImage();
         QString dst = Strings::DIR_FRAMES + QString("frame_%1.bmp").arg(frame);
         img.save(dst);
+    }
+
+    if (! Interaction::pause || SimulationWindow::key[RENDER])
+    {
+        ++frame;
     }
 }
 
@@ -200,7 +221,7 @@ void SimulationWindow::interact()
     Interaction::holdPressedParticle();
 }
 
-void SimulationWindow::keyPressEvent(QKeyEvent* e)
+void SimulationWindow::keyPressEvent(QKeyEvent *e)
 {
     switch (e->key())
     {
@@ -276,7 +297,7 @@ void SimulationWindow::keyReleaseEvent(QKeyEvent *e)
     }
 }
 
-void SimulationWindow::mouseMoveEvent(QMouseEvent* event)
+void SimulationWindow::mouseMoveEvent(QMouseEvent *event)
 {
     mousePoint = event->pos();
     normalizedX =    (mousePoint.x() / (float) width())  * 2 - 1;
@@ -303,7 +324,7 @@ void SimulationWindow::mouseMoveEvent(QMouseEvent* event)
     }
 }
 
-void SimulationWindow::mousePressEvent(QMouseEvent* event)
+void SimulationWindow::mousePressEvent(QMouseEvent *event)
 {
     mousePoint = event->pos();
     normalizedX =    (mousePoint.x() / (float) width())  * 2 - 1;
@@ -324,7 +345,7 @@ void SimulationWindow::mousePressEvent(QMouseEvent* event)
         }
     }
 }
-void SimulationWindow::mouseReleaseEvent(QMouseEvent* event)
+void SimulationWindow::mouseReleaseEvent(QMouseEvent *event)
 {
     if (key[CTRL])
     {
@@ -399,5 +420,12 @@ void SimulationWindow::r()
 
 void SimulationWindow::saveVideo()
 {
-
+    QString path = Strings::DIR_FRAMES;
+    QDir dir(path);
+    dir.setFilter(QDir::AllEntries | QDir::NoDotAndDotDot);
+    unsigned files = dir.count();
+    for (unsigned i = 0; i < files; ++i)
+    {
+        QString frame_path = Strings::DIR_FRAMES + QString("frame_%1.bmp").arg(i);
+    }
 }
