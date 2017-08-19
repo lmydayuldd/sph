@@ -8,6 +8,7 @@ class Strings
 public:
     static const QString DESKTOP;
     static QString DIR_FRAMES;
+    static QString IMG_FILE_TYPE;
 
     static void init();
 

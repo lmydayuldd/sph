@@ -30,6 +30,25 @@ std::vector<std::vector<Particle*>> Particle::flows;
 int Particle::count = 0;
 std::vector<std::vector<bool>> Particle::collision;
 std::vector<std::vector<double>> Particle::collisionDistance;
+// for CUDA
+// pinned host memory
+double *Particle::rx_host = 0;
+double *Particle::ry_host = 0;
+double *Particle::rz_host = 0;
+double *Particle::vx_host = 0;
+double *Particle::vy_host = 0;
+double *Particle::vz_host = 0;
+double *Particle::m_host = 0;
+bool *Particle::is_stationary_host = 0;
+double *Particle::rx_device = 0;
+double *Particle::ry_device = 0;
+double *Particle::rz_device = 0;
+double *Particle::vx_device = 0;
+double *Particle::vy_device = 0;
+double *Particle::vz_device = 0;
+double *Particle::m_device = 0;
+bool *Particle::is_stationary_device = 0;
+// for CUDA
 
 Particle::Particle()
 {
@@ -60,8 +79,8 @@ Particle::Particle(int parentFlow)
       id(++count),
       neighbours(nullptr),
       cell(std::vector<unsigned>{ std::numeric_limits<unsigned>::max(),
-                                      std::numeric_limits<unsigned>::max(),
-                                      std::numeric_limits<unsigned>::max() }),
+                                  std::numeric_limits<unsigned>::max(),
+                                  std::numeric_limits<unsigned>::max() }),
       cube(nullptr),
       m(Settings::PARTICLE_MASS),
       rho(Settings::DESIRED_REST_DENSITY),
@@ -71,7 +90,7 @@ Particle::Particle(int parentFlow)
       pressure(Settings::PRESSURE),
       smoothing_length(Settings::SMOOTHING_LENGTH),
       radius(Settings::PARTICLE_RADIUS),
-      stationary(false),
+      isStationary(false),
       didCollide(new bool(false)),
       boundary(false),
       color {0.5, 0, 0},
@@ -263,11 +282,11 @@ void Particle::updateNeighbours()
         }
         if (id == 50) {
             std::cout << neighbours->size()
-                      << "<- Particle 50 neighbour count." << std::endl << std::flush;
+                      << " <- Particle 50 neighbour count." << std::endl << std::flush;
         }
         if (id == 20) {
             std::cout << neighbours->size()
-                      << "<- Particle 20 neighbour count." << std::endl << std::flush;
+                      << " <- Particle 20 neighbour count." << std::endl << std::flush;
         }
     }
 

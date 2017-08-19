@@ -61,7 +61,7 @@ Cloth::Cloth(
             if ((i == 0       && j == 0) || (i == 0       && j == knots-1)
              || (i == knots-1 && j == 0) || (i == knots-1 && j == knots-1))
             {
-                (*flow)[i*knots + j]->stationary = true;
+                (*flow)[i*knots + j]->isStationary = true;
             }
         }
     }

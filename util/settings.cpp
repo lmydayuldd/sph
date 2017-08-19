@@ -10,10 +10,12 @@ using namespace std;
 
 // Environment:
 
-unsigned     Settings::WINDOW_WIDTH             = 720;
-unsigned     Settings::WINDOW_HEIGHT            = 540;
-bool         Settings::NO_PRINTOUT              = false;
-bool         Settings::NO_SCREENS_NO_VIDEO      = false; // eliminates inconsistent framerate
+unsigned     Settings::WINDOW_WIDTH        = 720;
+unsigned     Settings::WINDOW_HEIGHT       = 540;
+bool         Settings::NO_PRINTOUT         = false;
+bool         Settings::NO_SCREENS_NO_VIDEO = true; // eliminates inconsistent framerate, when enabled
+std::string  Settings::IMG_FILE_TYPE       = ".png";
+unsigned     Settings::VIDEO_FILE_FPS      = 120;
 
 // Graphics:
 
@@ -34,11 +36,11 @@ double        Settings::dt                   = 0.16 * 3; // 0.48
 unsigned      Settings::ITERATIONS_PER_FRAME = 1;
 double        Settings::ARENA_DIAMETER       = 30.; // 20.
 double        Settings::ARENA_DIAMETER_Z     = 0.;
-unsigned      Settings::PARTICLE_COUNT       = 1800; // 1200
+unsigned      Settings::PARTICLE_COUNT       = 2000; // 1200
 unsigned char Settings::MAP_SETUP            = DAM_BREAK_NON_MAP;
 unsigned      Settings::GHOST_LAYER_GAGE     = 0;
 bool          Settings::CALCULATE_MASS       = false; // TODO
-bool          Settings::PARALLEL_GPU         = false;
+bool          Settings::PARALLEL_GPU         = true;
 bool          Settings::PARALLEL_MPI         = false;
 bool          Settings::PARALLEL_OMP         = true;
 unsigned      Settings::PARALLEL_OMP_THREADS = 8;

@@ -9,10 +9,12 @@ public:
 
     // Environment:
 
-    static unsigned WINDOW_WIDTH;
-    static unsigned WINDOW_HEIGHT;
-    static bool     NO_PRINTOUT;
-    static bool     NO_SCREENS_NO_VIDEO;
+    static unsigned    WINDOW_WIDTH;
+    static unsigned    WINDOW_HEIGHT;
+    static bool        NO_PRINTOUT;
+    static bool        NO_SCREENS_NO_VIDEO;
+    static std::string IMG_FILE_TYPE;
+    static unsigned    VIDEO_FILE_FPS;
 
     // Graphics:
 

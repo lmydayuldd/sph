@@ -176,7 +176,7 @@ void Map::generate()
                  || j >= Grid::cell_count - Settings::GHOST_LAYER_GAGE)
                 {
                     ghostParticle = new Particle(0);
-                    ghostParticle->stationary = true;
+                    ghostParticle->isStationary = true;
                     ghostParticle->r->x = - Settings::ARENA_DIAMETER/2
                                           + Settings::PARTICLE_RADIUS
                                           + i * Settings::PARTICLES_INIT_DIST;

@@ -15,20 +15,20 @@ void Forces::universalGravitation(const Particle &p1, const Particle &p2)
         Vector r21 = *p1.r - *p2.r;
         double d = r21.norm();
         r21 = r21.normal();
-        if (! p1.stationary) *p1.F = *p1.F - r21 * (G_const * M/(d*d));
+        if (! p1.isStationary) *p1.F = *p1.F - r21 * (G_const * M/(d*d));
     }
 }
 
 void Forces::gravityEarth(const Particle &p)
 {
     Vector gravity = Vector(0, - G_earth, 0);
-    if (! p.stationary) *p.F += gravity * p.m;
+    if (! p.isStationary) *p.F += gravity * p.m;
 }
 
 void Forces::Coulomb(const Particle &p1, const Particle &p2)
 {
     if (&p1 != &p2) {
-        if (! p1.stationary) {
+        if (! p1.isStationary) {
             double Q = p1.charge * p2.charge;
             Vector r21 = *p1.r - *p2.r;
             double d = r21.norm();
@@ -40,7 +40,7 @@ void Forces::Coulomb(const Particle &p1, const Particle &p2)
 
 void Forces::Friction(const Particle &p)
 {
-    if (! p.stationary) {
+    if (! p.isStationary) {
         Vector friction
             = Vector(*p.F).normal() * (-1 * coefficient_of_friction * p.F->y);
 
@@ -51,14 +51,14 @@ void Forces::Friction(const Particle &p)
 void Forces::Hooke(const Particle &p1, const Particle &p2,
                    double ks, double d, double kd)
 { // F-> = -ks . x-> // d = targetSpringDistance
-    if (! p1.stationary || ! p2.stationary) {
+    if (! p1.isStationary || ! p2.isStationary) {
         Vector r12 = *p1.r - *p2.r;
         Vector v12 = *p1.v - *p2.v;
         double fs = ks * fabs(r12.norm() - d);
         double fd = kd * v12.dot(r12) / r12.norm();
         Vector fH = r12.normal() * (fs + fd);
-        if (! p1.stationary) *p1.F = *p1.F - fH;
-        if (! p2.stationary) *p2.F = *p2.F + fH;
+        if (! p1.isStationary) *p1.F = *p1.F - fH;
+        if (! p2.isStationary) *p2.F = *p2.F + fH;
     }
 }
 
@@ -96,7 +96,7 @@ void Forces::collide(const Particle &p1, const Particle &p2) {
                 double distanceBorder
                     = p1.r->distance(*p2.r) - p1.radius - p2.radius;
 
-                if (! p2.stationary)
+                if (! p2.isStationary)
                 {
 #pragma omp critical
                     *p2.r += sphereNormal * std::min(distanceBorder, Settings::PARTICLE_MAX_DR);
@@ -130,7 +130,7 @@ void Forces::collide(const Particle &p1, const Particle &p2) {
             if (Settings::COLLIDE_TRANSFER_VEL)
             {
                 Vector p2_v(*p2.v);
-                if (! p2.stationary)
+                if (! p2.isStationary)
                 {
 #pragma omp critical
                     *p2.v -=
@@ -143,7 +143,7 @@ void Forces::collide(const Particle &p1, const Particle &p2) {
 //#pragma omp critical
 //                    *p2.v *= (1. - Settings::WATER_DAMPENING);
                 }
-                if (! p1.stationary)
+                if (! p1.isStationary)
                 {
 #pragma omp critical
                     *p1.v -=
@@ -155,11 +155,11 @@ void Forces::collide(const Particle &p1, const Particle &p2) {
                         );
                     //*p1.v *= (1. - Settings::WATER_DAMPENING);
                 }
-                if (! p1.stationary) {
+                if (! p1.isStationary) {
 //                    *p1.r += *p1.v * (Settings::dt - exactCollisionTime);//(1. - exactCollisionTime); //// ??
 //                    *p1.r_former = *p1.r;
                 }
-                if (! p2.stationary) {
+                if (! p2.isStationary) {
 //                    *p2.r += *p2.v * (Settings::dt - exactCollisionTime);//(1. - exactCollisionTime); //// ??
 //                    *p2.r_former = *p2.r;
                 }
@@ -230,7 +230,7 @@ void Forces::collide(const Particle &p1, std::vector<Particle*>* with) {
                 std::cout << "p" << p1.id << " dt_left: " << *p1.dt_left << std::endl << std::flush;
 
                 Vector p2_v(*p2->v);
-                if (! p2->stationary)
+                if (! p2->isStationary)
                 {
 #pragma omp critical
                     *p2->v -=
@@ -243,7 +243,7 @@ void Forces::collide(const Particle &p1, std::vector<Particle*>* with) {
 #pragma omp critical
                     *p2->v *= (1. - Settings::FORCES_DAMPEN_WATER);
                 }
-                if (! p1.stationary)
+                if (! p1.isStationary)
                 {
                     *p1.v -=
                         (*p1.r - *p2->r) * (

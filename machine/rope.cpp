@@ -42,8 +42,8 @@ Rope::Rope(
         rn.z += (end.z - start.z) / knots;
         (*flow)[i]->r = new Vector(rn);
     }
-    (*flow)[0]->stationary         = true;
-    (*flow)[knots - 1]->stationary = true;
+    (*flow)[0]->isStationary         = true;
+    (*flow)[knots - 1]->isStationary = true;
 
     float color[4] = {1, 1, 0, 0.5};
     for (unsigned i = 0; i < (*flow).size(); ++i) {

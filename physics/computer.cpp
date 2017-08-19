@@ -5,6 +5,8 @@
 #include <omp.h>
 
 extern void GPUCollideAll();
+extern void GPUCollideMallocs();
+extern void GPUCollideFrees();
 
 class Particle;
 
@@ -77,8 +79,9 @@ void Computer::evaluateForces(const Particle &p)
     {
         #pragma omp section
         {
-            if (Settings::FORCES_GRAVITY_EARTH)
+            if (Settings::FORCES_GRAVITY_EARTH) {
                 Forces::gravityEarth(p);
+            }
         }
 
         #pragma omp section
@@ -124,15 +127,12 @@ void Computer::evaluateForces()
 void Computer::evaluateSPHForces()
 {
     double m = 0.;
-    if (Settings::CALCULATE_MASS)
-    {
+    if (Settings::CALCULATE_MASS) {
         double rho = 0.;
         int count = 0;
-        for (unsigned i = 0; i < Particle::flows.size(); ++i)
-        {
+        for (unsigned i = 0; i < Particle::flows.size(); ++i) {
             #pragma omp for
-            for (LOOP_TYPE j = 0; j < Particle::flows[i].size(); ++j)
-            {
+            for (LOOP_TYPE j = 0; j < Particle::flows[i].size(); ++j) {
                 count += 1;
                 rho += Particle::flows[i][j]->rho;
             }
@@ -145,13 +145,10 @@ void Computer::evaluateSPHForces()
     long long int formerTime = 0;
 
     formerTime = timer.diff();
-    for (unsigned i = 0; i < Particle::flows.size(); ++i)
-    {
+    for (unsigned i = 0; i < Particle::flows.size(); ++i) {
         #pragma omp parallel for if(Settings::PARALLEL_OMP)
-        for (LOOP_TYPE j = 0; j < Particle::flows[i].size(); ++j)
-        {
-            if (Settings::CALCULATE_MASS)
-            {
+        for (LOOP_TYPE j = 0; j < Particle::flows[i].size(); ++j) {
+            if (Settings::CALCULATE_MASS) {
                 Particle::flows[i][j]->m = m;
             }
             Particle::flows[i][j]->F->zero();
@@ -160,11 +157,9 @@ void Computer::evaluateSPHForces()
     LOG_TIME("ms <- Zero forces time.");
 
     formerTime = timer.diff();
-    for (unsigned i = 0; i < Particle::flows.size(); ++i)
-    {
+    for (unsigned i = 0; i < Particle::flows.size(); ++i) {
 #pragma omp parallel for if(Settings::PARALLEL_OMP)
-        for (LOOP_TYPE j = 0; j < Particle::flows[i].size(); ++j)
-        {
+        for (LOOP_TYPE j = 0; j < Particle::flows[i].size(); ++j) {
             Particle::flows[i][j]->updateNeighbours();
             Particle::flows[i][j]->isBoundary();
         }
@@ -172,11 +167,9 @@ void Computer::evaluateSPHForces()
     LOG_TIME("ms <- Update neighbours & find boundaries time.");
 
     formerTime = timer.diff();
-    for (unsigned i = 0; i < Particle::flows.size(); ++i)
-    {
+    for (unsigned i = 0; i < Particle::flows.size(); ++i) {
 #pragma omp parallel for if(Settings::PARALLEL_OMP)
-        for (LOOP_TYPE j = 0; j < Particle::flows[i].size(); ++j)
-        {
+        for (LOOP_TYPE j = 0; j < Particle::flows[i].size(); ++j) {
             Particle::flows[i][j]->updateDensity();
             Particle::flows[i][j]->updatePressure();
         }
@@ -184,11 +177,9 @@ void Computer::evaluateSPHForces()
     LOG_TIME("ms <- Update rho & p time.");
 
     formerTime = timer.diff();
-    for (unsigned i = 0; i < Particle::flows.size(); ++i)
-    {
+    for (unsigned i = 0; i < Particle::flows.size(); ++i) {
 #pragma omp parallel for if(Settings::PARALLEL_OMP)
-        for (LOOP_TYPE j = 0; j < Particle::flows[i].size(); ++j)
-        {
+        for (LOOP_TYPE j = 0; j < Particle::flows[i].size(); ++j) {
             Particle::flows[i][j]->computePressureForces();
             Particle::flows[i][j]->computeViscosityForces();
             Particle::flows[i][j]->computeOtherForces();
@@ -202,19 +193,41 @@ void Computer::evaluateSPHForces()
 
 void Computer::collide()
 {
-    for (unsigned i = 0; i < Particle::collision.size(); ++i) {
-        for (unsigned j = 0; j < Particle::collision[i].size(); ++j) {
+    #ifdef COMPILER_GPP
+    #pragma omp parallel for \
+                collapse(2) \
+                if(Settings::PARALLEL_OMP)
+    for (LOOP_TYPE i = 0; i < Particle::collision.size(); ++i) {
+        for (LOOP_TYPE j = 0; j < Particle::collision[i].size(); ++j) {
             Particle::collision[i][j] = false;
             Particle::collisionDistance[i][j] = std::numeric_limits<double>::infinity();
         }
     }
+    #elif COMPILER_MSVC
+    #pragma omp parallel for if(Settings::PARALLEL_OMP)
+    for (LOOP_TYPE n = 0; n < Particle::collision.size() * Particle::collision.size(); ++n) {
+        LOOP_TYPE i = n / Particle::collision.size();
+        LOOP_TYPE j = n % Particle::collision.size();
+        Particle::collision[i][j] = false;
+        Particle::collisionDistance[i][j] = std::numeric_limits<double>::infinity();
+    }
+    #endif
 
-//#pragma omp parallel for \
-//            collapse(2) \
-//            if(Settings::PARALLEL_OMP)
-    for (unsigned i = 0; i < Particle::flows.size(); ++i)
-         for (unsigned j = 0; j < Particle::flows.size(); ++j)
+    #ifdef COMPILER_GPP
+    #pragma omp parallel for \
+                collapse(2) \
+                if(Settings::PARALLEL_OMP)
+    for (LOOP_TYPE i = 0; i < Particle::flows.size(); ++i)
+         for (LOOP_TYPE j = 0; j < Particle::flows.size(); ++j)
              *Particle::flows[i][j]->dt_left = Settings::dt; // TODO 1. or Settings::dt ???
+    #elif COMPILER_MSVC
+    #pragma omp parallel if(Settings::PARALLEL_OMP)
+    for (LOOP_TYPE n = 0; n < Particle::flows.size() * Particle::flows.size(); ++n) {
+        LOOP_TYPE i = n / Particle::flows.size();
+        LOOP_TYPE j = n % Particle::flows.size();
+        *Particle::flows[i][j]->dt_left = Settings::dt; // TODO 1. or Settings::dt ???
+    }
+    #endif
 
 //////////////////////////////////////////////////////////////
 
@@ -227,7 +240,9 @@ void Computer::collide()
         }
 
         if (c == 0) {
+            GPUCollideMallocs();
             GPUCollideAll();
+            //GPUCollideFrees();
         }
 #endif
 
@@ -308,20 +323,20 @@ void Computer::collide()
 
     for (unsigned i = 0; i < Particle::flows.size(); ++i)
     {
-#ifdef COMPILER_GPP
+        #ifdef COMPILER_GPP
         #pragma omp parallel for collapse(2) if(Settings::PARALLEL_OMP)
         for (unsigned j = 0; j < Particle::flows[i].size(); ++j)
             for (unsigned k = 0; k < Machine::machines.size(); ++k)
                 Machine::machines[k]->collide(Particle::flows[i][j]);
-#elif COMPILER_MSVC
+        #elif COMPILER_MSVC
         #pragma omp parallel for if(Settings::PARALLEL_OMP)
         for (LOOP_TYPE n = 0; n < Particle::flows[i].size() * Machine::machines.size(); ++n)
         {
-            int j = n / Machine::machines.size();
-            int k = n % Machine::machines.size();
+            LOOP_TYPE j = n / Machine::machines.size();
+            LOOP_TYPE k = n % Machine::machines.size();
             Machine::machines[k]->collide(Particle::flows[i][j]);
         }
-#endif
+        #endif
     }
 
     for (unsigned i = 0; i < Particle::flows.size(); ++i)
@@ -334,7 +349,7 @@ void Computer::collide()
     }
 }
 
-void Computer::computeVectors(const Particle& p, float dt)
+void Computer::computeVectors(const Particle &p, float dt)
 {
     //MidPoint(p, dt);
     Euler(p, dt);
@@ -345,9 +360,9 @@ void Computer::computeVectors(float dt)
     Euler(dt);
 }
 
-void Computer::Euler(const Particle& p, float dt)
+void Computer::Euler(const Particle &p, float dt)
 {
-    if (! p.stationary)
+    if (! p.isStationary)
     {
         *p.r_former = *p.r;
         *p.v_former = *p.v;

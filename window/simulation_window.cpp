@@ -16,6 +16,15 @@
 #include <cuda.h>
 #endif
 
+#include <opencv2/opencv.hpp>
+#include <opencv2/core.hpp> // does it include all opencv2/core/*.hpp ?
+//#include <opencv2/core/core.hpp>
+//#include <opencv2/core/mat.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/video/video.hpp>
+#include <opencv2/videoio.hpp>
+
 class Particle;
 
 #include "control/interaction.h"
@@ -36,13 +45,16 @@ class Particle;
 #include "util/timer.h"
 #include "util/settings.h"
 
-Timer* SimulationWindow::timer = new Timer();
+Timer *SimulationWindow::timer = new Timer();
 long long int SimulationWindow::formerTime = 0;
 long long int SimulationWindow::currentTime = 0;
 double SimulationWindow::dt = 0;
 int SimulationWindow::frame = 0;
 int SimulationWindow::refreshRate = 0;
 bool SimulationWindow::key[] = {0};
+std::vector<QImage> SimulationWindow::screens;
+
+extern void GPUCollideFrees();
 
 SimulationWindow::SimulationWindow()
 {
@@ -199,11 +211,13 @@ void SimulationWindow::render()
 
     if (! Interaction::pause)
     {
-        if (! Settings::NO_SCREENS)
+        if (! Settings::NO_SCREENS_NO_VIDEO)
         {
             QPixmap pixMap = screen()->grabWindow(0, x(), y(), width(), height());
             QImage img = pixMap.toImage();
-            QString dst = Strings::DIR_FRAMES + QString("frame_%1.bmp").arg(frame);
+            //screens.push_back(img);
+            QString dst = Strings::DIR_FRAMES
+                    + QString("frame_%1").arg(frame) + Strings::IMG_FILE_TYPE;
             img.save(dst);
         }
     }
@@ -272,8 +286,9 @@ void SimulationWindow::keyReleaseEvent(QKeyEvent *e)
             break;
             case Qt::Key_Escape    :
                 key[ESCAPE] = false;
+                GPUCollideFrees();
                 QApplication::quit();
-                if (! Settings::NO_SCREENS) {
+                if (! Settings::NO_SCREENS_NO_VIDEO) {
                     saveVideo();
                     QDesktopServices::openUrl(Strings::DIR_FRAMES);
                 }
@@ -423,14 +438,79 @@ void SimulationWindow::r()
     Matrices::setViewMatrix();
 }
 
+// Eliminates console output on OpenCV cv::error() calls after failed
+//   OpenCV assertions.
+int handleCVError(int status, const char *func_name,
+                  const char *err_msg, const char *file_name,
+                  int line, void *userdata)
+{
+    std::cout << "Failed writing video frame." << std::endl << std::flush;
+    std::cout << err_msg << std::endl << std::flush;
+
+    return 0;
+}
+
 void SimulationWindow::saveVideo()
 {
     QString path = Strings::DIR_FRAMES;
     QDir dir(path);
     dir.setFilter(QDir::AllEntries | QDir::NoDotAndDotDot);
-    unsigned files = dir.count();
-    for (unsigned i = 0; i < files; ++i)
+    unsigned files_count = dir.count();
+    for (unsigned i = 0; i < files_count; ++i)
     {
-        QString frame_path = Strings::DIR_FRAMES + QString("frame_%1.bmp").arg(i);
+        QString frame_path = Strings::DIR_FRAMES + QString("frame_%1").arg(i)
+                             + Strings::IMG_FILE_TYPE;
+        screens.push_back(QImage(frame_path));
+    }
+
+    std::vector<cv::Mat> mats;
+    for (unsigned i = 0; i < screens.size(); ++i) {
+        // QImage to OpenCV cv::Mat
+        cv::Mat tmp_mat(
+            screens[i].height(), screens[i].width(), CV_8UC3,
+            (uchar*) screens[i].bits(), screens[i].bytesPerLine()
+        );
+        cv::Mat fin_mat;
+        cv::cvtColor(tmp_mat, fin_mat, CV_BGR2RGB);
+        QString frame_path = Strings::DIR_FRAMES + QString("frame_%1").arg(i)
+                             + Strings::IMG_FILE_TYPE;
+        fin_mat = cv::imread(frame_path.toStdString(), CV_LOAD_IMAGE_COLOR);
+        mats.push_back(fin_mat);
+    }
+
+//    cv::namedWindow("flowsVideo", CV_WINDOW_AUTOSIZE);
+//    cv::imshow("flowsVideo", mats[0]);
+
+//        std::vector<int> compression_params;
+//        compression_params.push_back(CV_IMWRITE_PNG_COMPRESSION);
+//        compression_params.push_back(9);
+//        cv::imwrite(
+//            (Strings::DIR_FRAMES + QString("flowsVideo_test_img") + Strings::IMG_FILE_TYPE).toStdString(),
+//            mats[0], compression_params
+//        );
+
+    try {
+        cv::VideoWriter video(
+            (Strings::DIR_FRAMES + QString("flowsVideo.avi")).toStdString(),
+            CV_FOURCC('M', 'J', 'P', 'G'), Settings::VIDEO_FILE_FPS,
+            cv::Size(screens[0].width(), screens[0].height()),
+            true
+        );
+        cv::redirectError(handleCVError);
+        unsigned failedFrames = 0;
+        for (int i = 0; i < mats.size(); ++i) {
+            try
+            {
+                video.write(mats[i]);
+            }
+            catch (runtime_error &e) { ++failedFrames; continue; }
+        }
+        std::cout << failedFrames << " <- failed frames count." << std::endl << std::flush;
+        cv::redirectError(nullptr);
+        video.release();
+        //cv::destroyAllWindows();
+    }
+    catch (runtime_error &ex) {
+        fprintf(stderr, "Exception: %s\n", ex.what());
     }
 }

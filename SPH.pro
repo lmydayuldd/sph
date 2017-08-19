@@ -11,10 +11,6 @@ TARGET                        = SPH
 TEMPLATE                      = app
 CONFIG                       += mobility c++11
 MOBILITY                      =
-*-g++:QMAKE_CXXFLAGS         += -std=c++11 -pthread -fopenmp
-win32-msvc*:QMAKE_CXXFLAGS   += /openmp
-*-g++:QMAKE_CXXFLAGS_WARN_ON += -Wextra
-#win32-msvc*:QMAKE_CXXFLAGS   += /sdl # TODO, it ignores some errors
 
 # Defines platform-specific preprocessor macro.
 #   Edit at "Projects -> QMake -> additional arguments"
@@ -24,7 +20,25 @@ CONFIG(ANDROID_BUILD) : DEFINES += ANDROID_BUILD
 CONFIG(COMPILER_MSVC) : DEFINES += COMPILER_MSVC
 CONFIG(COMPILER_GPP)  : DEFINES += COMPILER_GPP
 
-#CONFIG += release # TODO
+*-g++:QMAKE_CXXFLAGS_WARN_ON += -Wextra
+#win32-msvc*:QMAKE_CXXFLAGS   += /sdl # TODO, it ignores some errors
+
+CONFIG(debug, debug|release) {
+    *-g++ {
+        QMAKE_CXXFLAGS += -g3
+    }
+    win32-msvc* {
+        QMAKE_CXXFLAGS += /Z7
+    }
+}
+else {
+    *-g++ {
+        QMAKE_CXXFLAGS += -O3 -msse4.2
+    }
+    win32-msvc* {
+        QMAKE_CXXFLAGS += /O2 /arch:AVX2
+    }
+}
 
 *-g++ {
     # Qt Creator seems to have a problem providing qwindows.dll / qwindowsd.dll
@@ -42,6 +56,62 @@ CONFIG(COMPILER_GPP)  : DEFINES += COMPILER_GPP
 }
 
 ############################################################
+# OpenCV ###################################################
+############################################################
+
+INCLUDEPATH += D:\dev\opencv\build\include
+
+CONFIG(debug, debug|release) {
+    *-g++ {
+        LIBS += -LD:/dev/opencv/build/bin/Debug \
+                    -lopencv_calib3d330d \
+                    -lopencv_core330d \
+                    -lopencv_features2d330d \
+                    -lopencv_ffmpeg330d \
+                    -lopencv_highgui330d \
+                    -lopencv_imgproc330d
+                    #opencv_world330d
+    }
+    win32-msvc* {
+        LIBS += -L"D:\dev\opencv\build\bin\Debug"
+        LIBS += -LD:\dev\opencv\build\install\x64\vc15\lib \ #####################
+                    -lopencv_calib3d330d \
+                    -lopencv_core330d \
+                    -lopencv_features2d330d \
+                    #-lopencv_ffmpeg330d \
+                    -lopencv_highgui330d \
+                    -lopencv_imgproc330d \
+                    -lopencv_videoio330d # for VideoWriter
+                    #opencv_world330d
+    }
+}
+else {
+    *-g++ {
+        LIBS += -LD:/dev/opencv/build/bin/Release \
+                    -lopencv_calib3d330 \
+                    -lopencv_core330 \
+                    -lopencv_features2d330 \
+                    -lopencv_ffmpeg330 \
+                    -lopencv_highgui330 \
+                    -lopencv_imgproc330
+                    #-lopencv_world330
+    }
+    win32-msvc* {
+        LIBS += -L"D:\dev\opencv\build\bin\Release"
+        LIBS += -LD:\dev\opencv\build\install\x64\vc15\lib \ #####################
+                    -lopencv_calib3d330 \
+                    -lopencv_core330 \
+                    -lopencv_features2d330 \
+                    #-lopencv_ffmpeg330 \
+                    -lopencv_highgui330 \
+                    -lopencv_imgcodecs330 \ # for cv::imwrite
+                    -lopencv_imgproc330 \
+                    -lopencv_videoio330 # for cv::VideoWriter
+                    #-lopencv_world330#_64
+    }
+}
+
+############################################################
 # OMP, MPI & CUDA ##########################################
 ############################################################
 
@@ -51,6 +121,9 @@ CONFIG(COMPILER_GPP)  : LIBS += -LD:/dev/ms-mpi/Lib/x86 -lmsmpi # MPI (Microsoft
 CONFIG(COMPILER_MSVC) : LIBS += -LD:/dev/ms-mpi/Lib/x64 -lmsmpi # MPI (Microsoft)
 
 *-g++:LIBS += -pthread -fopenmp # OpenMP
+
+*-g++:QMAKE_CXXFLAGS       += -std=c++11 -pthread -fopenmp
+win32-msvc*:QMAKE_CXXFLAGS += /openmp
 
 win32-msvc* {
     CUDA_DIR = "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0" # CUDA Toolkit
@@ -68,8 +141,10 @@ win32-msvc* {
 
 win32-msvc* {
     # for CDB debugger
-    INCLUDEPATH += "C:\Program Files (x86)\Windows Kits\10\Lib\10.0.14393.0\ucrt"
-    LIBS += -L"C:\Program Files (x86)\Windows Kits\10\Lib\10.0.14393.0\ucrt\x64"
+    INCLUDEPATH += "C:\Program Files (x86)\Windows Kits\10\Source\10.0.14393.0\ucrt" \
+                   "C:\Program Files (x86)\Windows Kits\10\Source\10.0.14393.0\ucrt\inc"
+    LIBS += -L"C:\Program Files (x86)\Windows Kits\10\Lib\10.0.14393.0\ucrt\x64" \
+            -lucrtd# -lucrt -llibucrtd -llibucrt
 
     VISUAL_STUDIO_COMPILER = $$shell_quote("C:\Program Files (x86)\Microsoft Visual Studio\Shared\14.0\VC\bin")
     MSVCRT_LINK_FLAG_DEBUG = "/MDd" # /MD dynamic shared DLL, /MT static, /LD dynamic DLL
@@ -97,7 +172,6 @@ win32-msvc* {
 
 win32-msvc* {
     CONFIG(debug, debug|release) {
-        # Debug mode
         cuda_d.input = CUDA_SRCS
         cuda_d.output = ${QMAKE_FILE_BASE}_link.o
         equals(VISUAL_STUDIO_COMPILER, "MDd") {
@@ -113,20 +187,22 @@ win32-msvc* {
         }
         QMAKE_EXTRA_COMPILERS += cuda_d
         cuda_d.dependency_type = TYPE_C
-        cuda_d.commands = $$CUDA_DIR/bin/nvcc.exe --verbose \
+        cuda_d.commands = $$CUDA_DIR/bin/nvcc.exe --verbose -g \
                               $$CUDA_INCL $$CUDA_LIBS \
                               $$NVCC_FLAGS \
                               -D_DEBUG \
+                              -DCOMPILER_MSVC \
                               --machine 64 -gencode $$CUDA_ARCH \
                               -ccbin $$VISUAL_STUDIO_COMPILER \ # MSVC CL.exe directory
-                              -Xcompiler $$MSVCRT_LINK_FLAG_RELEASE \ # dynamic/static release
-                              -Xcompiler "/wd4819,/EHsc,/W3,/nologo,/Od,/Zi,/RTC1" \
+                              -Xcompiler $$MSVCRT_LINK_FLAG_DEBUG \ # dynamic/static release
+                              -Xcompiler "/wd4819,/EHsc,/W3,/nologo,/Zi" \
+                              -Xcompiler "/Od,/RTC1" \ # error checking, incompatible with /O2
+                              -Xcompiler "/openmp" \
                               -c -o ${QMAKE_FILE_OUT} \ # output files
                               # -dc instead, for multiple .cu files
                               ${QMAKE_FILE_NAME} # input files
     }
     else {
-        # Release mode
         cuda.input = CUDA_SRCS
         cuda.output = ${QMAKE_FILE_BASE}_link.o
         equals(VISUAL_STUDIO_COMPILER, "MD") {
@@ -145,26 +221,17 @@ win32-msvc* {
         cuda.commands = $$CUDA_DIR/bin/nvcc.exe --verbose \
                             $$CUDA_INCL $$CUDA_LIBS \
                             $$NVCC_FLAGS \
+                            -DCOMPILER_MSVC \
                             --machine 64 -gencode $$CUDA_ARCH \
                             -ccbin $$VISUAL_STUDIO_COMPILER \ # MSVC CL.exe directory
                             -Xcompiler $$MSVCRT_LINK_FLAG_RELEASE \ # dynamic/static release
-                            -Xcompiler "/wd4819,/EHsc,/W3,/nologo,/Od,/Zi,/RTC1" \
+                            -Xcompiler "/wd4819,/EHsc,/W3,/nologo,/Zi" \
+                            -Xcompiler "/openmp,/O2,/arch:AVX2" \
                             -c -o ${QMAKE_FILE_OUT} \ # output files
                             # -dc instead, for multiple .cu files
                             ${QMAKE_FILE_NAME} # input files
     }
 }
-
-############################################################
-# OpenCV ###################################################
-############################################################
-
-#LIBS += -LD:/dev/opencv/build/bin \
-#            libopencv_core240d \
-#            libopencv_highgui240d \
-#            libopencv_imgproc240d \
-#            libopencv_features2d240d \
-#            libopencv_calib3d240d
 
 ############################################################
 # Project files ############################################
@@ -182,10 +249,7 @@ DISTFILES += \
     map/sim_dam_fall.txt \
     map/sim_droplet.txt \
     shader/fragment_shader.fsh \
-    shader/vertex_shader.vsh \
-    \
-    sph.qmodel \
-    physics/cuda_header.cu
+    shader/vertex_shader.vsh
 
 HEADERS += \
     control/interaction.h \

@@ -15,6 +15,24 @@ public:
     static std::vector<std::vector<bool>> collision;
     static std::vector<std::vector<double>> collisionDistance;
     //std::vector<Particle*>* parentFlow;
+// for CUDA
+    static double *rx_host;
+    static double *ry_host;
+    static double *rz_host;
+    static double *vx_host;
+    static double *vy_host;
+    static double *vz_host;
+    static double *m_host;
+    static bool *is_stationary_host;
+    static double *rx_device;
+    static double *ry_device;
+    static double *rz_device;
+    static double *vx_device;
+    static double *vy_device;
+    static double *vz_device;
+    static double *m_device;
+    static bool *is_stationary_device;
+// for CUDA
     int parentFlow;
     int id;
     std::vector<Particle*> *neighbours;
@@ -26,7 +44,7 @@ public:
     double m, rho, charge, temperature, viscosity, pressure;
     double smoothing_length;
     double radius;
-    bool stationary;
+    bool isStationary;
     bool *didCollide;
     bool boundary;
     float color[3];

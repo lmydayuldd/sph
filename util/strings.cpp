@@ -8,6 +8,7 @@ const QString Strings::DESKTOP = QStandardPaths::locate(
                                     QStandardPaths::DesktopLocation, "",
                                     QStandardPaths::LocateDirectory);
 QString Strings::DIR_FRAMES;
+QString Strings::IMG_FILE_TYPE;
 
 void Strings::init()
 {
@@ -19,6 +20,7 @@ void Strings::init()
             = QStandardPaths::locate(QStandardPaths::DesktopLocation, "frames/",
                                      QStandardPaths::LocateDirectory);
     }
+    IMG_FILE_TYPE = QString::fromStdString(Settings::IMG_FILE_TYPE);
 }
 
 Strings::Strings()

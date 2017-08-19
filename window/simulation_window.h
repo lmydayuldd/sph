@@ -4,6 +4,7 @@
 #include <QScreen>
 
 class Timer;
+class QImage;
 
 #include "window/gl_window.h"
 
@@ -30,6 +31,8 @@ public:
     static bool key[sizeof(unsigned char) * 256];
 
 private:
+    static std::vector<QImage> screens;
+
     QPoint mousePoint;
     int dx;
     int dy;
