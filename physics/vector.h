@@ -18,7 +18,7 @@ public:
 
     friend std::ostream& operator<<(std::ostream &out, const Vector &v)
     {
-        return out << v.x << " " << v.y << " " << v.z << std::endl;
+        return out << v.x << " " << v.y << " " << v.z;
     }
 
     void createView();
@@ -49,6 +49,7 @@ public:
     virtual Vector normal() const;
 
     void limit(double max);
+    void cut(double max);
     void zero();
 
     void setApplicationPoint(Vector application);

@@ -91,11 +91,11 @@ void SimulationWindow::prepareSimulation()
 
     Map::generate();
 
-    for (unsigned i = 0; i < Settings::PARTICLE_COUNT; ++i)
+    for (unsigned i = 0; i < Settings::PARTICLE_COUNT_2D; ++i)
     {
-        Particle::collision.push_back(std::vector<bool>(Settings::PARTICLE_COUNT));
-        Particle::collisionDistance.push_back(std::vector<double>(Settings::PARTICLE_COUNT));
-        for (unsigned j = 0; j < Settings::PARTICLE_COUNT; ++j)
+        Particle::collision.push_back(std::vector<bool>(Settings::PARTICLE_COUNT_2D));
+        Particle::collisionDistance.push_back(std::vector<double>(Settings::PARTICLE_COUNT_2D));
+        for (unsigned j = 0; j < Settings::PARTICLE_COUNT_2D; ++j)
         {
             Particle::collision[i][j] = false;
             Particle::collisionDistance[i][j] = std::numeric_limits<double>::infinity();
@@ -144,6 +144,8 @@ void SimulationWindow::render()
 {
     glClear(GL_COLOR_BUFFER_BIT);
     glClear(GL_DEPTH_BUFFER_BIT);
+
+    //Form::printForms();
 
     currentTime = timer->diff();
     dt          = currentTime - formerTime;
@@ -489,8 +491,8 @@ void SimulationWindow::saveVideo()
 //            mats[0], compression_params
 //        );
 
-    try {
-        cv::VideoWriter video(
+//    try {
+        cv::VideoWriter video = cv::VideoWriter(
             (Strings::DIR_FRAMES + QString("flowsVideo.avi")).toStdString(),
             CV_FOURCC('M', 'J', 'P', 'G'), Settings::VIDEO_FILE_FPS,
             cv::Size(screens[0].width(), screens[0].height()),
@@ -498,19 +500,19 @@ void SimulationWindow::saveVideo()
         );
         cv::redirectError(handleCVError);
         unsigned failedFrames = 0;
-        for (int i = 0; i < mats.size(); ++i) {
+        for (unsigned i = 0; i < mats.size(); ++i) {
             try
             {
                 video.write(mats[i]);
             }
-            catch (runtime_error &e) { ++failedFrames; continue; }
+            catch (...) { ++failedFrames; continue; }
         }
         std::cout << failedFrames << " <- failed frames count." << std::endl << std::flush;
         cv::redirectError(nullptr);
         video.release();
         //cv::destroyAllWindows();
-    }
-    catch (runtime_error &ex) {
-        fprintf(stderr, "Exception: %s\n", ex.what());
-    }
+//    }
+//    catch (runtime_error &ex) {
+//        fprintf(stderr, "Exception: %s\n", ex.what());
+//    }
 }

@@ -23,7 +23,7 @@ void Walls::createView()
 {
     float color[3] = {0, 0.5, 0};
     shapeSpace::Rectangle rectangle(lim, color);
-    this->form = rectangle.form;
+    this->currentForm = rectangle.form;
 
 //    vector<float> vertices;
 //    float color[3] = {0, 0.5, 0};

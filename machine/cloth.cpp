@@ -90,7 +90,7 @@ void Cloth::createView()
         primaryClothSingularity[i+5] = 0;
     }
 
-    form = new Form(
+    currentForm = new Form(
         primaryClothSingularity, 3, GL_TRIANGLE_FAN,
         vector<float>(), 3,
         vector<float>(), 0, 0,
@@ -117,7 +117,7 @@ void Cloth::paint()
 
 void Cloth::move()
 {
-    if (form != nullptr)
+    if (currentForm != nullptr)
     {
         for (int i = 0; i < knots - 1; ++i)
         {
@@ -125,37 +125,37 @@ void Cloth::move()
             {
                 int k = (i * (knots - 1) + j) * 36;
 
-                form->posCoords[k+6]  = (*flow)[(i+1)*knots + j + 1]->r->x;
-                form->posCoords[k+7]  = (*flow)[(i+1)*knots + j + 1]->r->y;
-                form->posCoords[k+8]  = (*flow)[(i+1)*knots + j + 1]->r->z;
+                currentForm->posCoords[k+6]  = (*flow)[(i+1)*knots + j + 1]->r->x;
+                currentForm->posCoords[k+7]  = (*flow)[(i+1)*knots + j + 1]->r->y;
+                currentForm->posCoords[k+8]  = (*flow)[(i+1)*knots + j + 1]->r->z;
 
-                form->posCoords[k+24] = (*flow)[i*knots + j + 1]->r->x;
-                form->posCoords[k+25] = (*flow)[i*knots + j + 1]->r->y;
-                form->posCoords[k+26] = (*flow)[i*knots + j + 1]->r->z;
+                currentForm->posCoords[k+24] = (*flow)[i*knots + j + 1]->r->x;
+                currentForm->posCoords[k+25] = (*flow)[i*knots + j + 1]->r->y;
+                currentForm->posCoords[k+26] = (*flow)[i*knots + j + 1]->r->z;
 
-                form->posCoords[k+18] = (*flow)[i*knots + j]->r->x;
-                form->posCoords[k+19] = (*flow)[i*knots + j]->r->y;
-                form->posCoords[k+20] = (*flow)[i*knots + j]->r->z;
+                currentForm->posCoords[k+18] = (*flow)[i*knots + j]->r->x;
+                currentForm->posCoords[k+19] = (*flow)[i*knots + j]->r->y;
+                currentForm->posCoords[k+20] = (*flow)[i*knots + j]->r->z;
 
-                form->posCoords[k+12] = (*flow)[(i+1)*knots + j]->r->x;
-                form->posCoords[k+13] = (*flow)[(i+1)*knots + j]->r->y;
-                form->posCoords[k+14] = (*flow)[(i+1)*knots + j]->r->z;
+                currentForm->posCoords[k+12] = (*flow)[(i+1)*knots + j]->r->x;
+                currentForm->posCoords[k+13] = (*flow)[(i+1)*knots + j]->r->y;
+                currentForm->posCoords[k+14] = (*flow)[(i+1)*knots + j]->r->z;
 
-                form->posCoords[k+0]  = form->posCoords[k+18]
-                                      + fabs(form->posCoords[k+6]
-                                      - form->posCoords[k+18]) / 2;
-                form->posCoords[k+1]  = form->posCoords[k+19]
-                                      + fabs(form->posCoords[k+7]
-                                      - form->posCoords[k+19]) / 2;
-                form->posCoords[k+2]  = form->posCoords[k+20]
-                                      + fabs(form->posCoords[k+8]
-                                      - form->posCoords[k+20]) / 2;
+                currentForm->posCoords[k+0]  = currentForm->posCoords[k+18]
+                                      + fabs(currentForm->posCoords[k+6]
+                                      - currentForm->posCoords[k+18]) / 2;
+                currentForm->posCoords[k+1]  = currentForm->posCoords[k+19]
+                                      + fabs(currentForm->posCoords[k+7]
+                                      - currentForm->posCoords[k+19]) / 2;
+                currentForm->posCoords[k+2]  = currentForm->posCoords[k+20]
+                                      + fabs(currentForm->posCoords[k+8]
+                                      - currentForm->posCoords[k+20]) / 2;
 
-                form->posCoords[k+30] = form->posCoords[k+6];
-                form->posCoords[k+31] = form->posCoords[k+7];
-                form->posCoords[k+32] = form->posCoords[k+8];
+                currentForm->posCoords[k+30] = currentForm->posCoords[k+6];
+                currentForm->posCoords[k+31] = currentForm->posCoords[k+7];
+                currentForm->posCoords[k+32] = currentForm->posCoords[k+8];
             }
         }
-        form->move();
+        currentForm->move();
     }
 }

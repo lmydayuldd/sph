@@ -8,6 +8,7 @@ const char* Enums::shapeName[] = {
     "TRIANGLE",
     "RECTANGLE",
     "SPHERE",
+    "SPHERE_SURFACE",
     "LANDSCHAFT",
     "CLOTH"
 };

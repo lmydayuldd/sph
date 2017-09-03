@@ -41,30 +41,39 @@ public:
     std::vector<Spring*> springs;
     Vector *r, *v, *a, *dr, *dv, *da, *F;
     Vector *r_former, *v_former;
-    double m, rho, charge, temperature, viscosity, pressure;
+    double m, rho, charge, temperature, viscosity, P;
     double smoothing_length;
     double radius;
     bool isStationary;
     bool *didCollide;
     bool boundary;
-    float color[3];
+    bool overpressured;
+    float colorDefault[3];
+    float colorBoundary[3];
+    float colorOverpressured[3];
     double *dt_left;
+    Form *formDefault = nullptr;
+    Form *formBoundary = nullptr;
+    Form *formOverpressured = nullptr;
+    double color = 0.;
 
     Particle();
     Particle(int parentFlow);
     ~Particle();
 
-    void springify(Particle* p2, float ks, float d, float kd);
-    void springifyMutual(Particle* p2, float ks, float d, float kd);
+    void springify(Particle *p2, float ks, float d, float kd);
+    void springifyMutual(Particle *p2, float ks, float d, float kd);
     double v_max();
     void updateNeighbours();
     void isBoundary();
-    double kernelFunction(Particle* p2);
-    Vector kernelFunctionGradient(Particle* p2);
+    double kernelFunction(Particle *p2);
+    Vector kernelFunctionGradient(Particle *p2);
+    Vector kernelFunctionGradientSquared(Particle *p2);
     void updateDensity();
     void updatePressure();
     void computePressureForces();
     void computeViscosityForces();
+    void computeSurfaceTensionForces();
     void computeOtherForces();
 
     virtual void createView() override;

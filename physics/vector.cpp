@@ -38,7 +38,7 @@ Vector::Vector(const Vector& v)
 void Vector::createView()
 {
     Arrow arrow;
-    this->form = arrow.form;
+    this->currentForm = arrow.form;
 
 //    vector<float> vertices;
 //    vector<float> color = {1, 1, 0};
@@ -178,6 +178,10 @@ void Vector::limit(double max) {
     if (fabs(x) > max) x = Op::sgn(x) * max;
     if (fabs(y) > max) y = Op::sgn(y) * max;
     if (fabs(z) > max) z = Op::sgn(z) * max;
+}
+
+void Vector::cut(double max) {
+   *this = this->normal() * max;
 }
 
 void Vector::zero() {

@@ -8,7 +8,7 @@ enum ShapeType : unsigned char {
     ARROW,
     TRIANGLE,
     RECTANGLE,
-    SPHERE,
+    SPHERE, SPHERE_BOUNDARY, SPHERE_OVERPRESSURED,
     LANDSCHAFT,
     CLOTH
 };

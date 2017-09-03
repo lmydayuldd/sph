@@ -13,7 +13,7 @@ class Machine
 {
 public:
     static std::vector<Machine*> machines;
-    Form *form;
+    Form *currentForm;
 
     Machine();
     virtual ~Machine();

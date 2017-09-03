@@ -10,11 +10,13 @@
 
 using namespace std;
 
-Sphere::Sphere(double radius, float color[])
+Sphere::Sphere(double radius, float color[], ShapeType type)
     : center(vector<float> {0, 0, 0}),
       smoothness(Settings::SPHERE_DETAIL),
       radius(radius)
 {
+    this->type = type;
+
     float step = M_PI / smoothness;
     color[1] = 0.0f;
     for (float i = 0.0f; i < M_PI; i += step) {
@@ -44,6 +46,6 @@ void Sphere::makeForm()
         vertices, 3, GL_TRIANGLE_STRIP,
         vector<float>(), 3,
         vector<float>(), 0, 0,
-        SPHERE
+        type
     );
 }

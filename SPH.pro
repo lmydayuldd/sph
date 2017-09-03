@@ -14,7 +14,7 @@ MOBILITY                      =
 
 # Defines platform-specific preprocessor macro.
 #   Edit at "Projects -> QMake -> additional arguments"
-#   (by setting to CONFIG+="X_BUILD COMPILER_Y").
+#   (by setting to CONFIG+="debug/release DESKTOP/ANDROID_BUILD COMPILER_GPP/MSVC").
 CONFIG(DESKTOP_BUILD) : DEFINES += DESKTOP_BUILD
 CONFIG(ANDROID_BUILD) : DEFINES += ANDROID_BUILD
 CONFIG(COMPILER_MSVC) : DEFINES += COMPILER_MSVC
@@ -28,7 +28,7 @@ CONFIG(debug, debug|release) {
         QMAKE_CXXFLAGS += -g3
     }
     win32-msvc* {
-        QMAKE_CXXFLAGS += /Z7
+        QMAKE_CXXFLAGS += /Zi #/Z7
     }
 }
 else {
@@ -54,6 +54,40 @@ else {
                        $${QMAKE_COPY} $${QWINDOWS_DLL_SRC} $${QWINDOWS_DLL_DST}
     export(QMAKE_POST_LINK)
 }
+win32-msvc* {
+    # Qt Creator seems to have a problem providing qwindows.dll / qwindowsd.dll
+    CONFIG(debug, debug|release) {
+        QWINDOWS_DLL_SRC = $$shell_path(D:\dev\Qt\5.9.1\msvc2017_64\plugins\platforms\qwindowsd.dll)
+        QWINDOWS_DLL_DST = $$shell_path($${OUT_PWD}/debug/platforms/)
+        LIBS += -L"D:\dev\opencv\build\bin\Release"
+        LIBS += -LD:\dev\opencv\build\install\x64\vc15\lib \ #####################
+                    -lopencv_calib3d330 \
+                    -lopencv_core330 \
+                    -lopencv_features2d330 \
+                    #-lopencv_ffmpeg330 \
+                    -lopencv_highgui330 \
+                    -lopencv_imgcodecs330 \ # for cv::imwrite
+                    -lopencv_imgproc330 \
+                    -lopencv_videoio330 # for cv::VideoWriter
+                    #-lopencv_world330#_64
+    }
+    else {
+        QWINDOWS_DLL_SRC_0 = $$shell_path(D:\dev\Qt\5.9.1\msvc2017_64\plugins\platforms\qwindows.dll)
+        QWINDOWS_DLL_SRC_1 = $$shell_path(D:\dev\opencv\build\install\x64\vc15\bin\opencv_core330.dll)
+        QWINDOWS_DLL_SRC_2 = $$shell_path(D:\dev\opencv\build\install\x64\vc15\bin\opencv_imgcodecs330.dll)
+        QWINDOWS_DLL_SRC_3 = $$shell_path(D:\dev\opencv\build\install\x64\vc15\bin\opencv_imgproc330.dll)
+        QWINDOWS_DLL_SRC_4 = $$shell_path(D:\dev\opencv\build\install\x64\vc15\bin\opencv_videoio330.dll)
+        QWINDOWS_DLL_DST_0 = $$shell_path($${OUT_PWD}/release/platforms/)
+        QWINDOWS_DLL_DST   = $$shell_path($${OUT_PWD}/release/)
+    }
+    QMAKE_POST_LINK += $${QMAKE_MKDIR} $${QWINDOWS_DLL_DST_0} & \
+                       $${QMAKE_COPY} $${QWINDOWS_DLL_SRC_0} $${QWINDOWS_DLL_DST_0} & \
+                       $${QMAKE_COPY} $${QWINDOWS_DLL_SRC_1} $${QWINDOWS_DLL_DST} & \
+                       $${QMAKE_COPY} $${QWINDOWS_DLL_SRC_2} $${QWINDOWS_DLL_DST} & \
+                       $${QMAKE_COPY} $${QWINDOWS_DLL_SRC_3} $${QWINDOWS_DLL_DST} & \
+                       $${QMAKE_COPY} $${QWINDOWS_DLL_SRC_4} $${QWINDOWS_DLL_DST}
+    export(QMAKE_POST_LINK)
+}
 
 ############################################################
 # OpenCV ###################################################
@@ -73,8 +107,9 @@ CONFIG(debug, debug|release) {
                     #opencv_world330d
     }
     win32-msvc* {
-        LIBS += -L"D:\dev\opencv\build\bin\Debug"
-        LIBS += -LD:\dev\opencv\build\install\x64\vc15\lib \ #####################
+        LIBS += \#-LD:/dev/opencv/build/bin/Debug \
+                -L"D:\dev\opencv\build\install\x64\vc15\bin" \
+                -L"D:\dev\opencv\build\install\x64\vc15\lib" \
                     -lopencv_calib3d330d \
                     -lopencv_core330d \
                     -lopencv_features2d330d \
@@ -89,7 +124,7 @@ else {
     *-g++ {
         LIBS += -LD:/dev/opencv/build/bin/Release \
                     -lopencv_calib3d330 \
-                    -lopencv_core330 \
+                    -lopencv_core3sar30 \
                     -lopencv_features2d330 \
                     -lopencv_ffmpeg330 \
                     -lopencv_highgui330 \
@@ -97,8 +132,9 @@ else {
                     #-lopencv_world330
     }
     win32-msvc* {
-        LIBS += -L"D:\dev\opencv\build\bin\Release"
-        LIBS += -LD:\dev\opencv\build\install\x64\vc15\lib \ #####################
+        LIBS += \#-LD:/dev/opencv/build/bin/Release \
+                -L"D:\dev\opencv\build\install\x64\vc15\bin" \
+                -L"D:\dev\opencv\build\install\x64\vc15\lib" \
                     -lopencv_calib3d330 \
                     -lopencv_core330 \
                     -lopencv_features2d330 \
@@ -174,15 +210,15 @@ win32-msvc* {
     CONFIG(debug, debug|release) {
         cuda_d.input = CUDA_SRCS
         cuda_d.output = ${QMAKE_FILE_BASE}_link.o
-        equals(VISUAL_STUDIO_COMPILER, "MDd") {
+        equals(MSVCRT_LINK_FLAG_DEBUG, "/MDd") {
             linux:cuda_d.output = ${QMAKE_FILE_BASE}_link.obj
             win32:cuda_d.output = ${QMAKE_FILE_BASE}_link.o
             NVCC_FLAGS += --shared -cudart shared
         }
-        equals(VISUAL_STUDIO_COMPILER, "MTd") {
+        equals(MSVCRT_LINK_FLAG_DEBUG, "/MTd") {
             win32:cuda_d.output = ${QMAKE_FILE_BASE}_link.a
         }
-        equals(VISUAL_STUDIO_COMPILER, "LDd") {
+        equals(MSVCRT_LINK_FLAG_DEBUG, "/LDd") {
             win32:cuda_d.output = ${QMAKE_FILE_BASE}_link.dll
         }
         QMAKE_EXTRA_COMPILERS += cuda_d
@@ -195,8 +231,8 @@ win32-msvc* {
                               --machine 64 -gencode $$CUDA_ARCH \
                               -ccbin $$VISUAL_STUDIO_COMPILER \ # MSVC CL.exe directory
                               -Xcompiler $$MSVCRT_LINK_FLAG_DEBUG \ # dynamic/static release
-                              -Xcompiler "/wd4819,/EHsc,/W3,/nologo,/Zi" \
-                              -Xcompiler "/Od,/RTC1" \ # error checking, incompatible with /O2
+                              -Xcompiler "/nologo,/EHsc,/wd4819,/W3,/Zi,/Od" \
+                              -Xcompiler "/RTC1" \ # error checking, incompatible with /O2
                               -Xcompiler "/openmp" \
                               -c -o ${QMAKE_FILE_OUT} \ # output files
                               # -dc instead, for multiple .cu files
@@ -205,15 +241,15 @@ win32-msvc* {
     else {
         cuda.input = CUDA_SRCS
         cuda.output = ${QMAKE_FILE_BASE}_link.o
-        equals(VISUAL_STUDIO_COMPILER, "MD") {
+        equals(MSVCRT_LINK_FLAG_RELEASE, "/MD") {
             linux:cuda.output = ${QMAKE_FILE_BASE}_link.obj
             win32:cuda.output = ${QMAKE_FILE_BASE}_link.o
             NVCC_FLAGS += --shared -cudart shared
         }
-        equals(VISUAL_STUDIO_COMPILER, "MT") {
+        equals(MSVCRT_LINK_FLAG_RELEASE, "/MT") {
             win32:cuda.output = ${QMAKE_FILE_BASE}_link.a
         }
-        equals(VISUAL_STUDIO_COMPILER, "LD") {
+        equals(MSVCRT_LINK_FLAG_RELEASE, "/LD") {
             win32:cuda.output = ${QMAKE_FILE_BASE}_link.dll
         }
         QMAKE_EXTRA_COMPILERS += cuda
@@ -225,8 +261,8 @@ win32-msvc* {
                             --machine 64 -gencode $$CUDA_ARCH \
                             -ccbin $$VISUAL_STUDIO_COMPILER \ # MSVC CL.exe directory
                             -Xcompiler $$MSVCRT_LINK_FLAG_RELEASE \ # dynamic/static release
-                            -Xcompiler "/wd4819,/EHsc,/W3,/nologo,/Zi" \
-                            -Xcompiler "/openmp,/O2,/arch:AVX2" \
+                            -Xcompiler "/nologo,/EHsc,/wd4819,/W3,/Zi,/O2" \
+                            -Xcompiler "/openmp,/arch:AVX2" \
                             -c -o ${QMAKE_FILE_OUT} \ # output files
                             # -dc instead, for multiple .cu files
                             ${QMAKE_FILE_NAME} # input files

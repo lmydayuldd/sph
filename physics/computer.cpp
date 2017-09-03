@@ -86,7 +86,7 @@ void Computer::evaluateForces(const Particle &p)
 
         #pragma omp section
         {
-        //    if (Settings::FORCES_UNIVERSAL_GRAVITY)
+        //    if (Settings::FORCES_GRAVITY_UNIVERSAL)
         //        for (unsigned i = 0; i < Particle::flows[p.parentFlow].size(); ++i)
         //            Forces::universalGravitation(p, *Particle::flows[p.parentFlow][i]);
         }
@@ -151,6 +151,8 @@ void Computer::evaluateSPHForces()
             if (Settings::CALCULATE_MASS) {
                 Particle::flows[i][j]->m = m;
             }
+            //Particle::flows[i][j]->m = Particle::flows[i][j]->rho;
+            //Particle::flows[i][j]->m *= Particle::flows[i][j]->rho / Settings::DESIRED_REST_DENSITY;
             Particle::flows[i][j]->F->zero();
         }
     }
@@ -161,31 +163,52 @@ void Computer::evaluateSPHForces()
 #pragma omp parallel for if(Settings::PARALLEL_OMP)
         for (LOOP_TYPE j = 0; j < Particle::flows[i].size(); ++j) {
             Particle::flows[i][j]->updateNeighbours();
-            Particle::flows[i][j]->isBoundary();
         }
     }
-    LOG_TIME("ms <- Update neighbours & find boundaries time.");
+    LOG_TIME("ms <- Update neighbours time.");
 
     formerTime = timer.diff();
     for (unsigned i = 0; i < Particle::flows.size(); ++i) {
 #pragma omp parallel for if(Settings::PARALLEL_OMP)
         for (LOOP_TYPE j = 0; j < Particle::flows[i].size(); ++j) {
             Particle::flows[i][j]->updateDensity();
+            Particle::flows[i][j]->isBoundary();
             Particle::flows[i][j]->updatePressure();
         }
+//        unsigned surface = 0;
+//        for (LOOP_TYPE j = 0; j < Particle::flows[i].size(); ++j)
+//            if (Particle::flows[i][j]->boundary)
+//                ++surface;
+//        std::cout << surface << " <- Surface particle count." << std::endl << std::flush;
     }
-    LOG_TIME("ms <- Update rho & p time.");
+    LOG_TIME("ms <- Update rho & p and find boundaries time.");
 
     formerTime = timer.diff();
     for (unsigned i = 0; i < Particle::flows.size(); ++i) {
 #pragma omp parallel for if(Settings::PARALLEL_OMP)
         for (LOOP_TYPE j = 0; j < Particle::flows[i].size(); ++j) {
-            Particle::flows[i][j]->computePressureForces();
-            Particle::flows[i][j]->computeViscosityForces();
+            if (Settings::GRANULAR_OR_LIQUID) {
+                Particle::flows[i][j]->computePressureForces();
+                Particle::flows[i][j]->computeViscosityForces();
+                Particle::flows[i][j]->computeSurfaceTensionForces();
+                if (Particle::flows[i][j]->id == 500) {
+                    std::cout << "F_p500 " << *Particle::flows[i][j]->F << std::endl << std::flush;
+                    //std::cout << "rho_p500 " << Particle::flows[i][j]->rho << std::endl << std::flush;
+                    //std::cout << "P_p500 " << Particle::flows[i][j]->pressure << std::endl << std::flush;
+                }
+            }
             Particle::flows[i][j]->computeOtherForces();
-            //*Particle::flows[i][j]->F /= 1000; ////////////////////////
-            Particle::flows[i][j]->F->limit(5); //////////////////////// TODO
-            //Particle::flows[i][j]->v->limit(10); ////////////////////////
+            if (Particle::flows[i][j]->id == 500) {
+                std::cout << "F_p500 " << *Particle::flows[i][j]->F << std::endl << std::flush;
+                //std::cout << "rho_p500 " << Particle::flows[i][j]->rho << std::endl << std::flush;
+                //std::cout << "P_p500 " << Particle::flows[i][j]->pressure << std::endl << std::flush;
+            }
+            Particle::flows[i][j]->F->cut(Settings::FORCES_LIMIT);
+            if (Particle::flows[i][j]->id == 500) {
+                std::cout << "F_p500 " << *Particle::flows[i][j]->F << std::endl << std::flush;
+                //std::cout << "rho_p500 " << Particle::flows[i][j]->rho << std::endl << std::flush;
+                //std::cout << "P_p500 " << Particle::flows[i][j]->pressure << std::endl << std::flush;
+            }
         }
     }
     LOG_TIME("ms <- Compute p, viscosity & other Fs time.");
@@ -233,6 +256,11 @@ void Computer::collide()
 
     if (Settings::PARTICLES_REACT) {
         int c = 1;
+
+        if (Settings::COLLIDE_NEIGHBOURS)
+        {
+            c = 2;
+        }
 
 #ifdef COMPILER_MSVC
         if (Settings::PARALLEL_GPU) {
@@ -296,16 +324,30 @@ void Computer::collide()
         }
 
         if (c == 2)
-        for (unsigned i = 0; i < Particle::flows.size(); ++i) {
-            //#pragma omp parallel for collapse(2) schedule(guided) \
-            //                     if(Settings::PARALLEL_OMP)
-            for (unsigned j = 0; j < Particle::flows[i].size(); ++j) {
-                for (unsigned k = 0; k < Particle::flows[i][j]->neighbours->size(); ++k) {
+#ifdef COMPILER_GPP
+        for (LOOP_TYPE i = 0; i < Particle::flows.size(); ++i) {
+//            #pragma omp parallel for collapse(2) schedule(guided) \
+//                                 if(Settings::PARALLEL_OMP)
+            for (LOOP_TYPE j = 0; j < Particle::flows[i].size(); ++j) {
+                for (LOOP_TYPE k = 0; k < Particle::flows[i][j]->neighbours->size(); ++k) {
                     Forces::collide(*Particle::flows[i][j],
                                     *Particle::flows[i][j]->neighbours->at(k));
                 }
             }
         }
+#elif COMPILER_MSVC
+        for (LOOP_TYPE i = 0; i < Particle::flows.size(); ++i) {
+            #pragma omp parallel for if(Settings::PARALLEL_OMP)
+            for (LOOP_TYPE j = 0; j < Particle::flows[i].size(); ++j) {
+                for (LOOP_TYPE k = 0; k < Particle::flows[i][j]->neighbours->size(); ++k) {
+//                    if (! Particle::collision[Particle::flows[i][j]->id-1][Particle::flows[i][j]->neighbours->at(k)->id-1]) {
+                        Forces::collide(*Particle::flows[i][j],
+                                        *Particle::flows[i][j]->neighbours->at(k));
+//                    }
+                }
+            }
+        }
+#endif
 
         if (c == 3)
         for (unsigned i = 0; i < Particle::flows.size(); ++i) {
@@ -367,6 +409,7 @@ void Computer::Euler(const Particle &p, float dt)
         *p.r_former = *p.r;
         *p.v_former = *p.v;
 
+//        *p.dv  = *p.F * (1. / p.m / (p.rho / Settings::DESIRED_REST_DENSITY)) * dt;
         *p.dv  = *p.F * (1. / p.m) * dt;
         *p.v  += *p.dv;
         *p.dr  = *p.v * dt;

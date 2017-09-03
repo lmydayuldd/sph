@@ -8,7 +8,7 @@ using namespace std;
 vector<Machine*> Machine::machines;
 
 Machine::Machine()
-    : form(nullptr)
+    : currentForm(nullptr)
 {
 }
 
@@ -18,8 +18,8 @@ Machine::~Machine()
 
 void Machine::linkView(ShapeType formShapeType)
 {
-    if (form == nullptr)
-    {
+    //if (form == nullptr)
+    //{
         if (Form::forms.size() == 0)
         {
             createView();
@@ -30,7 +30,7 @@ void Machine::linkView(ShapeType formShapeType)
             {
                 if (Form::forms[i]->type == formShapeType)
                 {
-                    form = Form::forms[i];
+                    currentForm = Form::forms[i];
                     break; ///////////////////////////////////////////////////
                 }
                 else if (i == Form::forms.size() - 1)
@@ -43,16 +43,16 @@ void Machine::linkView(ShapeType formShapeType)
                 }
             }
         }
-    }
+    //}
 }
 
 void Machine::paint()
 {
-    if (form != nullptr)
+    if (currentForm != nullptr)
     {
-        if (Form::lastBoundFormType != form->type)
+        if (Form::lastBoundFormType != currentForm->type)
         {
-           form->bindVAO();
+           currentForm->bindVAO();
         }
         Matrices::modelViewMatrix.setToIdentity();
         Matrices::mvpMatrix.setToIdentity();
@@ -61,11 +61,11 @@ void Machine::paint()
         Matrices::mvpMatrix       = Matrices::projectionMatrix
                                   * Matrices::modelViewMatrix;
 
-        form->draw();
+        currentForm->draw();
     }
 }
 
 void Machine::recolor(float color[])
 {
-    form->recolor(color);
+    currentForm->recolor(color);
 }
