@@ -1,17 +1,13 @@
 #include "grid.h"
 
-#include <omp.h>
-
 #include "machine/particle.h"
 #include "physics/vector.h"
 #include "util/operations.h"
 #include "util/settings.h"
 
-#ifdef COMPILER_GPP
-    #define LOOP_TYPE unsigned
-#elif COMPILER_MSVC
-    #define LOOP_TYPE int
-#endif
+#include <omp.h>
+
+#include "util/macros.h"
 
 vector<vector<vector<vector<Particle*>>>> Grid::grid;
 double Grid::arena_diameter = Settings::ARENA_DIAMETER;

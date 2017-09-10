@@ -24,7 +24,7 @@ void Forces::universalGravitation(const Particle &p1, const Particle &p2)
 
 void Forces::gravityEarth(const Particle &p)
 {
-    Vector gravity = Vector(0, - G_earth, 0);
+    Vector gravity = Vector(0, Settings::FORCES_GRAVITY_EARTH_VAL, 0);
     if (! p.isStationary) *p.F += gravity * p.m;
 }
 
@@ -45,7 +45,8 @@ void Forces::Friction(const Particle &p)
 {
     if (! p.isStationary) {
         Vector friction
-            = Vector(*p.F).normal() * (-1 * coefficient_of_friction * p.F->y);
+            = Vector(*p.F).normal()
+            * (-1 * Settings::FORCES_FRICTION * p.F->y);
 
         *p.F -= friction;
     }
@@ -102,7 +103,10 @@ void Forces::collide(const Particle &p1, const Particle &p2) {
                 if (! p2.isStationary)
                 {
 #pragma omp critical
-                    *p2.r += sphereNormal * distanceBorder;//std::min(distanceBorder, Settings::PARTICLE_MAX_DR);
+                    // TODO
+                    if (abs(distanceBorder) > Settings::PARTICLE_MAX_DR)
+                        distanceBorder = Op::sgn(distanceBorder) * Settings::PARTICLE_MAX_DR;
+                    *p2.r += sphereNormal * distanceBorder;
                 }
 
 //                Vector dist = *p1.r_former - *p2.r_former;
@@ -265,29 +269,3 @@ void Forces::collide(const Particle &p1, std::vector<Particle*>* with) {
         former_p1_dt_left = *p1.dt_left;
     }
 }
-
-//void CollisionSphere::collide_new(Particle& p2) {
-//    double nextDistance = position.distance(p2.r + p2.v) - p2.radius; // d = |p1-p2|-r2
-//    if (nextDistance < radius) { // collision
-//        Vector sphereSurfaceNormal = (position - p2.r).normal();      // ssn = p1-p2/|p1-p2|
-//        double moveOutOfSphere = nextDistance - radius;               // move = d-r1
-//        p2.r = p2.r + sphereSurfaceNormal * moveOutOfSphere;          // p2 = p2 + ssn*move
-
-//        Vector p2_v_n = sphereSurfaceNormal * sphereSurfaceNormal.dotProduct(p2.v);
-//        Vector p2_v_s = p2.v - p2_v_n;
-//        p2.v = p2_v_s - p2_v_n * damping;
-//    }
-//}
-
-//void CollisionSphere::collide(Particle& p2) {
-//    double distance = position.distance(p2.r) - p2.radius;       // d = |p1-p2|-r2
-//    if (distance < radius) { // collision
-//        Vector sphereSurfaceNormal = (position - p2.r).normal(); // ssn = p1-p2/|p1-p2|
-//        double moveOutOfSphere = distance - radius;              // move = d-r1
-//        p2.r = p2.r + sphereSurfaceNormal * moveOutOfSphere;     // p2 = p2 + ssn*move
-
-//        Vector p2_v_n = sphereSurfaceNormal * sphereSurfaceNormal.dotProduct(p2.v);
-//        Vector p2_v_s = p2.v - p2_v_n;
-//        p2.v = p2_v_s - p2_v_n * damping;
-//    }
-//}

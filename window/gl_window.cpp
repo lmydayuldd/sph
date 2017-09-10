@@ -1,8 +1,8 @@
+#include "gl/matrices.h"
+#include "window/gl_window.h"
+
 #include <QPainter>
 #include <QCoreApplication>
-
-#include "window/gl_window.h"
-#include "gl/matrices.h"
 
 GLWindow::~GLWindow()
 {

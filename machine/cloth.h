@@ -16,12 +16,9 @@ private:
 
 public:
     Cloth(
-        const Vector& start,
-        const Vector& end,
+        const Vector& start, const Vector& end,
         int knots,
-        float ks,
-        float d,
-        float kd,
+        float ks, float d, float kd,
         int strength
     );
     ~Cloth();

@@ -1,8 +1,8 @@
 #include "shape/line.h"
 
-#include <QOpenGLFunctions>
-
 #include "gl/form.h"
+
+#include <QOpenGLFunctions>
 
 using namespace std;
 

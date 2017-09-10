@@ -4,7 +4,7 @@ DebugHelper::DebugHelper()
 {
 }
 
-void DebugHelper::showText(const char* text)
+void DebugHelper::showText(const char *text)
 {
     QMessageBox msgBox;
     msgBox.setWindowTitle(QString("DebugHelper"));
@@ -18,7 +18,7 @@ template void DebugHelper::showVariable<float>(const char*, float);
 template void DebugHelper::showVariable<double>(const char*, double);
 
 template<typename T>
-void DebugHelper::showVariable(const char* title, T value)
+void DebugHelper::showVariable(const char *title, T value)
 {
     QMessageBox msgBox;
     msgBox.setWindowTitle(QString(title));

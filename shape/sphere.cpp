@@ -1,12 +1,12 @@
 #include "shape/sphere.h"
 
-#include <cmath>
-
-#include <QOpenGLFunctions>
-
 #include "gl/form.h"
 #include "util/constants.h"
 #include "util/settings.h"
+
+#include <QOpenGLFunctions>
+
+#include <cmath>
 
 using namespace std;
 

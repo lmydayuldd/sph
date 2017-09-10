@@ -14,11 +14,8 @@ public:
     static QMatrix4x4 mvpMatrix;
     static float defaultCam[9];
     static float cam[9];
-    static float camRX;
-    static float camRY;
-    static float camTX;
-    static float camTY;
-    static float camTZ;
+    static float camRX, camRY;
+    static float camTX, camTY, camTZ;
 
     static void setViewMatrix();
 };

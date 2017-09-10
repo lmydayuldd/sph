@@ -1,7 +1,6 @@
 #ifndef SPRING_H
 #define SPRING_H
 
-//class Particle;
 #include "machine/particle.h"
 
 class Spring {

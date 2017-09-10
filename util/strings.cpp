@@ -1,5 +1,6 @@
-#include "util/settings.h"
 #include "util/strings.h"
+
+#include "util/settings.h"
 
 #include <QDir>
 #include <QStandardPaths>

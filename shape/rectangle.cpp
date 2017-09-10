@@ -1,12 +1,11 @@
 #include "shape/rectangle.h"
 
-#include <cmath>
-
 #include "gl/form.h"
-#include "shape/line.h"
-
-#include "util/settings.h"
 #include "physics/grid.h"
+#include "shape/line.h"
+#include "util/settings.h"
+
+#include <cmath>
 
 using namespace std;
 using namespace shapeSpace;

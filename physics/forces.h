@@ -1,9 +1,9 @@
 #ifndef FORCES_H
 #define FORCES_H
 
-#include <cmath>
-
 #include "machine/particle.h"
+
+#include <cmath>
 
 class Forces {
 public:

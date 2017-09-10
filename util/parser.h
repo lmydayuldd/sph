@@ -26,7 +26,9 @@ public:
             }
             else
             {
-                //throw(errno); // android non-compatible
+                #ifdef DESKTOP_BUILD
+                    throw(errno); // android non-compatible
+                #endif
             }
         }
         catch (std::ifstream::failure e)

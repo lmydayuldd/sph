@@ -1,17 +1,8 @@
 #include "physics/computer.h"
 
-#include <iostream>
-
-#include <omp.h>
-
-extern void GPUCollideAll();
-extern void GPUCollideMallocs();
-extern void GPUCollideFrees();
-
 class Particle;
 
 #include "control/interaction.h"
-#include "machine/machine.h"
 #include "machine/obstacle.h"
 #include "machine/particle.h"
 #include "machine/spring.h"
@@ -22,18 +13,17 @@ class Particle;
 #include "util/timer.h"
 #include "window/simulation_window.h" // for current frame number
 
+#include <iostream>
+
+#include <omp.h>
+
+#include "util/macros.h"
+
+extern void GPUCollideAll();
+extern void GPUCollideMallocs();
+extern void GPUCollideFrees();
+
 Computer *Computer::currentComputer;
-
-#ifdef COMPILER_GPP
-    #define LOOP_TYPE unsigned
-#elif COMPILER_MSVC
-    #define LOOP_TYPE int
-#endif
-
-#define LOG_TIME(MSG) \
-    if (! Settings::NO_PRINTOUT) \
-        if (! Interaction::pause || SimulationWindow::key[RENDER]) \
-            std::cout << (timer.diff() - formerTime)/1000000 << (MSG) << std::endl;
 
 Computer::Computer()
 {
@@ -50,11 +40,15 @@ void Computer::loop()
 
     //if (SimulationWindow::frame % 10 == 0) /////////////////////////////////////
     evaluateSPHForces();
-    //evaluateForces();
 
     formerTime = timer.diff();
     collide();
     LOG_TIME("ms <- Collide time.");
+
+    // TODO
+//    for (unsigned i = 0; i < Particle::flows[0].size(); ++i) {
+//        Particle::flows[0][i]->F->cut(Settings::PARTICLE_MAX_DR);
+//    }
 
     formerTime = timer.diff();
     computeVectors(Settings::dt);
@@ -69,59 +63,6 @@ void Computer::loop()
 //    LOG_TIME("ms <- Collide time.");
 
     Computer::getVolume();
-}
-
-void Computer::evaluateForces(const Particle &p)
-{
-    *p.F = Vector();
-
-    #pragma omp sections
-    {
-        #pragma omp section
-        {
-            if (Settings::FORCES_GRAVITY_EARTH) {
-                Forces::gravityEarth(p);
-            }
-        }
-
-        #pragma omp section
-        {
-        //    if (Settings::FORCES_GRAVITY_UNIVERSAL)
-        //        for (unsigned i = 0; i < Particle::flows[p.parentFlow].size(); ++i)
-        //            Forces::universalGravitation(p, *Particle::flows[p.parentFlow][i]);
-        }
-
-        #pragma omp section
-        {
-        //    if (Settings::FORCES_COULOMB)
-        //        for (unsigned i = 0; i < Particle::flows[p.parentFlow].size(); ++i)
-        //            Forces::Coulomb(p, *Particle::flows[p.parentFlow][i]);
-        }
-
-        #pragma omp section
-        {
-        //    //if (p.r.v[1] == -1.0f && p.v.v[1] == 0.0f) Forces.Friction(p);
-        }
-
-        #pragma omp section
-        {
-            //for (Spring *s : p.springs)
-            for (unsigned i = 0; i < p.springs.size(); ++i)
-            {
-                Spring *s = p.springs[i];
-                /*if (s.ks != 0 && s.kd != 0)*/
-                    Forces::Hooke(p, *s->p2, s->ks, s->d, s->kd);
-            }
-        }
-    }
-}
-
-void Computer::evaluateForces()
-{
-    for (unsigned i = 0; i < Particle::flows.size(); ++i)
-#pragma omp parallel for if(Settings::PARALLEL_OMP)
-        for (LOOP_TYPE j = 0; j < Particle::flows[i].size(); ++j)
-            evaluateForces(*Particle::flows[i][j]);
 }
 
 void Computer::evaluateSPHForces()
@@ -145,18 +86,31 @@ void Computer::evaluateSPHForces()
     long long int formerTime = 0;
 
     formerTime = timer.diff();
+//    if      (Settings::COLOR_BY == VELOCITY)  Particle::evaluateMaximalVelocity();
+//    else if (Settings::COLOR_BY == PRESSURE)  Particle::evaluateMaximalPressure();
+//    else if (Settings::COLOR_BY == VISCOSITY) Particle::evaluateMaximalViscosity();
+//    else if (Settings::COLOR_BY == TENSION)   Particle::evaluateMaximalTension();
+    Particle::evaluateMaximalVelocity();
+    Particle::evaluateMaximalPressure();
+    Particle::evaluateMaximalViscosity();
+    Particle::evaluateMaximalTension();
+    std::cout << Particle::v_avg_norm << " <- v_avg " << std::endl << std::flush;
+    std::cout << Particle::F_P_avg_norm << " <- F_P_avg" << std::endl << std::flush;
+    std::cout << Particle::F_visc_avg_norm << " <- F_visc_avg" << std::endl << std::flush;
+    std::cout << Particle::F_tens_avg_norm << " <- F_tens_avg" << std::endl << std::flush;
     for (unsigned i = 0; i < Particle::flows.size(); ++i) {
         #pragma omp parallel for if(Settings::PARALLEL_OMP)
         for (LOOP_TYPE j = 0; j < Particle::flows[i].size(); ++j) {
             if (Settings::CALCULATE_MASS) {
                 Particle::flows[i][j]->m = m;
             }
+            // TODO
             //Particle::flows[i][j]->m = Particle::flows[i][j]->rho;
             //Particle::flows[i][j]->m *= Particle::flows[i][j]->rho / Settings::DESIRED_REST_DENSITY;
             Particle::flows[i][j]->F->zero();
         }
     }
-    LOG_TIME("ms <- Zero forces time.");
+    LOG_TIME("ms <- Zero forces and evaluate max/avg v/F_P/F_visc/F_surf_tens time.");
 
     formerTime = timer.diff();
     for (unsigned i = 0; i < Particle::flows.size(); ++i) {
@@ -175,11 +129,6 @@ void Computer::evaluateSPHForces()
             Particle::flows[i][j]->isBoundary();
             Particle::flows[i][j]->updatePressure();
         }
-//        unsigned surface = 0;
-//        for (LOOP_TYPE j = 0; j < Particle::flows[i].size(); ++j)
-//            if (Particle::flows[i][j]->boundary)
-//                ++surface;
-//        std::cout << surface << " <- Surface particle count." << std::endl << std::flush;
     }
     LOG_TIME("ms <- Update rho & p and find boundaries time.");
 
@@ -190,28 +139,29 @@ void Computer::evaluateSPHForces()
             if (Settings::GRANULAR_OR_LIQUID) {
                 Particle::flows[i][j]->computePressureForces();
                 Particle::flows[i][j]->computeViscosityForces();
-                Particle::flows[i][j]->computeSurfaceTensionForces();
-                if (Particle::flows[i][j]->id == 500) {
-                    std::cout << "F_p500 " << *Particle::flows[i][j]->F << std::endl << std::flush;
-                    //std::cout << "rho_p500 " << Particle::flows[i][j]->rho << std::endl << std::flush;
-                    //std::cout << "P_p500 " << Particle::flows[i][j]->pressure << std::endl << std::flush;
-                }
+                Particle::flows[i][j]->computeSurfaceTensionForces(); // TODO
             }
             Particle::flows[i][j]->computeOtherForces();
-            if (Particle::flows[i][j]->id == 500) {
-                std::cout << "F_p500 " << *Particle::flows[i][j]->F << std::endl << std::flush;
-                //std::cout << "rho_p500 " << Particle::flows[i][j]->rho << std::endl << std::flush;
-                //std::cout << "P_p500 " << Particle::flows[i][j]->pressure << std::endl << std::flush;
-            }
-            Particle::flows[i][j]->F->cut(Settings::FORCES_LIMIT);
-            if (Particle::flows[i][j]->id == 500) {
-                std::cout << "F_p500 " << *Particle::flows[i][j]->F << std::endl << std::flush;
-                //std::cout << "rho_p500 " << Particle::flows[i][j]->rho << std::endl << std::flush;
-                //std::cout << "P_p500 " << Particle::flows[i][j]->pressure << std::endl << std::flush;
-            }
+            Particle::flows[i][j]->F->cut(Settings::FORCES_LIMIT); // TODO
+//            if (Particle::flows[i][j]->id == 500) {
+//                //std::cout << "F_p500 " << *Particle::flows[i][j]->F << std::endl << std::flush;
+//                //std::cout << "rho_p500 " << Particle::flows[i][j]->rho << std::endl << std::flush;
+//                //std::cout << "P_p500 " << Particle::flows[i][j]->pressure << std::endl << std::flush;
+//            }
         }
     }
     LOG_TIME("ms <- Compute p, viscosity & other Fs time.");
+
+//#pragma omp section
+//    {
+//        //for (Spring *s : p.springs)
+//        for (unsigned i = 0; i < p.springs.size(); ++i)
+//        {
+//            Spring *s = p.springs[i];
+//            /*if (s.ks != 0 && s.kd != 0)*/
+//                Forces::Hooke(p, *s->p2, s->ks, s->d, s->kd);
+//        }
+//    }
 }
 
 void Computer::collide()
@@ -257,7 +207,7 @@ void Computer::collide()
     if (Settings::PARTICLES_REACT) {
         int c = 1;
 
-        if (Settings::COLLIDE_NEIGHBOURS)
+        if (Settings::COLLIDE_NEIGHBOURS_ONLY)
         {
             c = 2;
         }
@@ -391,18 +341,22 @@ void Computer::collide()
     }
 }
 
-void Computer::computeVectors(const Particle &p, float dt)
+void Computer::computeVectors(double dt)
 {
-    //MidPoint(p, dt);
-    Euler(p, dt);
-}
-void Computer::computeVectors(float dt)
-{
-    //MidPoint(dt);
-    Euler(dt);
+    switch (Settings::INTEGRATION_SCHEME)
+    {
+        case EULER         :               break;
+        case REVERSE_EULER : Euler(dt);    break;
+        case LEAPFROG      :               break;
+        case MIDPOINT      : MidPoint(dt); break;
+        case RK4           : RKV4(dt);     break;
+        default :
+            std::cout << "Switch failure at computeVectors()!" << std::endl << std::flush;
+            exit(0);
+    }
 }
 
-void Computer::Euler(const Particle &p, float dt)
+void Computer::Euler(const Particle &p, double dt)
 {
     if (! p.isStationary)
     {
@@ -413,44 +367,23 @@ void Computer::Euler(const Particle &p, float dt)
         *p.dv  = *p.F * (1. / p.m) * dt;
         *p.v  += *p.dv;
         *p.dr  = *p.v * dt;
-        //*p.dr = p.dr->normal() * Settings::PARTICLE_MAX_DR;
+        if (p.dr->norm() > Settings::PARTICLE_MAX_DR)
+            *p.dr = p.dr->normal() * Settings::PARTICLE_MAX_DR;
         *p.r  += *p.dr;
-
-    //    if (p.id == 1)
-    //    {
-    //        std::cout << *p.r << std::endl;
-    //    }
     }
 }
-void Computer::Euler(float dt)
+void Computer::Euler(double dt)
 {
     for (unsigned i = 0; i < Particle::flows.size(); ++i)
 #pragma omp parallel for if(Settings::PARALLEL_OMP)
         for (LOOP_TYPE j = 0; j < Particle::flows[i].size(); ++j)
             Euler(*Particle::flows[i][j], dt);
 }
-void Computer::MidPoint(const Particle& p, float dt) // RK2?
+void Computer::MidPoint(double dt) // RK2
 {
-    Euler(p, dt * 0.5);
-    evaluateForces(p);
-    Euler(p, dt);
-}
-void Computer::MidPoint(float dt) // RK2?
-{
-    for (unsigned i = 0; i < Particle::flows.size(); ++i)
-#pragma omp parallel for if(Settings::PARALLEL_OMP)
-        for (LOOP_TYPE j = 0; j < Particle::flows[i].size(); ++j)
-            Euler(*Particle::flows[i][j], dt * 0.5);
-
-    for (unsigned i = 0; i < Particle::flows.size(); ++i)
-#pragma omp parallel for if(Settings::PARALLEL_OMP)
-        for (LOOP_TYPE j = 0; j < Particle::flows[i].size(); ++j)
-            evaluateForces(*Particle::flows[i][j]);
-
-    for (unsigned i = 0; i < Particle::flows.size(); ++i)
-#pragma omp parallel for if(Settings::PARALLEL_OMP)
-        for (LOOP_TYPE j = 0; j < Particle::flows[i].size(); ++j)
-            Euler(*Particle::flows[i][j], dt);
+    Euler(dt * 0.5);
+    evaluateSPHForces();
+    Euler(dt);
 }
 
 void Computer::getVolume()
@@ -485,7 +418,7 @@ void Computer::getVolume()
 
 // FUTURE //////////////////////////////////////////////////////////////////////
 
-void Computer::RKV4()
+void Computer::RKV4(double dt)
 {
 
 }

@@ -20,7 +20,7 @@ public:
     Grid();
 
     static void distributeParticles();
-    static void fitParticle(Particle* p);
+    static void fitParticle(Particle *p);
 };
 
 #endif // GRID_H

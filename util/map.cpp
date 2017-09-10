@@ -1,11 +1,13 @@
-#include <QFile>
-#include <QTextStream>
-
 #include "machine/particle.h"
 #include "physics/grid.h"
 #include "physics/vector.h"
 #include "util/map.h"
 #include "util/settings.h"
+
+#include <QFile>
+#include <QTextStream>
+
+#include "util/macros.h"
 
 std::vector<std::vector<char>> Map::map;
 unsigned Map::mapWidth = 0;
@@ -38,6 +40,9 @@ void Map::import(unsigned char mapSetup)
         case DROPLET   : fileName = ":/map/sim_droplet.txt";               break;
         case VESSELS   : fileName = ":/map/sim_communicating_vessels.txt"; break;
         case DAM_FALL  : fileName = ":/map/sim_dam_fall.txt";              break;
+        default :
+            std::cout << "Switch failure at Map::import()!" << std::endl << std::flush;
+            exit(0);
     }
 
     QFile file(fileName);
@@ -162,14 +167,15 @@ void Map::generate()
 
     if (Settings::GHOST_LAYER_GAGE > 0)
     {
-//#pragma omp parallel for if(Settings::PARALLEL_OMP)
-        for (unsigned i = 0; i < Particle::flows[0].size(); ++i)
+        #pragma omp parallel for if(Settings::PARALLEL_OMP)
+        for (LOOP_TYPE i = 0; i < Particle::flows[0].size(); ++i)
         {
             Particle::flows[0][i]->r->x += Settings::GHOST_LAYER_GAGE
                                          * Settings::PARTICLES_INIT_DIST;
             Particle::flows[0][i]->r->y += Settings::GHOST_LAYER_GAGE
                                          * Settings::PARTICLES_INIT_DIST;
         }
+
         Particle *ghostParticle;
         for (unsigned i = 0; i < Grid::cell_count; ++i)
         {
@@ -183,6 +189,7 @@ void Map::generate()
                 {
                     ghostParticle = new Particle(0);
                     ghostParticle->isStationary = true;
+                    ghostParticle->isGhost = true;
                     ghostParticle->r->x = - Settings::ARENA_DIAMETER/2
                                           + Settings::PARTICLE_RADIUS
                                           + i * Settings::PARTICLES_INIT_DIST;

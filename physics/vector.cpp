@@ -1,13 +1,13 @@
 #include "physics/vector.h"
 
-#include <iostream>
-
 #include "gl/form.h"
 #include "gl/matrices.h"
 #include "shape/arrow.h"
 #include "shape/line.h"
 #include "util/operations.h"
 #include "util/settings.h"
+
+#include <iostream>
 
 using namespace std;
 
@@ -192,7 +192,7 @@ void Vector::zero() {
 
 void Vector::setModelMatrix()
 {
-    double us = norm() * 0.2 * Settings::VECTOR_LENGTH_MULTIPLIER;
+    double us = norm() * 0.2 * Settings::VECTOR_LEN_MULT;
     Matrices::modelMatrix.scale(QVector3D(us, us, us));
 }
 

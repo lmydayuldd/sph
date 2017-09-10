@@ -1,7 +1,8 @@
-#include <gl/matrices.h>
+#include "gl/matrices.h"
+
+#include "util/settings.h"
 
 #include <cmath>
-#include "util/settings.h"
 
 QMatrix4x4 Matrices::modelMatrix            = QMatrix4x4();
 QMatrix4x4 Matrices::viewMatrix             = QMatrix4x4();

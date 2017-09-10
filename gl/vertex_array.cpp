@@ -61,7 +61,7 @@ void VertexArray::setVertexAttribPointer(
     int dataStride,
     int dataOffset
 ) {
-    QOpenGLFunctions* gl = QOpenGLContext::currentContext()->functions();
+    QOpenGLFunctions *gl = QOpenGLContext::currentContext()->functions();
     gl->glVertexAttribPointer(
         attributeHandle,
         COORDS_PER_VERTEX,

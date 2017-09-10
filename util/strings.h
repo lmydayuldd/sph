@@ -1,5 +1,5 @@
 #ifndef STRINGS_H
-#define STRINGS_H
+#define STRINGS_H // TODO // also takes care of dirs so name is misleading
 
 #include <QString>
 

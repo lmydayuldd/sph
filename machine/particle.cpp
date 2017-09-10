@@ -1,11 +1,5 @@
 #include "machine/particle.h"
 
-#include <iostream>
-#include <random>
-
-#include <omp.h>
-#include "mpi.h"
-
 #include "gl/matrices.h"
 #include "machine/spring.h"
 #include "physics/forces.h"
@@ -18,18 +12,28 @@
 #include "util/map.h"
 #include "util/settings.h"
 
-#ifdef COMPILER_GPP
-    #define LOOP_TYPE unsigned
-#elif COMPILER_MSVC
-    #define LOOP_TYPE int
-#endif
+#include <iostream>
+#include <random>
+
+#include <omp.h>
+#include "mpi.h"
+
+#include "util/macros.h"
 
 using namespace std;
 
-std::vector<std::vector<Particle*>> Particle::flows;
 int Particle::count = 0;
+std::vector<std::vector<Particle*>> Particle::flows;
 std::vector<std::vector<bool>> Particle::collision;
 std::vector<std::vector<double>> Particle::collisionDistance;
+double Particle::v_max_norm = 0;
+double Particle::F_P_max_norm = 0;
+double Particle::F_visc_max_norm = 0;
+double Particle::F_tens_max_norm = 0; // surface tension force
+double Particle::v_avg_norm = 0;
+double Particle::F_P_avg_norm = 0;
+double Particle::F_visc_avg_norm = 0;
+double Particle::F_tens_avg_norm = 0; // surface tension force
 // for CUDA
 // pinned host memory
 double *Particle::rx_host = 0;
@@ -85,26 +89,32 @@ Particle::Particle(int parentFlow)
       m(Settings::PARTICLE_MASS),
       rho(Settings::DESIRED_REST_DENSITY),
       charge(Settings::FORCES_COULOMB),
-      temperature(Settings::TEMPERATURE),
       viscosity(Settings::VISCOSITY),
-      P(Settings::PRESSURE),
-      smoothing_length(Settings::SMOOTHING_LENGTH),
+      P(0.),
       radius(Settings::PARTICLE_RADIUS),
+      smoothing_length(Settings::SMOOTHING_LENGTH),
+      colorTag(0.),
       isStationary(false),
-      didCollide(new bool(false)),
+      isGhost(false),
+      isPhantom(false),
       boundary(false),
       overpressured(false),
+      didCollide(new bool(false)),
+      dt_left(new double(Settings::dt)),
       colorDefault {0.5, 0, 0},
       colorBoundary {0.2f, 0.2f, 0.2f},
       colorOverpressured {0.7f, 0, 0},
-      dt_left(new double(Settings::dt)),
+      colorGreen {0, 0.7f, 0},
       a(new Vector()),
       dr(new Vector()),
       dv(new Vector()),
       da(new Vector()),
       F(new Vector()),
       r(new Vector()),
-      v(new Vector())
+      v(new Vector()),
+      F_P(new Vector()),
+      F_visc(new Vector()),
+      F_tens(new Vector())
 {
     switch (Settings::MAP_SETUP)
     {
@@ -132,23 +142,27 @@ Particle::Particle(int parentFlow)
     r_former = new Vector(*r);
     v_former = new Vector(*v);
 
-    linkView(SPHERE);
+    linkView(SPHERE_YELLOW);
     formDefault = currentForm;
-    linkView(SPHERE_BOUNDARY);
+    linkView(SPHERE_BLUE);
     formBoundary = currentForm;
-    linkView(SPHERE_OVERPRESSURED);
+    linkView(SPHERE_RED);
     formOverpressured = currentForm;
+    linkView(SPHERE_GREEN);
+    formGreen = currentForm;
 }
 
 void Particle::createView()
 {
     if (Settings::DOT_OR_SPHERE) {
-        Sphere sphereDefault(1.0, colorDefault, SPHERE);
+        Sphere sphereDefault(1.0, colorDefault, SPHERE_YELLOW);
         formDefault = sphereDefault.form;
-        Sphere sphereBoundary(1.0, colorBoundary, SPHERE_BOUNDARY);
+        Sphere sphereBoundary(1.0, colorBoundary, SPHERE_BLUE);
         formBoundary = sphereBoundary.form;
-        Sphere sphereOverpressured(1.0, colorOverpressured, SPHERE_OVERPRESSURED);
+        Sphere sphereOverpressured(1.0, colorOverpressured, SPHERE_RED);
         formOverpressured = sphereOverpressured.form;
+        Sphere sphereGreen(1.0, colorGreen, SPHERE_GREEN);
+        formGreen = sphereGreen.form;
         if      (boundary)      currentForm = formBoundary;
         else if (overpressured) currentForm = formOverpressured;
         else                    currentForm = formDefault;
@@ -160,27 +174,53 @@ void Particle::createView()
     }
 }
 
-void Particle::springify(Particle *p2, float ks, float d, float kd)
+void Particle::evaluateMaximalVelocity()
 {
-    springs.push_back(new Spring(p2, ks, d, kd));
-}
-void Particle::springifyMutual(Particle *p2, float ks, float d, float kd)
-{
-    springs.push_back(new Spring(p2, ks, d, kd));
-    p2->springs.push_back(new Spring(this, ks, d, kd)); ////////////////////////
-}
-
-double Particle::v_max()
-{
-    double v_max = - std::numeric_limits<double>::infinity();
-    for (unsigned i = 0; i < Particle::flows[parentFlow].size(); ++i)
-    {
-        if (Particle::flows[parentFlow][i]->v->norm() > v_max)
-        {
-            v_max = Particle::flows[parentFlow][i]->v->norm();
+    v_max_norm = - std::numeric_limits<double>::infinity();
+    v_avg_norm = 0.;
+    for (unsigned i = 0; i < Particle::flows[0].size(); ++i) {
+        if (Particle::flows[0][i]->v->norm() > v_max_norm) {
+            v_max_norm  = Particle::flows[0][i]->v->norm();
+            v_avg_norm += Particle::flows[0][i]->v->norm();
         }
     }
-    return v_max;
+    v_avg_norm /= Particle::flows[0].size();
+}
+void Particle::evaluateMaximalPressure()
+{
+    F_P_max_norm = - std::numeric_limits<double>::infinity();
+    F_P_avg_norm = 0.;
+    for (unsigned i = 0; i < Particle::flows[0].size(); ++i) {
+        if (Particle::flows[0][i]->F_P->norm() > F_P_max_norm) {
+            F_P_max_norm  = Particle::flows[0][i]->F_P->norm();
+            F_P_avg_norm += Particle::flows[0][i]->F_P->norm();
+        }
+    }
+    F_P_avg_norm /= Particle::flows[0].size();
+}
+void Particle::evaluateMaximalViscosity()
+{
+    F_visc_max_norm = - std::numeric_limits<double>::infinity();
+    F_visc_avg_norm = 0.;
+    for (unsigned i = 0; i < Particle::flows[0].size(); ++i) {
+        if (Particle::flows[0][i]->F_visc->norm() > F_visc_max_norm) {
+            F_visc_max_norm  = Particle::flows[0][i]->F_visc->norm();
+            F_visc_avg_norm += Particle::flows[0][i]->F_visc->norm();
+        }
+    }
+    F_visc_avg_norm /= Particle::flows[0].size();
+}
+void Particle::evaluateMaximalTension()
+{
+    F_tens_max_norm = - std::numeric_limits<double>::infinity();
+    F_tens_avg_norm = 0.;
+    for (unsigned i = 0; i < Particle::flows[0].size(); ++i) {
+        if (Particle::flows[0][i]->F_tens->norm() > F_tens_max_norm) {
+            F_tens_max_norm  = Particle::flows[0][i]->F_tens->norm();
+            F_tens_avg_norm += Particle::flows[0][i]->F_tens->norm();
+        }
+    }
+    F_tens_avg_norm /= Particle::flows[0].size();
 }
 
 void Particle::updateNeighbours()
@@ -191,7 +231,6 @@ void Particle::updateNeighbours()
 
     // naive // incomputable for large particle count
     if (Settings::NEIGHBOUR_CHOICE.compare("ALL") == 0) {
-        unsigned neighbour_count = Settings::NEIGHBOUR_COUNT;
         double neighbour_range = std::numeric_limits<double>::infinity();//2 * smoothing_length;
 
         unsigned particle_count = Particle::flows[this->parentFlow].size();
@@ -205,7 +244,7 @@ void Particle::updateNeighbours()
         }
 
         double last_min_distance = 0;
-        for (unsigned i = 0; i < neighbour_count && i < particle_count; ++i)
+        for (unsigned i = 0; i < particle_count; ++i)
         {
             double min_distance = std::numeric_limits<double>::infinity();
             unsigned min_index = std::numeric_limits<unsigned>::max();
@@ -253,19 +292,20 @@ void Particle::updateNeighbours()
         // cell they are, and then find neighbhours among
         // particles of this cell, than it would be much fast
         // (? having brought no disadvantages at the same time ?)
+        int nlc = Settings::NEIGHBOUR_RANGE_CELLS;
         Particle *p = nullptr;
 #pragma omp parallel for \
             if(Settings::PARALLEL_OMP)
 //            collapse(3)
 //            firstprivate(p) // TODO
-        for (int i = std::max<int>((int)cell[0] - 1, 0);
-             i <= std::min<unsigned>(cell[0] + 1, Grid::cell_count - 1);
+        for (int i = std::max<int>((int)cell[0] - nlc, 0);
+             i <= std::min<unsigned>(cell[0] + nlc, Grid::cell_count - 1);
              ++i) {
-            for (int j = std::max<int>((int)cell[1] - 1, 0);
-                 j <= std::min<unsigned>(cell[1] + 1, Grid::cell_count - 1);
+            for (int j = std::max<int>((int)cell[1] - nlc, 0);
+                 j <= std::min<unsigned>(cell[1] + nlc, Grid::cell_count - 1);
                  ++j) {
-                for (int k = std::max<int>((int)cell[2] - 1, 0);
-                     k <= std::min<unsigned>(cell[2] + 1, Grid::cell_count - 1);
+                for (int k = std::max<int>((int)cell[2] - nlc, 0);
+                     k <= std::min<unsigned>(cell[2] + nlc, Grid::cell_count - 1);
                      ++k) {
                     for (int l = 0;
                          l < Grid::grid[i][j][k].size();
@@ -274,11 +314,6 @@ void Particle::updateNeighbours()
                         p = Grid::grid[i][j][k][l];
                         if (this != p)
                         {
-                            if (Settings::NEIGHBOUR_LMT_BY_CNT
-                                && neighbours->size() > Settings::NEIGHBOUR_COUNT)
-                            {
-                                continue; /////////////////////////////////////////////////////////////////////////////
-                            }
                             if (Settings::NEIGHBOUR_LMT_BY_DST
                                 && (r->distance(*p->r) > Settings::NEIGHBOUR_RANGE))
                             {
@@ -330,26 +365,26 @@ void Particle::isBoundary()
 //    }
 //    else {
 //        boundary = false;
-//    }\
+//    }
 
-    if (abs(rho - Settings::DESIRED_REST_DENSITY)
-        > Settings::DESIRED_REST_DENSITY * 0.4) // TODO, 0.7? that's a lot. Why differences in density are so big?
+    if (fabs(rho - Settings::DESIRED_REST_DENSITY)
+        > Settings::DESIRED_REST_DENSITY * 0.7) // TODO
     {
         if (rho < Settings::DESIRED_REST_DENSITY) {
             boundary = true;
             overpressured = false;
-            color = 0;
+            colorTag = 0;
         }
         else {
             overpressured = true;
             boundary = false;
-            color = 1;
+            colorTag = 1;
         }
     }
     else {
         boundary = false;
         overpressured = false;
-        color = 1;
+        colorTag = 1;
     }
 }
 
@@ -363,31 +398,45 @@ double Particle::kernelFunction(Particle *p2)
     double W = 0.;
     double q = r->distance(*p2->r) / h;
 
-    switch (Settings::KERNEL_DIM)
-    {
-        // Cubic Spline
-        case 1: C_h = 1.  / ( 6        * h);         break;
-        case 2: C_h = 15. / (14 * M_PI * pow(h, 2)); break;
-        case 3: C_h = 1.  / ( 4 * M_PI * pow(h, 3)); break;
-//        // Quintic Spline SPH kernel: [Liu2010]
-//        case 1: C_h = 1. / (120 * h);                break;
-//        case 2: C_h = 7. / (478 * M_PI * pow(h, 2)); break;
-//        case 3: C_h = 3. / (359 * M_PI * pow(h, 3)); break;
+    switch (Settings::KERNEL_STEEPNESS) {
+        case CUBIC :
+            switch (Settings::KERNEL_DIM) {
+            // Cubic Spline
+                case 1: C_h = 1.  / ( 6        * h);         break;
+                case 2: C_h = 15. / (14 * M_PI * pow(h, 2)); break;
+                case 3: C_h = 1.  / ( 4 * M_PI * pow(h, 3)); break;
+            }
+        break;
+        case QUINTIC_LIU :
+            switch (Settings::KERNEL_DIM) {
+            // Quintic Spline SPH kernel: [Liu2010]
+                case 1: C_h = 1. / (120 * h);                break;
+                case 2: C_h = 7. / (478 * M_PI * pow(h, 2)); break;
+                case 3: C_h = 3. / (359 * M_PI * pow(h, 3)); break;
+            }
+        break;
     }
 
-    // Cubic Spline
-    if      (q >= 0. && q < 1.) W = C_h * (pow(2-q, 3) - 4 * pow(1-q, 3));
-    else if (q >= 1. && q < 2.) W = C_h *  pow(2-q, 3);
-    else if (q >= 2.)           W = 0.;
-//    // Quintic Spline SPH kernel: [Liu2010]
-//    if      (q >= 0. && q <= 1.) W = C_h * (pow(3-q, 5) - 6*pow(2-q, 5) + 15*pow(1-q, 5));
-//    else if (q >  1. && q <= 2.) W = C_h * (pow(3-q, 5) - 6*pow(2-q, 5));
-//    else if (q >  2. && q <= 3.) W = C_h *  pow(3-q, 5);
-//    else if (q >  3.)            W = 0;
+    switch (Settings::KERNEL_STEEPNESS) {
+        case CUBIC :
+        // Cubic Spline
+            if      (q >= 0. && q < 1.) W = C_h * (pow(2-q, 3) - 4 * pow(1-q, 3));
+            else if (q >= 1. && q < 2.) W = C_h *  pow(2-q, 3);
+            else if (q >= 2.)           W = 0.;
+        break;
+        case QUINTIC_LIU :
+        // Quintic Spline SPH kernel: [Liu2010]
+            if      (q >= 0. && q <= 1.) W = C_h * (pow(3-q, 5) - 6*pow(2-q, 5) + 15*pow(1-q, 5));
+            else if (q >  1. && q <= 2.) W = C_h * (pow(3-q, 5) - 6*pow(2-q, 5));
+            else if (q >  2. && q <= 3.) W = C_h *  pow(3-q, 5);
+            else if (q >  3.)            W = 0;
+        break;
+    }
 
     //std::cout << "distance " << r->distance(*p2->r) << std::endl << std::flush;
     //std::cout << "QQQQQQQQQQ " << q << std::endl << std::flush;
-    //std::cout << "Kernel " << W << std::endl << std::flush;
+    //std::cout << "Kernel Function " << W << std::endl << std::flush;
+
     return W;
 }
 
@@ -395,33 +444,53 @@ Vector Particle::kernelFunctionGradient(Particle *p2)
 {
     double h = smoothing_length;
     double C_h = 0.;
-    double grad_W = 0;
+    double dW = 0;
     double q = r->distance(*p2->r) / h;
 
-    switch (Settings::KERNEL_DIM)
-    {
+    switch (Settings::KERNEL_STEEPNESS) {
+        case CUBIC :
         // Cubic Spline
-        case 1: C_h =  -1. / (6        * pow(h, 2)); break;
-        case 2: C_h = -15. / (7 * M_PI * pow(h, 3)); break;
-        case 3: C_h =  -3. / (4 * M_PI * pow(h, 4)); break;
-//        // Quintic Spline SPH kernel: [Liu2010]
-//        case 1: C_h = -1. / (120        * pow(h, 2)); break;
-//        case 2: C_h = -7. / (239 * M_PI * pow(h, 3)); break;
-//        case 3: C_h = -9. / (359 * M_PI * pow(h, 4)); break;
+            switch (Settings::KERNEL_DIM) {
+                case 1: C_h =  -1. / (6        * pow(h, 2)); break;
+                case 2: C_h = -15. / (7 * M_PI * pow(h, 3)); break;
+                case 3: C_h =  -3. / (4 * M_PI * pow(h, 4)); break;
+            }
+        break;
+        case QUINTIC_LIU :
+        // Quintic Spline SPH kernel: [Liu2010]
+            switch (Settings::KERNEL_DIM) {
+                case 1: C_h = -1. / (120        * pow(h, 2)); break;
+                case 2: C_h = -7. / (239 * M_PI * pow(h, 3)); break;
+                case 3: C_h = -9. / (359 * M_PI * pow(h, 4)); break;
+            }
+        break;
     }
 
-    // Cubic Spline
-    if      (q >= 0. && q < 1.) grad_W = C_h *  q * (9*q - 4);
-    else if (q >= 1. && q < 2.) grad_W = C_h * (q * (4 - 3*q) - 4);
-    else if (q >= 2.)           grad_W = 0;
-//    // Quintic Spline SPH kernel: [Liu2010]
-//    if      (q >= 0. && q <= 1.) grad_W = C_h * (-10 * q * (5*pow(q, 3) - 12*pow(q, 2) + 12));
-//    else if (q >  1. && q <= 2.) grad_W = C_h * (30*pow(2-q, 4) - 5*pow(3-q, 4));
-//    else if (q >  2. && q <= 3.) grad_W = C_h * (-5 * pow(3-q, 4));
-//    else if (q >  3.)            grad_W = 0;
+    switch (Settings::KERNEL_STEEPNESS) {
+        case CUBIC :
+        // Cubic Spline
+            if      (q >= 0. && q < 1.) dW = C_h *  q * (9*q - 4);
+            else if (q >= 1. && q < 2.) dW = C_h * (q * (4 - 3*q) - 4);
+            else if (q >= 2.)           dW = 0;
+        break;
+        case QUINTIC_LIU :
+        // Quintic Spline SPH kernel: [Liu2010]
+            if      (q >= 0. && q <= 1.) dW = C_h * (-10 * q * (5*pow(q, 3) - 12*pow(q, 2) + 12));
+            else if (q >  1. && q <= 2.) dW = C_h * (30*pow(2-q, 4) - 5*pow(3-q, 4));
+            else if (q >  2. && q <= 3.) dW = C_h * (-5 * pow(3-q, 4));
+            else if (q >  3.)            dW = 0;
+        break;
+    }
 
-    //std::cout << "Kernel Function gradient " << grad_W << std::endl << std::flush;
-    return (*p2->r - *r) / r->distance(*p2->r) * grad_W;
+    Vector grad_W = Vector();
+    grad_W = (*p2->r - *r) / r->distance(*p2->r) * dW;
+
+//    if (id == 500)
+//    {
+//        std::cout << "Kernel Function gradient " << grad_W << std::endl << std::flush;
+//    }
+
+    return grad_W;
 }
 
 Vector Particle::kernelFunctionGradientSquared(Particle *p2)
@@ -477,9 +546,9 @@ void Particle::updatePressure()
     P = k * (pow(rho/rho_0, gamma) - 1); // Tait equation
 
 //    double c_s = Settings::SOUND_SPEED;
-//    pressure = c_s * c_s * (rho - rho_0);
+//    P = c_s * c_s * (rho - rho_0);
 
-    //std::cout << "Pressure " << pressure << std::endl << std::flush;
+    //std::cout << "Pressure " << P << std::endl << std::flush;
 }
 
 void Particle::computePressureForces()
@@ -496,22 +565,22 @@ void Particle::computePressureForces()
         {
             n = (*neighbours)[i];
     //#pragma omp critical
-//            gradient_pressure +=
-//                kernelFunctionGradient(n)
-//                * n->m
-//                * (P/pow(rho, 2) + n->P/pow(n->rho, 2));
             gradient_pressure +=
                 kernelFunctionGradient(n)
                 * n->m
-                * (P + n->P)
-                / (2 * rho * n->rho);
+                * (P/pow(rho, 2) + n->P/pow(n->rho, 2));
+//            gradient_pressure +=
+//                kernelFunctionGradient(n)
+//                * n->m
+//                * (P + n->P)
+//                / (2 * rho * n->rho);
             // TODO // chose one of methods above
         }
         gradient_pressure *= rho;
 
-        Vector F_p = Vector();
-        F_p = gradient_pressure * (- m/rho);
-        *F += F_p;
+        *F_P = gradient_pressure * (- m/rho);
+        *F += *F_P;
+
         //std::cout << "F_pressure " << F_p << std::endl << std::flush;
     }
 }
@@ -531,24 +600,25 @@ void Particle::computeViscosityForces()
             n = (*neighbours)[i];
     //#pragma omp critical
             velocity_gradient_squared +=
-                (*r - *n->r)
-                * kernelFunctionGradient(n)
-                * (*v - *n->v)
+                (*v - *n->v)
                 * (n->m / n->rho)
+                * (*r - *n->r).dot(kernelFunctionGradient(n))
                 / ((*r - *n->r).dot(*r - *n->r)
                    + 0.01 * pow(smoothing_length, 2));
-            //std::cout << "v - n->v" << (v - n->v) << std::endl << std::flush;
+//            if (id == 500) {
+//                std::cout << "v - n->v " << (v - n->v) << std::endl << std::flush;
+//            }
         }
         velocity_gradient_squared *= 2;
         //std::cout << "velocity_gradient_squared " << velocity_gradient_squared << std::endl << std::flush;
 
-        Vector F_viscosity = Vector();
-        F_viscosity = velocity_gradient_squared * viscosity * m;// * 10000000000000000000;
-        *F += F_viscosity;
+        *F_visc = velocity_gradient_squared * viscosity * m;
+        *F += *F_visc;
+
 //#pragma omp critical
-        if (id == 500) {
-          std::cout << "p500_F_viscosity " << F_viscosity << std::endl << std::flush;
-        }
+//        if (id == 500) {
+//          std::cout << "p500_F_viscosity " << F_viscosity << std::endl << std::flush;
+//        }
     }
 }
 
@@ -564,15 +634,15 @@ void Particle::computeSurfaceTensionForces()
         for (unsigned i = 0; i < neighbours->size(); ++i)
         {
             n = (*neighbours)[i];
-            color_avg += kernelFunction(n) * n->color * n->m / n->rho;
-            color_gradient += kernelFunctionGradient(n) * n->color * n->m / n->rho;
+            color_avg += kernelFunction(n) * n->colorTag * n->m / n->rho;
+            color_gradient += kernelFunctionGradient(n) * n->colorTag * n->m / n->rho;
             color_gradient_squared
-                += kernelFunctionGradientSquared(n) * n->color * n->m / n->rho;
+                += kernelFunctionGradientSquared(n) * n->colorTag * n->m / n->rho;
         }
 
         double surfaceTensionCoefficient = Settings::SURFACE_TENSION_COEF;
         Vector liquid_surface_normal = Vector();
-        Vector F_st = Vector();
+        *F_tens = Vector();
         if (color_gradient.norm() != 0.) {
             liquid_surface_normal = - color_gradient / color_gradient.norm();
 
@@ -581,16 +651,16 @@ void Particle::computeSurfaceTensionForces()
 //            surface_curvature = kernelFunctionGradient
 //            F_st = liquid_surface_normal * surfaceCurvature * surfaceTensionCoefficient;
 
-            F_st = liquid_surface_normal * surfaceTensionCoefficient;
-            *F += F_st;
+            *F_tens = liquid_surface_normal * surfaceTensionCoefficient;
+            *F += *F_tens;
         }
 
 //#pragma omp critical
-        if (id == 500) {
-            //        std::cout << color << " color" << std::endl << std::flush;
-            //        std::cout << color_avg << " color_avg" << std::endl << std::flush;
-            std::cout << F_st << " p500_tension" << std::endl << std::flush;
-        }
+//        if (id == 500) {
+//            //        std::cout << color << " color" << std::endl << std::flush;
+//            //        std::cout << color_avg << " color_avg" << std::endl << std::flush;
+//            //std::cout << F_st << " p500_tension" << std::endl << std::flush;
+//        }
 
 
 
@@ -624,9 +694,7 @@ void Particle::computeSurfaceTensionForces()
 
 void Particle::computeOtherForces()
 {
-    Vector F_o = Vector();
-    F_o = Vector(0, Settings::FORCES_GRAVITY_EARTH_VAL, 0) * m;
-    *F += F_o;
+    Forces::gravityEarth(*this);
 
     if (Settings::FORCES_GRAVITY_UNIVERSAL)
         for (unsigned i = 0; i < Particle::flows[parentFlow].size(); ++i)
@@ -655,53 +723,19 @@ void Particle::paint()
 {
     setModelMatrix();
 
-//    if (Settings::COLOR_BY_SPEED) {
-//        color[0] = (float) (v->norm() / v_max());
-//        color[1] = -1.;
-//        color[2] = -1.;
-//        Machine::recolor(color);
-//    }
-//    if (Settings::COLOR_BOUNDARIES) {
-//        if (boundary) {
-//            if (color[0] != 0.0f
-//             || color[1] != 1.0f
-//             || color[2] != 0.0f) {
-//                color[0] = 0.0f;
-//                color[1] = 1.0f;
-//                color[2] = 0.0f;
-//                Machine::recolor(color);
-//            }
-//        }
-//        else {
-//            if (color[0] != 0.5f
-//             || color[1] != 0.0f
-//             || color[2] != 0.0f) {
-//                color[0] = 0.5f;
-//                color[1] = 0.0f;
-//                color[2] = 0.0f;
-//                Machine::recolor(color);
-//            }
-//        }
-//    }
+    switch (Settings::COLOR_BY) {
+        case LAYERS             : paintLayers();      break;
+        case BOUNDARIES         : paintBoundaries();  break;
+        case DENSITY            : paintDensities();   break;
+        case PRESSURE           : paintPressures();   break;
+        case VELOCITY           : paintVelocities();  break;
+        case ColorBy::VISCOSITY : paintViscosities(); break;
+        case TENSION            : paintTensions();    break;
+        default :
+            std::cout << "Switch failure at paint()!" << std::endl << std::flush;
+            exit(0);
+    }
 
-    if      (boundary) {
-        linkView(SPHERE_BOUNDARY);
-    }
-    else if (overpressured) {
-        linkView(SPHERE_OVERPRESSURED);
-    }
-    else {
-        linkView(SPHERE);
-    }
-//    if (collision[499][id-1] || collision[id-1][499]) {
-//        linkView(SPHERE_BOUNDARY);
-//    }
-//    else if (id == 500) {
-//        linkView(SPHERE_OVERPRESSURED);
-//    }
-//    else {
-//        linkView(SPHERE);
-//    }
     Machine::paint();
 
     if (Settings::PAINT_VECTORS)
@@ -709,4 +743,59 @@ void Particle::paint()
         v->setApplicationPoint(*r);
         v->paint();
     }
+}
+
+void Particle::paintLayers()
+{
+    float which = float(id) / float(Settings::PARTICLE_COUNT_2D);
+    if      (which <= 0.25) linkView(SPHERE_BLUE);
+    else if (which <= 0.50) linkView(SPHERE_GREEN);
+    else if (which <= 0.75) linkView(SPHERE_YELLOW);
+    else                    linkView(SPHERE_RED);
+}
+void Particle::paintBoundaries()
+{
+    if (boundary) linkView(SPHERE_BLUE); // depends on density, check isBoundary()
+    else          linkView(SPHERE_YELLOW);
+}
+void Particle::paintDensities()
+{
+    if      (boundary)      linkView(SPHERE_BLUE);
+    else if (overpressured) linkView(SPHERE_RED);
+    else                    linkView(SPHERE_YELLOW);
+}
+void Particle::paintVelocities()
+{
+    if      (v->norm() <= v_max_norm * 0.25) linkView(SPHERE_BLUE);
+    else if (v->norm() <= v_max_norm * 0.50) linkView(SPHERE_GREEN);
+    else if (v->norm() <= v_max_norm * 0.75) linkView(SPHERE_YELLOW);
+    else                                     linkView(SPHERE_RED);
+}
+void Particle::paintPressures()
+{
+    if      (F_P->norm() <= F_P_max_norm * 0.25) linkView(SPHERE_BLUE);
+    else if (F_P->norm() <= F_P_max_norm * 0.50) linkView(SPHERE_GREEN);
+    else if (F_P->norm() <= F_P_max_norm * 0.75) linkView(SPHERE_YELLOW);
+    else                                         linkView(SPHERE_RED);
+}
+void Particle::paintViscosities()
+{
+    if      (F_visc->norm() <= F_visc_max_norm * 0.25) linkView(SPHERE_BLUE);
+    else if (F_visc->norm() <= F_visc_max_norm * 0.50) linkView(SPHERE_GREEN);
+    else if (F_visc->norm() <= F_visc_max_norm * 0.75) linkView(SPHERE_YELLOW);
+    else                                               linkView(SPHERE_RED);
+}
+void Particle::paintTensions()
+{
+
+}
+
+void Particle::springify(Particle *p2, float ks, float d, float kd)
+{
+    springs.push_back(new Spring(p2, ks, d, kd));
+}
+void Particle::springifyMutual(Particle *p2, float ks, float d, float kd)
+{
+    springs.push_back(new Spring(p2, ks, d, kd));
+    p2->springs.push_back(new Spring(this, ks, d, kd)); ////////////////////////
 }

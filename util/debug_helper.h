@@ -10,11 +10,11 @@ class DebugHelper
 public:
     DebugHelper();
 
-    static void showText(const char* text);
+    static void showText(const char *text);
     template<typename T> static void showVariable(const char* title, T value);
 
     template<typename... Args>
-    static void showVariables(const char* title, Args... args)
+    static void showVariables(const char *title, Args... args)
     {
         QMessageBox msgBox;
         msgBox.setWindowTitle(QString(title));

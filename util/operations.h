@@ -1,9 +1,9 @@
 #ifndef OPERATIONS_H
 #define OPERATIONS_H
 
-#include <Qvector4D>
-
 #include "physics/geometry.h"
+
+#include <Qvector4D>
 
 namespace Op {
     double sgn(double x);
@@ -19,7 +19,9 @@ double lineLineMinDist(const Geometry::Line& l1, const Geometry::Line& l2);
 bool lineIntersectsLine(const Geometry::Line& l1, const Geometry::Line& l2);
 double segSegMinDist(const Geometry::Line& l1, const Geometry::Line& l2);
 bool SegIntersectsSeg(const Geometry::Line& l1, const Geometry::Line& l2);
-double timePointPointClosest(const Vector& r1, const Vector& v1, const Vector& r2, const Vector& v2);
-double distPointPointClosest(const Vector& r1, const Vector& v1, const Vector& r2, const Vector& v2);
+double timePointPointClosest(const Vector& r1, const Vector& v1,
+                             const Vector& r2, const Vector& v2);
+double distPointPointClosest(const Vector& r1, const Vector& v1,
+                             const Vector& r2, const Vector& v2);
 
 #endif // OPERATIONS_H

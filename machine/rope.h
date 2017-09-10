@@ -1,10 +1,10 @@
 #ifndef ROPE_H
 #define ROPE_H
 
-#include <vector>
-
 #include "machine/particle.h"
 #include "physics/vector.h"
+
+#include <vector>
 
 class Rope : public Machine
 {

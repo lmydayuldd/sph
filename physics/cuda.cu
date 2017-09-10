@@ -1,54 +1,38 @@
-#include <cuda.h>
-#include <builtin_types.h> // __global__ __host__ __device__
-
-#define UNIFIED_MATH_CUDA_H
-#include <vector_functions.h>
-#include <math_functions.h>
-#include <cuda_runtime.h> // cudaMalloc(), cudaMemcpy(), ...
-#include <helper_cuda.h>
-
-//#include <thrust/device_vector.h>
-//#include <thrust/host_vector.h>
-//#include <thrust/system/cuda/experimental/pinned_allocator.h>
+#include "machine/particle.h"
+#include "physics/forces.h"
+#include "physics/vector.h"
+#include "util/settings.h"
 
 #include <vector>
 //#ifdef COMPILER_MSVC
 #include <algorithm>
 //#endif
 
-#include "machine/particle.h"
-#include "physics/forces.h"
-#include "physics/vector.h"
-#include "util/settings.h"
-
 #include <omp.h>
+
+#include <cuda.h>
+#include <cuda_runtime.h> // checkCudaErrors(), cudaMalloc(), cudaMemcpy(), ...
+#include <helper_cuda.h> // checkCudaErrors() // helper_cuda.h must go after cuda_runtime.h
+#include <builtin_types.h> // __global__ __host__ __device__
+
+#define UNIFIED_MATH_CUDA_H
+#include <vector_functions.h>
+#include <math_functions.h>
+
+//#include <thrust/device_vector.h>
+//#include <thrust/host_vector.h>
+//#include <thrust/system/cuda/experimental/pinned_allocator.h>
 
 using namespace std;
 
-#ifdef COMPILER_GPP
-    #define LOOP_TYPE unsigned
-#elif COMPILER_MSVC
-    #define LOOP_TYPE int
-#endif
+#include "util/macros.h"
 
 #define CUDA_TIME_MEASUREMENT_INIT \
     cudaEvent_t startEvent, stopEvent; \
     float time; \
     int bytes;
 
-#define CUDA_TIME_MEASUREMENT_START \
-    checkCudaErrors(cudaEventCreate(&startEvent)); \
-    checkCudaErrors(cudaEventCreate(&stopEvent)); \
-    checkCudaErrors(cudaEventRecord(startEvent, 0));
-
-#define CUDA_TIME_MEASUREMENT_END \
-    checkCudaErrors(cudaEventRecord(stopEvent, 0)); \
-    checkCudaErrors(cudaEventSynchronize(stopEvent)); \
-    checkCudaErrors(cudaEventElapsedTime(&time, startEvent, stopEvent));
-
-#define CUDA_TIME_MEASUREMENT_FIN \
-    checkCudaErrors(cudaEventDestroy(startEvent)); \
-    checkCudaErrors(cudaEventDestroy(stopEvent));
+#include "util/macros.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 //// Interface for outside world. //////////////////////////////////////////////
@@ -89,14 +73,15 @@ __forceinline __device__ double3 normal(const double3 &v) {
     return v / norm(v);
 }
 
-__forceinline __device__ void collidePair(double &rx1, double &ry1, double &rz1,
-                                          double &vx1, double &vy1, double &vz1,
-                                          double &rx2, double &ry2, double &rz2,
-                                          double &vx2, double &vy2, double &vz2,
-                                          double &m1, double &m2,
-                                          double &radius,
-                                          bool &is_stationary_p1,
-                                          bool &is_stationary_p2)
+__forceinline __device__ void collidePair(
+                                  double &rx1, double &ry1, double &rz1,
+                                  double &vx1, double &vy1, double &vz1,
+                                  double &rx2, double &ry2, double &rz2,
+                                  double &vx2, double &vy2, double &vz2,
+                                  double &m1, double &m2,
+                                  double &radius,
+                                  bool &is_stationary_p1,
+                                  bool &is_stationary_p2)
 {
     //double3 sphereNormal;
     double3 p1_r = make_double3(rx1, ry1, rz1);

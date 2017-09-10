@@ -18,12 +18,11 @@ public:
 
     // Graphics:
 
-    static bool     DOT_OR_SPHERE;
-    static unsigned SPHERE_DETAIL;
-    static bool     PAINT_VECTORS;
-    static bool     COLOR_BY_SPEED;
-    static bool     COLOR_BOUNDARIES;
-    static double   VECTOR_LENGTH_MULTIPLIER;
+    static bool          DOT_OR_SPHERE;
+    static unsigned      SPHERE_DETAIL;
+    static bool          PAINT_VECTORS;
+    static unsigned char COLOR_BY;
+    static double        VECTOR_LEN_MULT;
 
     // Controls:
 
@@ -31,6 +30,7 @@ public:
 
     // Simulation:
 
+    static unsigned char INTEGRATION_SCHEME;
     static double        dt;
     static unsigned      ITERATIONS_PER_FRAME;
     static double        ARENA_DIAMETER;
@@ -50,29 +50,29 @@ public:
 
     // Physics:
 
-    static bool         COLLIDE_NEIGHBOURS;
-    static bool         GRANULAR_OR_LIQUID;
-    static bool         PARTICLES_REACT;
-    static bool         COLLIDE_MOVE_OUT;
-    static bool         COLLIDE_TRANSFER_VEL;
-    static bool         NEIGHBOUR_LMT_BY_CNT;
-    static bool         NEIGHBOUR_LMT_BY_DST;
-    static std::string  NEIGHBOUR_CHOICE;
-    static unsigned     NEIGHBOUR_COUNT;
-    static unsigned     KERNEL_DIM;
-    static double       STIFFNESS_CONSTANT;
-    static double       DESIRED_REST_DENSITY;
-    static double       SOUND_SPEED;
-    static double       SURFACE_TENSION_COEF;
-    static double       UNIVERSAL_GRAV_MULT;
-    static double       VISCOSITY;
-    static double       PARTICLE_RADIUS;
-    static double       PARTICLES_INIT_DIST;
-    static double       MESH_CELL_DIAMETER;
-    static double       SMOOTHING_LENGTH;
-    static double       NEIGHBOUR_RANGE;
-    static double       PARTICLE_MAX_DR;
-    static double       PARTICLE_MASS;
+    static bool          COLLIDE_NEIGHBOURS_ONLY;
+    static bool          GRANULAR_OR_LIQUID;
+    static bool          PARTICLES_REACT;
+    static bool          COLLIDE_MOVE_OUT;
+    static bool          COLLIDE_TRANSFER_VEL;
+    static double        PARTICLE_RADIUS;
+    static double        PARTICLE_MAX_DR;
+    static double        PARTICLES_INIT_DIST;
+    static double        MESH_CELL_DIAMETER;
+    static double        SMOOTHING_LENGTH;
+    static double        PARTICLE_MASS;
+    static std::string   NEIGHBOUR_CHOICE;
+    static bool          NEIGHBOUR_LMT_BY_DST;
+    static double        NEIGHBOUR_RANGE;
+    static int           NEIGHBOUR_RANGE_CELLS;
+    static unsigned char KERNEL_STEEPNESS;
+    static unsigned      KERNEL_DIM;
+    static double        STIFFNESS_CONSTANT;
+    static double        SOUND_SPEED;
+    static double        DESIRED_REST_DENSITY;
+    static double        SURFACE_TENSION_COEF;
+    static double        VISCOSITY;
+    static double        UNIVERSAL_GRAV_MULT;
 
     static double FORCES_LIMIT;
     static bool   FORCES_GRAVITY_EARTH;
@@ -84,9 +84,6 @@ public:
     static double FORCES_DAMPEN_WATER;
 
 // LEGACY //////////////////////////////////////////////////////////////////////
-
-    static double PRESSURE;
-    static double TEMPERATURE;
 
     static double FORCES_HOOKE_SPRING;
     static float  FORCES_HOOKE_DISTANCE;

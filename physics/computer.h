@@ -11,22 +11,19 @@ public:
     Computer();
 
     static void evaluateForces(const Particle &p);
-    static void evaluateForces();
     static void evaluateSPHForces();
     static void collide();
-    static void computeVectors(const Particle &p, float dt);
-    static void computeVectors(float dt);
-    static void Euler(const Particle &p, float dt);
-    static void Euler(float dt);
-    static void MidPoint(const Particle &p, float dt); // RK2?
-    static void MidPoint(float dt); // RK2? // Runge-Kutta
+    static void computeVectors(double dt);
+    static void Euler(const Particle &p, double dt);
+    static void Euler(double dt);
+    static void MidPoint(double dt); // RK2? // Runge-Kutta
     static void getVolume();
 
     void loop();
 
     // FUTURE //////////////////////////////////////////////////////////////////////
 
-    static void RKV4();
+    static void RKV4(double dt);
 
     // LEGACY //////////////////////////////////////////////////////////////////////
 

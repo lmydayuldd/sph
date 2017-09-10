@@ -1,14 +1,13 @@
 #include "enums.h"
 
-const char* Enums::shapeName[] = {
+const char *Enums::shapeName[] = {
     "NOTHING",
     "DOT",
     "LINE",
     "ARROW",
     "TRIANGLE",
     "RECTANGLE",
-    "SPHERE",
-    "SPHERE_SURFACE",
+    "SPHERE_YELLOW", "SPHERE_BLUE", "SPHERE_RED", "SPHERE_GREEN",
     "LANDSCHAFT",
     "CLOTH"
 };

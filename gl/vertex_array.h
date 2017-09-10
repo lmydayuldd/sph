@@ -1,23 +1,22 @@
 #ifndef VERTEX_ARRAY_H
 #define VERTEX_ARRAY_H
 
+#include "util/enums.h"
+
 #include <QOpenGLBuffer>
 #include <QOpenGLFunctions>
 //#include <QOpenGLVertexArrayObject>
 
-#include "util/enums.h"
-
 class VertexArray {
 private:
-    QOpenGLFunctions* gl;
+    QOpenGLFunctions *gl;
 
 public:
     static std::vector<VertexArray*> arrays;
-    QOpenGLBuffer* vertexBuffer;
+    QOpenGLBuffer *vertexBuffer;
     ShapeType type;
 
     ~VertexArray();
-    // initialize vertex byte buffer for coordinates
     VertexArray(std::vector<float> vertexData, ShapeType type);
 
     static void printArrays();

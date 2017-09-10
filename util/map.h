@@ -7,15 +7,13 @@ class Map
 {
 private:
     static std::vector<std::vector<char>> map;
-
-    static void reset();
-    static void import(unsigned char mapSetup);
-
-    static unsigned mapWidth;
-    static unsigned mapHeight;
+    static unsigned mapWidth, mapHeight;
     static unsigned obstacleCount;
     static unsigned particleCount;
     static unsigned ghostCount;
+
+    static void reset();
+    static void import(unsigned char mapSetup);
 
 public:
     static void generate();

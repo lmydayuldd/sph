@@ -3,7 +3,6 @@
 
 #include <iostream>
 
-//class Vector;
 #include "physics/vector.h"
 
 namespace Geometry {

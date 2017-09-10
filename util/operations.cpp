@@ -1,9 +1,9 @@
 #include "util/operations.h"
 
-#include <iostream>
-
 #include "gl/matrices.h"
 #include "physics/vector.h"
+
+#include <iostream>
 
 namespace Op {
     double sgn(double x)
@@ -25,7 +25,8 @@ Geometry::Ray convertNormalized2DPointToRay(float normalizedX, float normalizedY
 {
     // We'll convert these normalized device coordinates into world-space coordinates.
     // We'll pick a source on the near and far planes, and draw a line between them.
-    // To do this transform, we need to first multiply by the inverse matrix, and then we need to undo the perspective divide.
+    // To do this transform, we need to first multiply by the inverse matrix,
+    //   and then we need to undo the perspective divide.
     QVector4D nearPointNdc(normalizedX, normalizedY, -1, 1);
     QVector4D farPointNdc(normalizedX, normalizedY, 1, 1);
     QVector4D nearPointWorld = Matrices::viewProjectionInverted * nearPointNdc;
@@ -174,8 +175,8 @@ double segSegMinDist(const Geometry::Line& l1, const Geometry::Line& l2)
         }
     }
     // finally do the division to get sc and tc
-    sc = (abs(sN) < 0.000001 ? 0.0 : sN / sD);
-    tc = (abs(tN) < 0.000001 ? 0.0 : tN / tD);
+    sc = (fabs(sN) < 0.000001 ? 0.0 : sN / sD);
+    tc = (fabs(tN) < 0.000001 ? 0.0 : tN / tD);
 
     // get the difference of the two closest points
     Vector dP = w + u*sc - v*tc; // S1(sc) - S2(tc)

@@ -7,10 +7,10 @@
 QT += core gui opengl
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET                        = SPH
-TEMPLATE                      = app
-CONFIG                       += mobility c++11
-MOBILITY                      =
+TARGET    = SPH
+TEMPLATE  = app
+CONFIG   += mobility c++11
+MOBILITY  =
 
 # Defines platform-specific preprocessor macro.
 #   Edit at "Projects -> QMake -> additional arguments"
@@ -43,11 +43,11 @@ else {
 *-g++ {
     # Qt Creator seems to have a problem providing qwindows.dll / qwindowsd.dll
     CONFIG(debug, debug|release) {
-        QWINDOWS_DLL_SRC = $$shell_path(D:\dev\Qt\5.9.1\mingw53_32\plugins\platforms\qwindowsd.dll)
+        QWINDOWS_DLL_SRC = $$shell_path(E:\dev\Qt\5.9.1\mingw53_32\plugins\platforms\qwindowsd.dll)
         QWINDOWS_DLL_DST = $$shell_path($${OUT_PWD}/debug/platforms/)
     }
     else {
-        QWINDOWS_DLL_SRC = $$shell_path(D:\dev\Qt\5.9.1\mingw53_32\plugins\platforms\qwindows.dll)
+        QWINDOWS_DLL_SRC = $$shell_path(E:\dev\Qt\5.9.1\mingw53_32\plugins\platforms\qwindows.dll)
         QWINDOWS_DLL_DST = $$shell_path($${OUT_PWD}/release/platforms/)
     }
     QMAKE_POST_LINK += $${QMAKE_MKDIR} $${QWINDOWS_DLL_DST} & \
@@ -57,10 +57,10 @@ else {
 win32-msvc* {
     # Qt Creator seems to have a problem providing qwindows.dll / qwindowsd.dll
     CONFIG(debug, debug|release) {
-        QWINDOWS_DLL_SRC = $$shell_path(D:\dev\Qt\5.9.1\msvc2017_64\plugins\platforms\qwindowsd.dll)
+        QWINDOWS_DLL_SRC = $$shell_path(E:\dev\Qt\5.9.1\msvc2017_64\plugins\platforms\qwindowsd.dll)
         QWINDOWS_DLL_DST = $$shell_path($${OUT_PWD}/debug/platforms/)
-        LIBS += -L"D:\dev\opencv\build\bin\Release"
-        LIBS += -LD:\dev\opencv\build\install\x64\vc15\lib \ #####################
+        LIBS += -L"E:\dev\opencv\build\bin\Release"
+        LIBS += -LE:\dev\opencv\build\install\x64\vc15\lib \ #####################
                     -lopencv_calib3d330 \
                     -lopencv_core330 \
                     -lopencv_features2d330 \
@@ -72,11 +72,11 @@ win32-msvc* {
                     #-lopencv_world330#_64
     }
     else {
-        QWINDOWS_DLL_SRC_0 = $$shell_path(D:\dev\Qt\5.9.1\msvc2017_64\plugins\platforms\qwindows.dll)
-        QWINDOWS_DLL_SRC_1 = $$shell_path(D:\dev\opencv\build\install\x64\vc15\bin\opencv_core330.dll)
-        QWINDOWS_DLL_SRC_2 = $$shell_path(D:\dev\opencv\build\install\x64\vc15\bin\opencv_imgcodecs330.dll)
-        QWINDOWS_DLL_SRC_3 = $$shell_path(D:\dev\opencv\build\install\x64\vc15\bin\opencv_imgproc330.dll)
-        QWINDOWS_DLL_SRC_4 = $$shell_path(D:\dev\opencv\build\install\x64\vc15\bin\opencv_videoio330.dll)
+        QWINDOWS_DLL_SRC_0 = $$shell_path(E:\dev\Qt\5.9.1\msvc2017_64\plugins\platforms\qwindows.dll)
+        QWINDOWS_DLL_SRC_1 = $$shell_path(E:\dev\opencv\build\install\x64\vc15\bin\opencv_core330.dll)
+        QWINDOWS_DLL_SRC_2 = $$shell_path(E:\dev\opencv\build\install\x64\vc15\bin\opencv_imgcodecs330.dll)
+        QWINDOWS_DLL_SRC_3 = $$shell_path(E:\dev\opencv\build\install\x64\vc15\bin\opencv_imgproc330.dll)
+        QWINDOWS_DLL_SRC_4 = $$shell_path(E:\dev\opencv\build\install\x64\vc15\bin\opencv_videoio330.dll)
         QWINDOWS_DLL_DST_0 = $$shell_path($${OUT_PWD}/release/platforms/)
         QWINDOWS_DLL_DST   = $$shell_path($${OUT_PWD}/release/)
     }
@@ -93,11 +93,11 @@ win32-msvc* {
 # OpenCV ###################################################
 ############################################################
 
-INCLUDEPATH += D:\dev\opencv\build\include
+INCLUDEPATH += E:\dev\opencv\build\include
 
 CONFIG(debug, debug|release) {
     *-g++ {
-        LIBS += -LD:/dev/opencv/build/bin/Debug \
+        LIBS += -LE:/dev/opencv/build/bin/Debug \
                     -lopencv_calib3d330d \
                     -lopencv_core330d \
                     -lopencv_features2d330d \
@@ -107,9 +107,9 @@ CONFIG(debug, debug|release) {
                     #opencv_world330d
     }
     win32-msvc* {
-        LIBS += \#-LD:/dev/opencv/build/bin/Debug \
-                -L"D:\dev\opencv\build\install\x64\vc15\bin" \
-                -L"D:\dev\opencv\build\install\x64\vc15\lib" \
+        LIBS += \#-LE:/dev/opencv/build/bin/Debug \
+                -L"E:\dev\opencv\build\install\x64\vc15\bin" \
+                -L"E:\dev\opencv\build\install\x64\vc15\lib" \
                     -lopencv_calib3d330d \
                     -lopencv_core330d \
                     -lopencv_features2d330d \
@@ -122,7 +122,7 @@ CONFIG(debug, debug|release) {
 }
 else {
     *-g++ {
-        LIBS += -LD:/dev/opencv/build/bin/Release \
+        LIBS += -LE:/dev/opencv/build/bin/Release \
                     -lopencv_calib3d330 \
                     -lopencv_core3sar30 \
                     -lopencv_features2d330 \
@@ -132,9 +132,9 @@ else {
                     #-lopencv_world330
     }
     win32-msvc* {
-        LIBS += \#-LD:/dev/opencv/build/bin/Release \
-                -L"D:\dev\opencv\build\install\x64\vc15\bin" \
-                -L"D:\dev\opencv\build\install\x64\vc15\lib" \
+        LIBS += \#-LE:/dev/opencv/build/bin/Release \
+                -L"E:\dev\opencv\build\install\x64\vc15\bin" \
+                -L"E:\dev\opencv\build\install\x64\vc15\lib" \
                     -lopencv_calib3d330 \
                     -lopencv_core330 \
                     -lopencv_features2d330 \
@@ -151,10 +151,10 @@ else {
 # OMP, MPI & CUDA ##########################################
 ############################################################
 
-INCLUDEPATH += D:/dev/ms-mpi/Include # MPI (Microsoft)
+INCLUDEPATH += E:/dev/ms-mpi/Include # MPI (Microsoft)
 
-CONFIG(COMPILER_GPP)  : LIBS += -LD:/dev/ms-mpi/Lib/x86 -lmsmpi # MPI (Microsoft)
-CONFIG(COMPILER_MSVC) : LIBS += -LD:/dev/ms-mpi/Lib/x64 -lmsmpi # MPI (Microsoft)
+CONFIG(COMPILER_GPP)  : LIBS += -LE:/dev/ms-mpi/Lib/x86 -lmsmpi # MPI (Microsoft)
+CONFIG(COMPILER_MSVC) : LIBS += -LE:/dev/ms-mpi/Lib/x64 -lmsmpi # MPI (Microsoft)
 
 *-g++:LIBS += -pthread -fopenmp # OpenMP
 
@@ -317,6 +317,7 @@ HEADERS += \
     util/debug_helper.h \
     util/enums.h \
     util/constants.h \
+    util/macros.h \
     util/map.h \
     util/operations.h \
     util/parser.h \
