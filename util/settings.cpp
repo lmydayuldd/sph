@@ -6,6 +6,8 @@
 #include <cmath>
 #include <limits>
 
+#include <omp.h>
+
 // required to get any printout when running from cmd.exe on Windows
 #pragma comment(linker, "/SUBSYSTEM:CONSOLE")
 
@@ -49,7 +51,7 @@ bool          Settings::CALCULATE_MASS       = false; // TODO
 bool          Settings::PARALLEL_GPU         = false;
 bool          Settings::PARALLEL_MPI         = false;
 bool          Settings::PARALLEL_OMP         = true;
-unsigned      Settings::PARALLEL_OMP_THREADS = 8;
+unsigned      Settings::PARALLEL_OMP_THREADS = omp_get_num_procs();
 double        Settings::WORLD_ROTATION       = 0.;
 
 // Physics:

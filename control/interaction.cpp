@@ -208,7 +208,9 @@ void Interaction::keyRelease(QKeyEvent *e)
             break;
             case Qt::Key_Escape    :
                 key[ESCAPE] = false;
-                GPUCollideFrees();
+                if (SimulationWindow::cudaInitialized) {
+                    GPUCollideFrees();
+                }
                 QApplication::quit();
                 if (! Settings::NO_SCREENS_NO_VIDEO) {
                     SimulationWindow::saveVideo();

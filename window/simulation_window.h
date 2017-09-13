@@ -13,6 +13,7 @@ class SimulationWindow : public GLWindow
 public:
     static SimulationWindow *simWin;
     static Timer *frameTimer;
+    static bool cudaInitialized;
     static int frame;
     static int refreshRate;
     static long long int frameStartTime;

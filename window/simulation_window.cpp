@@ -17,6 +17,8 @@
 #include "util/timer.h"
 #include "util/settings.h"
 
+class Particle;
+
 #include <QDir>
 #include <QScreen>
 #include <QString>
@@ -36,22 +38,37 @@
 
 #include <omp.h>
 #include "mpi.h"
-#ifdef COMPILER_MSVC
-#include <cuda.h>
-#include <cuda_runtime.h> // checkCudaErrors()
-#include <helper_cuda.h> // checkCudaErrors() // helper_cuda.h must go after cuda_runtime.h
-#endif
 
-class Particle;
+#ifdef COMPILER_MSVC
+    #include <cuda.h>
+    #include <cuda_runtime.h> // checkCudaErrors()
+    #include <helper_cuda.h> // checkCudaErrors() // helper_cuda.h must go after cuda_runtime.h
+
+    template< typename T >
+    unsigned checkWithoutExit(T result, char const *const func,
+                              const char *const file, int const line) {
+        if (result) {
+            fprintf(stderr, "CUDA error at %s:%d code=%d(%s) \"%s\" \n",
+                    file, line, static_cast<unsigned int>(result), _cudaGetErrorEnum(result), func);
+            DEVICE_RESET
+            //exit(EXIT_FAILURE);
+            return static_cast<unsigned>(result);
+        }
+        return 0;
+    }
+    #define checkCudaErrorsWithoutExit(val) \
+        checkWithoutExit((val), #val, __FILE__, __LINE__)
+#endif
 
 SimulationWindow *SimulationWindow::simWin = nullptr;
 Timer *SimulationWindow::frameTimer = new Timer();
+std::vector<QImage> SimulationWindow::screens;
+bool SimulationWindow::cudaInitialized = false;
+int SimulationWindow::frame = 0;
+int SimulationWindow::refreshRate = 0;
 long long int SimulationWindow::frameStartTime = 0;
 long long int SimulationWindow::currentTime = 0;
 double SimulationWindow::frame_dt = 0;
-int SimulationWindow::frame = 0;
-int SimulationWindow::refreshRate = 0;
-std::vector<QImage> SimulationWindow::screens;
 
 SimulationWindow::SimulationWindow()
 {
@@ -66,14 +83,15 @@ SimulationWindow::SimulationWindow()
     int deviceCount = 0;
     int cudaDevice = 0;
     char cudaDeviceName[100];
-    try {
-        checkCudaErrors(cuInit(0));
+    if (checkCudaErrorsWithoutExit(cuInit(0)) == 0) {
         checkCudaErrors(cuDeviceGetCount(&deviceCount));
         checkCudaErrors(cuDeviceGet(&cudaDevice, 0));
         checkCudaErrors(cuDeviceGetName(cudaDeviceName, 100, cudaDevice));
         qDebug() << "Number of devices: " << deviceCount;
         qDebug() << "Device name:" << cudaDeviceName;
-    } catch (...) {
+        cudaInitialized = true;
+    }
+    else {
         std::cout << "You probably don't possess proper CUDA-enabled nVidia GPU. Moving on..."
                   << std::endl << std::flush;
     }
@@ -332,15 +350,17 @@ void SimulationWindow::saveVideo()
             true
         );
         cv::redirectError(handleCVError);
-        unsigned failedFrames = 0;
-        for (unsigned i = 0; i < mats.size(); ++i) {
-            try
-            {
-                video.write(mats[i]);
+        {
+            unsigned failedFrames = 0;
+            for (unsigned i = 0; i < mats.size(); ++i) {
+                try
+                {
+                    video.write(mats[i]);
+                }
+                catch (...) { ++failedFrames; continue; }
             }
-            catch (...) { ++failedFrames; continue; }
+            std::cout << failedFrames << " <- failed frames count." << std::endl << std::flush;
         }
-        std::cout << failedFrames << " <- failed frames count." << std::endl << std::flush;
         cv::redirectError(nullptr);
         video.release();
         //cv::destroyAllWindows();

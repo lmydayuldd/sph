@@ -13,7 +13,7 @@ namespace Op {
     }
 }
 
-void divideByW(QVector4D& v)
+void divideByW(QVector4D &v)
 {
     for (int i = 0; i < 3; ++i)
     {
@@ -42,7 +42,7 @@ Geometry::Ray convertNormalized2DPointToRay(float normalizedX, float normalizedY
     return Geometry::Ray(nearPointRay, ray);
 }
 
-double distanceBetween(const Vector& point, const Geometry::Ray& ray)
+double distanceBetween(const Vector &point, const Geometry::Ray &ray)
 {
     Vector p1ToPoint = point - ray.source;
     Vector p2ToPoint = point - (ray.source + ray.vector);
@@ -59,12 +59,12 @@ double distanceBetween(const Vector& point, const Geometry::Ray& ray)
     return areaOfTriangleTimesTwo / lengthOfBase;
 }
 
-bool intersects(const Geometry::Sphere& sphere, const Geometry::Ray& ray)
+bool intersects(const Geometry::Sphere &sphere, const Geometry::Ray &ray)
 {
     return distanceBetween(sphere.center, ray) < sphere.radius;
 }
 
-Vector intersectionPoint(const Geometry::Ray& ray, const Geometry::Plane& plane)
+Vector intersectionPoint(const Geometry::Ray &ray, const Geometry::Plane &plane)
 {
     Vector rayToPlaneVector = plane.point - ray.source;
     double scaleFactor = rayToPlaneVector.dot(plane.normal)
@@ -73,7 +73,7 @@ Vector intersectionPoint(const Geometry::Ray& ray, const Geometry::Plane& plane)
     return intersectionPoint;
 }
 
-double lineLineMinDist(const Geometry::Line& l1, const Geometry::Line& l2)
+double lineLineMinDist(const Geometry::Line &l1, const Geometry::Line &l2)
 {
     Vector u = l1.p2 - l1.p1;
     Vector v = l2.p2 - l2.p1;
@@ -100,7 +100,7 @@ double lineLineMinDist(const Geometry::Line& l1, const Geometry::Line& l2)
     return dP.norm();
 }
 
-bool lineIntersectsLine(const Geometry::Line& l1, const Geometry::Line& l2)
+bool lineIntersectsLine(const Geometry::Line &l1, const Geometry::Line &l2)
 {
     bool intersects = false;
     if (lineLineMinDist(l1, l2) == 0.)
@@ -110,7 +110,7 @@ bool lineIntersectsLine(const Geometry::Line& l1, const Geometry::Line& l2)
     return intersects;
 }
 
-double segSegMinDist(const Geometry::Line& l1, const Geometry::Line& l2)
+double segSegMinDist(const Geometry::Line &l1, const Geometry::Line &l2)
 {
     Vector u = l1.p2 - l1.p1;
     Vector v = l2.p2 - l2.p1;
@@ -184,7 +184,7 @@ double segSegMinDist(const Geometry::Line& l1, const Geometry::Line& l2)
     return dP.norm(); // return the closest distance
 }
 
-bool segIntersectsSeg(const Geometry::Line& l1, const Geometry::Line& l2)
+bool segIntersectsSeg(const Geometry::Line &l1, const Geometry::Line &l2)
 {
     bool intersects = false;
     if (segSegMinDist(l1, l2) == 0.)
@@ -194,7 +194,8 @@ bool segIntersectsSeg(const Geometry::Line& l1, const Geometry::Line& l2)
     return intersects;
 }
 
-double timePointPointClosest(const Vector& r1, const Vector& v1, const Vector& r2, const Vector& v2)
+double timePointPointClosest(const Vector &r1, const Vector &v1,
+                             const Vector &r2, const Vector &v2)
 {
     Vector dv = v1 - v2;
 
@@ -210,7 +211,8 @@ double timePointPointClosest(const Vector& r1, const Vector& v1, const Vector& r
     return cpa_time;
 }
 
-double distPointPointClosest(const Vector& r1, const Vector& v1, const Vector& r2, const Vector& v2)
+double distPointPointClosest(const Vector &r1, const Vector &v1,
+                             const Vector &r2, const Vector &v2)
 {
     double ctime = timePointPointClosest(r1, v1, r2, v2);
     Vector p1 = r1 + v1 * ctime;
